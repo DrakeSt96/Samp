@@ -1,0 +1,32 @@
+/*
+    Serverkonfiguration - VORLAGE
+    ------------------------------------------------------------------
+    Diese Datei nach "config.inc" kopieren und die echten Werte eintragen.
+    config.inc wird von .gitignore ausgeschlossen und darf NICHT
+    ins Repository eingecheckt werden.
+
+        cp gamemodes/config.inc.example gamemodes/config.inc
+
+    Wird keine config.inc angelegt, greifen die Notfallwerte in
+    script.pwn und der Server verbindet sich nicht zur Datenbank.
+*/
+
+#define MySQL_Host      "localhost"
+#define MySQL_User      "samp"          // KEIN root verwenden
+#define MySQL_Passwort  ""              // hier das echte Passwort eintragen
+#define MySQL_Datenbank "samp1"
+
+
+// Der Admindienst (/aduty) verlangt seit dem Sicherheitsfix das
+// persoenliche Accountpasswort des jeweiligen Admins - hier ist
+// dafuer nichts einzutragen.
+
+// Salt-Laenge fuer Passwort-Hashes.
+//   NEUINSTALLATION (Schema aus Datenbank/samp_server.sql, varchar(64)):
+//     die beiden Zeilen unten direkt einkommentieren.
+//   BESTEHENDER SERVER (Spalte noch varchar(34)):
+//     erst Datenbank/migration_passwort_salt.sql einspielen, dann
+//     einkommentieren. Vorher nicht - sonst schneidet MySQL den Hash ab.
+//   Ohne die Zeilen laeuft alles mit 2 Zeichen Salt, das ist sicher.
+//#define SCRIPT_PW_COLLEN  (64)
+//#define SCRIPT_PW_SALTLEN (32)

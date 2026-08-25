@@ -1,0 +1,71 @@
+// open.mp-Serverkonfiguration - VORLAGE
+//
+// Diese Datei nach "config.json" kopieren und das RCON-Passwort eintragen:
+//     cp config.json.example config.json
+//
+// config.json wird von .gitignore ausgeschlossen und darf NICHT eingecheckt
+// werden, da sie das RCON-Passwort enthaelt.
+//
+// WICHTIG: Eine vorhandene server.cfg wird von open.mp NACH dieser Datei
+// gelesen und ueberschreibt deren Werte stillschweigend. Die server.cfg aus
+// dem SA-MP-Betrieb muss deshalb entfernt oder umbenannt werden.
+//
+// Typen sind streng: 1000 und 1000.0 sind nicht dasselbe. Ein falscher Typ
+// wird kommentarlos auf den Standardwert zurueckgesetzt, ein Syntaxfehler
+// verwirft die ganze Datei zugunsten der Werkseinstellungen.
+{
+    "name": "« Lade Script! »",
+    "language": "German",
+    "website": "",
+    "password": "",
+    "announce": true,
+    "enable_query": true,
+    "max_players": 500,
+    "max_bots": 10,
+    "bot_exe": "samp-npc",
+    "sleep": 5.0,
+    "network": {
+        "port": 7777,
+        "bind": "",
+        "use_lan_mode": false,
+        "on_foot_sync_rate": 40,
+        "in_vehicle_sync_rate": 40,
+        "aiming_sync_rate": 40,
+        "stream_radius": 1000.0,
+        "stream_rate": 1000,
+        "allow_037_clients": true
+    },
+    "pawn": {
+        "main_scripts": [
+            "script 1"
+        ],
+        "side_scripts": [],
+        "legacy_plugins": [
+            "crashdetect",
+            "streamer",
+            "mysql",
+            "sscanf"
+        ]
+    },
+    "rcon": {
+        "enable": false,
+        "password": "HIER_EIN_EIGENES_RCON_PASSWORT_EINTRAGEN"
+    },
+    "logging": {
+        "enable": true,
+        "file": "server_log.txt",
+        "use_timestamp": true,
+        "timestamp_format": "[%H:%M:%S]",
+        "log_chat": false,
+        "log_deaths": false,
+        "log_connection_messages": true,
+        "log_queries": false,
+        "log_cookies": false
+    },
+    "artwork": {
+        "enable": false
+    },
+    "game": {
+        "lag_compensation_mode": 1
+    }
+}

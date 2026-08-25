@@ -89,10 +89,16 @@ public OnPlayerCommandText(playerid, cmdtext[])
     new
         pos,
         funcname[MAX_FUNC_NAME];
+    // Sicherheitsfix: ohne diese Grenzpruefung schreibt die Schleife bei
+    // langen Befehlsnamen weit ueber funcname hinaus (Stack-Overflow).
+    // funcname fasst das Praefix "cmd_" (4 Zellen), den Namen und die
+    // abschliessende Null - der Name darf also MAX_FUNC_NAME-5 Zeichen lang sein.
     while (cmdtext[++pos] > ' ') 
 	{
+		if (pos > MAX_FUNC_NAME - 5) return 0;
 		funcname[pos-1] = tolower(cmdtext[pos]); 
 	}
+	funcname[pos-1] = '\0';
 	format(funcname, sizeof(funcname), "cmd_%s", funcname);
     while (cmdtext[pos] == ' ') pos++;
 	if (!cmdtext[pos])

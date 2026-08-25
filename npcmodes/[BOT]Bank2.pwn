@@ -1,4 +1,4 @@
-#include </Gloabe Includes/a_npc>
+#include <a_npc>
 main(){}
 #define RECORDING "[BOT]Bank2"
 
