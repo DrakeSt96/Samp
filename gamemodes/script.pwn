@@ -88,7 +88,7 @@ stock ScriptPW_MakeSalt(dest[], destsize)
 	new i, laenge = SCRIPT_PW_SALTLEN;
 	if(laenge > SCRIPT_PW_MAXSALT) laenge = SCRIPT_PW_MAXSALT;
 	if(laenge > destsize - 1) laenge = destsize - 1;
-	if(laenge < 1) laenge = 1;
+	if(laenge < 1) { dest[0] = 0; return 0; } // lieber gar kein Salt als ein von MySQL abgeschnittener Hash
 	for(i = 0; i < laenge; i++)
 	{
 		dest[i] = zeichen[random(sizeof(zeichen) - 1)];
@@ -16880,7 +16880,7 @@ COMMAND:rauswerfen(playerid,params[])
 	    mysql_function_query(MySQL_R394,query,true,"sql_array","ssiiii",query,namestring,a_script_hmieterkick,haus,playerid,MySQL_R394);
 		return 1;
 	}
-	if(Spieler[pID][pRentHome] == haus)return SCM(playerid,SAMP_WEISS,"Spieler ist nicht bei dir eingemietet.");
+	if(Spieler[pID][pRentHome] != haus)return SCM(playerid,SAMP_WEISS,"Spieler ist nicht bei dir eingemietet.");
 	Spieler[pID][pSpawn] = 0;
   	HausInfo[haus][haus_eingemitetenzaehler]--;
    	format(string,sizeof(string),""IINFO" du hast %s aus deinem Haus geworfen! Mieterslots %i/%i",namestring,HausInfo[haus][haus_eingemitetenzaehler],HausInfo[haus][haus_slots]);
@@ -19061,7 +19061,7 @@ COMMAND:buylevel(playerid,params[])
 		new personalid = GetPlayerID(Spieler[playerid][GeworbenPlaya]);
 		if(personalid == -1)
 		{
-			format(string,sizeof(string),"SELECT * FROM spieler WHERE Name='%s'",Spieler[playerid][GeworbenPlaya]);
+			mysql_format(MySQL_R394,string,sizeof(string),"SELECT * FROM spieler WHERE Name='%e'",Spieler[playerid][GeworbenPlaya]);
 			mysql_function_query(MySQL_R394,string,true,"sql_array2","siii",string,_SQL_SETPREMIUM,0,MySQL_R394);
 		}
 		else
@@ -26591,14 +26591,14 @@ COMMAND:set(playerid,params[])
 			new personalid = GetPlayerID(Spieler[pID][GeworbenPlaya]);
 			if(personalid == -1)
 			{
-				format(string,sizeof(string),"SELECT * FROM spieler WHERE Name='"IINFO2"%s"#HTML_WEISS"'",Spieler[pID][GeworbenPlaya]);
+				mysql_format(MySQL_R394,string,sizeof(string),"SELECT * FROM spieler WHERE Name='%e'",Spieler[pID][GeworbenPlaya]);
 				mysql_function_query(MySQL_R394,string,true,"sql_array2","siii",string,_SQL_SETPREMIUM,0,MySQL_R394);
 			}
 			else
 			{
-                format(string,sizeof(string),"{00F0FF}* Da du {33CC00}"IINFO2"%s"#HTML_WEISS"{00F0FF} geworben hast bekommst du nun 30 Coins *",Spieler[playerid][GeworbenPlaya]);
+                format(string,sizeof(string),"{00F0FF}* Da du {33CC00}"IINFO2"%s"#HTML_WEISS"{00F0FF} geworben hast bekommst du nun 30 Coins *",Spieler[pID][GeworbenPlaya]);
 		    	SCM(personalid,WEISS,string);
-			    Spieler[playerid][pCoins] += 30;
+			    Spieler[personalid][pCoins] += 30;
 			}
 		}
 		format(string,sizeof(string),"Admin: "IINFO2"%s"#HTML_WEISS" | Spieler: "IINFO2"%s"#HTML_WEISS" | Menge: "IINFO2"%i"#HTML_WEISS" | Art: /set ["IINFO2"%s"#HTML_WEISS"/%i]["IINFO2"%s"#HTML_WEISS"][%i]",Spieler[playerid][pName],Spieler[pID][pName],menge,Spieler[pID][pName],pID,cmd,menge);
@@ -61838,7 +61838,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		    }
 		    if(response == 1)
 		    {
-			    if(listitem > sizeof(Radio)-1)
+			    if(listitem < 0 || listitem > sizeof(Radio)-1)
 				{
 					StopAudioStreamForPlayer(playerid);
 					return ShowPlayerHandyMenu2(playerid);
@@ -61857,7 +61857,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			else
 		    {
 				if(!IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du sitzt in keinem Fahrzeug.");
-				if(listitem > sizeof(Radio)-1)
+				if(listitem < 0 || listitem > sizeof(Radio)-1)
 				{
 					ForEachPlayer(i)
 					{
@@ -61946,6 +61946,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 	    if(!response)
 	    return 0;
 
+		if(listitem < 0 || listitem >= sizeof(ElevatorQueue))return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 		if(FloorRequestedBy[listitem] != INVALID_PLAYER_ID || IsFloorInQueue(listitem))
 	 	SCM(playerid,SAMP_WEISS,"Aufzug ist bereits auf deiner Ebene!");
 		else if(DidPlayerRequestElevator(playerid))
@@ -62268,6 +62269,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				format(string,sizeof(string),""IINFO" der Sprunkautomat: "IINFO2"%i"#HTML_WEISS" wurde auf deiner Karte markiert.",listitem);
 				SCM(playerid,SAMP_WEISS,string);
 				DisablePlayerCheckpoint(playerid);
+				if(listitem < 0 || listitem >= MAX_SPRUNKS)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 				SetPlayerCheckpoint(playerid,Sprunk[listitem][_posx],Sprunk[listitem][_posy],Sprunk[listitem][_posz],3.0);
 				Spieler[playerid][pIsearch] = 1;
 				return 1;
@@ -62279,6 +62281,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			if(response == 0)return 1;
 			else
 			{
+				if(listitem < 0 || listitem >= MAX_ATMS)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 				format(string,sizeof(string),""IINFO" der Bankautomat: "IINFO2"%i"#HTML_WEISS" wurde auf deiner Karte markiert.",listitem);
 				SCM(playerid,WEISS,string);
 				SetPlayerCheckpoint(playerid,ATM[listitem][_posx],ATM[listitem][_posy],ATM[listitem][_posz],3.0);
@@ -62294,6 +62297,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			{
 				format(string,sizeof(string),""IINFO" die Telefonzelle: "IINFO2"%i"#HTML_WEISS" wurde auf deiner Karte markiert.",listitem);
 				SCM(playerid,WEISS,string);
+				if(listitem < 0 || listitem >= MAX_TELEFONZELLEN)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 				SetPlayerCheckpoint(playerid,TeleFonPunkte[listitem][_posx],TeleFonPunkte[listitem][_posy],TeleFonPunkte[listitem][_posz],3.0);
 				Spieler[playerid][pIsearch] = 1;
 				return 1;
@@ -62307,6 +62311,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			{
 				format(string,sizeof(string),""IINFO" der Blitzer: "IINFO2"%i"#HTML_WEISS" wurde auf deiner Karte markiert.",listitem);
 				SCM(playerid,WEISS,string);
+				if(listitem < 0 || listitem >= MAX_BLITZER)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 				SetPlayerCheckpoint(playerid,Blitzer[listitem][sperreX],Blitzer[listitem][sperreY],Blitzer[listitem][sperreZ],3.0);
 				Spieler[playerid][pIsearch] = 1;
 				return 1;
@@ -62320,6 +62325,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			{
 				format(string,sizeof(string),""IINFO" der Funkmast: "IINFO2"%i"#HTML_WEISS" wurde auf deiner Karte markiert.",listitem);
 				SCM(playerid,WEISS,string);
+				if(listitem < 0 || listitem >= MAX_MASTEN)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 				SetPlayerCheckpoint(playerid,FMastenInfo[listitem][sperreX],FMastenInfo[listitem][sperreY],FMastenInfo[listitem][sperreZ],8.0);
 				Spieler[playerid][pIsearch] = 1;
 				return 1;
@@ -63252,6 +63258,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		    }
 		    if(response == 1)
 		    {
+			    if(listitem < 0 || listitem >= sizeof(Homestore))return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 			    if((GetACMoney(playerid) - Homestore[listitem][Hcost]) < 0)
 				{
 					SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
@@ -63302,6 +63309,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		    }
 		    if(response == 1)
 		    {
+			    if(listitem < 0 || listitem >= sizeof(Homestore))return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 			    format(string,sizeof(string),""IINFO" du besichtigst den Innenraum '%s'",Homestore[listitem][HInnenraum]);
 				SCM(playerid,SAMP_WEISS,string);
 				SCM(playerid,SAMP_WEISS,"Mit '/exitiraum' kommen Sie zurück zum HomeStore!");
@@ -65266,6 +65274,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 	    case DIALOG_BUYHANDY:
 	    {
 		    new biz = ReturnBizID(playerid),string[128],givemwst;
+		    if(biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keinem Handyladen.");
+		    if(listitem < 0 || listitem > 3)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 			if(response == 0)
 		    {
 				ShowPlayerHandyMenu(playerid);
@@ -65296,6 +65306,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 	    case DIALOG_BUYLOTTOSCHEIN:
 		{
 			new string[350],lottonummer = strval(inputtext),biz = ReturnBizID(playerid),givemwst;
+			if(biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keinem Laden.");
 			if(response == 0)
 		    {
 			    format(string,sizeof(string),"Telefonbuch   %i$\nNavigationsgerät   %i$\nSchokolade   %i$\nPreis pro Lunchpaket   %i$\nRoter Helm   %i$\nGrüner Helm   %i$\nBlauer Helm   %i$\nCross Helm   %i$\nWerkzeugkasten   %i$\nKoffer   %i$\nAngel   %i$\nPackung Zigaretten   %i$\n20 Fischköder   %i$\nLottoschein\nKondome   %i$",
@@ -65378,6 +65389,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		case DIALOG_BUYHANDYCOINS:
 		{
 			new string[350],coins = strval(inputtext),biz = ReturnBizID(playerid),givemwst;
+			if(biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keinem Handyladen.");
 			if(response == 0)
 		    {
 				ShowPlayerHandyMenu(playerid);
@@ -65584,6 +65596,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 						if(IsPlayerInRangeOfPoint(playerid,10.0,BizInfo[biz][tPos][0],BizInfo[biz][tPos][1],BizInfo[biz][tPos][2]) || IsPlayerInRangeOfPoint(playerid,10.0,BizInfo[biz][tPos][3],BizInfo[biz][tPos][4],BizInfo[biz][tPos][5]))
 					    {
 						    SCM(playerid,SAMP_WEISS,""IINFO" du kannst Fahrzeuge mit der 'SPRINT-TASTE' Schritt für Schritt betanken.");
+							if(listitem < 0 || listitem > 3)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 							Spieler[playerid][pTankArt] = listitem+1;
 							Spieler[playerid][pTankState] = false;
 							RefillVehicle[GetPlayerVehicleID(playerid)] = 1;
@@ -66768,6 +66781,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 	    case DIALOG_BUWTHINGSINBIZ:
 		{
 			new string[128],biz = ReturnBizID(playerid),givemwst;
+			if(biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keinem Laden.");
 		    if(response == 0)return 1;
 		    else
 		    {
@@ -67694,6 +67708,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		    }
 		    if(response == 1)
 		    {
+			    if(biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht an deinem Business.");
+			    if(listitem < 0 || listitem > 14)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 			    Spieler[playerid][pBizProbOptionUsed] = listitem;
 			    format(string,sizeof(string),"Gebe nun den Preis an\nMomentaner Preis bei : %i$",BizInfo[biz][biz_artikel][listitem]);
 				ShowPlayerDialog(playerid,BIZ_DIALOG_PREIS_opt,DIALOG_STYLE_INPUT,"Businessverwaltung (Preise)",string,"Auswählen","Zurück");
@@ -67820,6 +67836,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				}
 				else
 				{
+					if(biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht an deinem Business.");
+					if(Spieler[playerid][pBizProbOptionUsed] < 0 || Spieler[playerid][pBizProbOptionUsed] > 14)return Spieler[playerid][pBizProbOptionUsed] = 0;
 					BizInfo[biz][biz_artikel][Spieler[playerid][pBizProbOptionUsed]] = Menge;
 					format(string,sizeof(string),""IINFO" du hast den Preis von dem ausgewähltem Produkt auf %i$ gesetzt!",BizInfo[biz][biz_artikel][Spieler[playerid][pBizProbOptionUsed]]);
 					SCM(playerid,SAMP_WEISS,string);
@@ -68024,6 +68042,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			if(response == 0)return ShowPlayerDialog(playerid,SMARK_MENU,DIALOG_STYLE_LIST,"Schwarzmarkt","Preis Einstellungen\nBeschreibung\nGeld einzahlen\nGeld auszahlen\nMaterials einzahlen\nMaterials auszahlen","Auswählen","Abbrechen");
 			else
 		    {
+			    if(sm == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keinem Schwarzmarkt.");
+			    if(listitem < 0 || listitem > 13)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 			    Spieler[playerid][pSmarkProbOptionUsed] = listitem;
 			    format(string,sizeof(string),"Gebe nun den Preis an\nMomentaner Preis bei : %i$",SmarkInfo[sm][sartikel][listitem]);
 				ShowPlayerDialog(playerid,SMARK_MENU_PREISE_opt,DIALOG_STYLE_INPUT,"Schwarzmarkt (Preise)",string,"Ändern","Zurück");
@@ -68062,6 +68082,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				}
 				else
 				{
+					if(sm == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keinem Schwarzmarkt.");
+					if(Spieler[playerid][pSmarkProbOptionUsed] < 0 || Spieler[playerid][pSmarkProbOptionUsed] > 13)return Spieler[playerid][pSmarkProbOptionUsed] = 0;
 					SmarkInfo[sm][sartikel][Spieler[playerid][pSmarkProbOptionUsed]] = Menge;
 					format(string,sizeof(string),""IINFO" du hast den Preis von dem ausgewähltem Produkt auf %i$ gesetzt!",SmarkInfo[sm][sartikel][Spieler[playerid][pSmarkProbOptionUsed]]);
 					SCM(playerid,SAMP_WEISS,string);
@@ -68921,6 +68943,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 	    case DIALOG_APORTEN:
 		{
 			new string[128];
+			if(listitem < 0 || listitem >= sizeof(APorten))return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 		    if(response == 0)return 1;
 		    if(response == 1)
 		    {
@@ -70943,6 +70966,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			{
 				if(isPlayerInJob(playerid,9))
 				{
+					if(listitem < 0 || listitem >= MAX_ATMS)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 					format(string,sizeof(string),""IINFO" der Bankautomat "IINFO2"%i"#HTML_WEISS" wurde auf deiner Karte markiert.",listitem);
 					SCM(playerid,WEISS,string);
 					SetPlayerCheckpoint(playerid,ATM[listitem][_posx],ATM[listitem][_posy],ATM[listitem][_posz],3.0);
@@ -70950,6 +70974,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				}
 				if(isPlayerInJob(playerid,19))
 				{
+					if(listitem < 0 || listitem >= MAX_ZIGAUTOMATEN)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 					format(string,sizeof(string),""IINFO" der Zigarettenautomat "IINFO2"%i"#HTML_WEISS" wurde auf deiner Karte markiert.",listitem);
 					SCM(playerid,WEISS,string);
 					SetPlayerCheckpoint(playerid,Zigaretenautomaten[listitem][0],Zigaretenautomaten[listitem][1],Zigaretenautomaten[listitem][2],3.0);
@@ -72282,6 +72307,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			}
 			if(response == 1)
 			{
+				if(listitem < 0 || listitem >= sizeof(JOBinvitePUNKTE))return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 				new string[128],jobid = (sizeof(JOBinvitePUNKTE)-listitem) - 1;
 				SetPlayerCheckpoint(playerid,JOBinvitePUNKTE[jobid][jxpos],JOBinvitePUNKTE[jobid][jypos],JOBinvitePUNKTE[jobid][jzpos],1.0);
 				format(string,sizeof(string),"%s wurde auf deiner Karte markiert!",JOBinvitePUNKTE[jobid][JobInviteJobname]);
@@ -72653,6 +72679,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 
 		case DIALOG_REPORTANNAHME:
 		{
+			if(listitem < 0 || listitem > 29)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 			new clickedlistitem = Spieler[playerid][pReportSelect],string[1000],headerstring[64];
 			if(response == 0)
 			{
@@ -78745,6 +78772,17 @@ public sql_array(index[],index2[],sqlresultid,extraid,extraid2,SconnectionHandle
 	    SCM(extraid,SAMP_WEISS,query);
 	    mysql_format(MySQL_R394,query,sizeof(query),"UPDATE spieler SET Passwort='%s' WHERE Name='%e'",ScriptPW_CreateStr(index2),index);
 	    mysql_function_query(MySQL_R394,query,false,"","");
+	    // F-04: den im Speicher gehaltenen Hash des Betroffenen mitziehen,
+	    // sonst oeffnet das alte Passwort bis zum Relog weiter den Admindienst.
+	    ForEachPlayer(pwpl)
+	    {
+	        if(IsPlayerConnected(pwpl) && !IsPlayerNPC(pwpl) && strcmp(SpielerName(pwpl),index,true) == 0)
+	        {
+	            SetAccountPasswortHash(pwpl,index2);
+	            SetPVarInt(pwpl,"apwfails",0);
+	            SetPVarInt(pwpl,"admind",0);
+	        }
+	    }
 	    return 1;
 	}
 	case d_script_name:
@@ -78786,7 +78824,7 @@ public sql_array(index[],index2[],sqlresultid,extraid,extraid2,SconnectionHandle
 		{
 			if(!strcmp(Spieler[extraid2][pName],Pfahrzeug[slot][extraid2][Besitzer],true))
 			{
-				format(query,sizeof(query),"UPDATE spieler_fahrzeuge SET name='%s' WHERE name='%s' AND slot='%d'",index2,slot,Pfahrzeug[slot][extraid2][Besitzer],slot);
+				mysql_format(MySQL_R394,query,sizeof(query),"UPDATE spieler_fahrzeuge SET name='%e' WHERE name='%e' AND slot='%d'",index2,Pfahrzeug[slot][extraid2][Besitzer],slot);
 			    mysql_function_query(MySQL_R394,query,false,"","");
 			    format(Pfahrzeug[slot][extraid2][Besitzer],24,"%s",index2);
 		    }
@@ -81082,7 +81120,7 @@ stock OnGameModeSave()
 		format(query,sizeof(query),"UPDATE server_ffahrzeuge SET Fraktion='%d',Rang='%d',modelid='%d',Farbe1='%d',Farbe2='%d',Paintjob='%d',HP='%f',posx='%f',posy='%f',posz='%f',posa='%f',Abgeschlossen='%d',Abgeschleppt='%d',Interior='%d',VirtualWorld='%d',",
 		Fahrzeug[fv][Fraktion],Fahrzeug[fv][FraktionsRang],Fahrzeug[fv][modelid],Fahrzeug[fv][Colour1],Fahrzeug[fv][Colour2],Fahrzeug[fv][Paintjob],Fahrzeug[fv][HP],Fahrzeug[fv][posx],Fahrzeug[fv][posy],Fahrzeug[fv][posz],Fahrzeug[fv][posa],Fahrzeug[fv][Abgeschlossen],vFahrzeug[Fahrzeug[fv][Vehicle]][Abgeschleppt],Fahrzeug[fv][Interior],Fahrzeug[fv][VirtualWorld]);
 	    strcat(mainquery,query);
-		format(query,sizeof(query),"AbgeschlepptPreis='%d',AbgeschlepptGrund='%s',Nummernschild='%s',Neon='%d',Spoiler='%d',Hood='%d',Roof='%d',Sideskirt='%d',Lamps='%d',Nitro='%d',Exhaust='%d',Wheels='%d',Stereo='%d',Hydraulics='%d',FrontBumper='%d',RearBumper='%d',VentRight='%d',VentLeft='%d',",
+		mysql_format(MySQL_R394,query,sizeof(query),"AbgeschlepptPreis='%d',AbgeschlepptGrund='%e',Nummernschild='%e',Neon='%d',Spoiler='%d',Hood='%d',Roof='%d',Sideskirt='%d',Lamps='%d',Nitro='%d',Exhaust='%d',Wheels='%d',Stereo='%d',Hydraulics='%d',FrontBumper='%d',RearBumper='%d',VentRight='%d',VentLeft='%d',",
 		vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptPreis],vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptGrund],Fahrzeug[fv][Nummernschild],vFahrzeug[Fahrzeug[fv][Vehicle]][Neon],Fahrzeug[fv][Hood],Fahrzeug[fv][Roof],Fahrzeug[fv][Sideskirt],Fahrzeug[fv][Lamps],Fahrzeug[fv][Nitro],Fahrzeug[fv][Exhaust],Fahrzeug[fv][Wheels],Fahrzeug[fv][Stereo],
 		Fahrzeug[fv][Hydraulics],Fahrzeug[fv][FrontBumper],Fahrzeug[fv][RearBumper],Fahrzeug[fv][VentRight],Fahrzeug[fv][VentLeft]);
 	    strcat(mainquery,query);
@@ -83496,7 +83534,7 @@ stock SaveAccount(playerid)
 		Spieler[playerid][pFraktionsGehalt],Spieler[playerid][pJob],Spieler[playerid][JobWarns],Spieler[playerid][pJobSperre],Spieler[playerid][pWorkLess]);
 	    strcat(mainquery,query);
 	    strdel(query,0,sizeof(query));
-	    format(query,sizeof(query),"Geschlecht='%d',SpielerAlter='%d',Level='%d',Geld='%d',GWD='%d',ZiviNote='%d',FAbteilung='%d',Bankguthaben='%d',BankPin='%d',WantedSterne='%d',WantedPunkte='%d',Suspects='%d',Wanted_Grund1='%s',Wanted_Grund2='%s',Wanted_Grund3='%s',Wanted_Grund4='%s',Wanted_Grund5='%s',",
+	    mysql_format(MySQL_R394,query,sizeof(query),"Geschlecht='%d',SpielerAlter='%d',Level='%d',Geld='%d',GWD='%d',ZiviNote='%d',FAbteilung='%d',Bankguthaben='%d',BankPin='%d',WantedSterne='%d',WantedPunkte='%d',Suspects='%d',Wanted_Grund1='%e',Wanted_Grund2='%e',Wanted_Grund3='%e',Wanted_Grund4='%e',Wanted_Grund5='%e',",
 		Spieler[playerid][pSex],Spieler[playerid][pYearsOld],GetPlayerLevel(playerid),GetACMoney(playerid),Spieler[playerid][pGrundwehrdienst],Spieler[playerid][pZiviNote],Spieler[playerid][pFraktABTInvite],Spieler[playerid][pBank],Spieler[playerid][pBankPin],GetPlayerWantedLevel(playerid),Spieler[playerid][pWantedPoints],Spieler[playerid][pSuspectPoints],
 		pWantedReason1[playerid],pWantedReason2[playerid],pWantedReason3[playerid],pWantedReason4[playerid],pWantedReason5[playerid]);
 	    strcat(mainquery,query);
@@ -83531,14 +83569,14 @@ stock SaveAccount(playerid)
 		strcat(mainquery,query);
 	    strdel(query,0,sizeof(query));
 	    
-    	format(query,sizeof(query),"Time4Payday='%d',TimeoutCrashExeorKick='%d',HabGeworben='%d',RpChat='%d',pPremium='%d',GeworbenerSpieler='%s',pScheinSperre='%d',DigiHud='%d',Bonus='%d',Gutschein='%d',pCoins='%d',cLeben='%d',cServerLeiste='%d',cUpdate='%d',cPickup='%d',cFahrzeug='%d',cSound='%d',pTeleAnzeige='%d',pHandyFortung='%d',pRingTone='%d',cHausIcon='%d',cKonto='%d',",
+    	mysql_format(MySQL_R394,query,sizeof(query),"Time4Payday='%d',TimeoutCrashExeorKick='%d',HabGeworben='%d',RpChat='%d',pPremium='%d',GeworbenerSpieler='%e',pScheinSperre='%d',DigiHud='%d',Bonus='%d',Gutschein='%d',pCoins='%d',cLeben='%d',cServerLeiste='%d',cUpdate='%d',cPickup='%d',cFahrzeug='%d',cSound='%d',pTeleAnzeige='%d',pHandyFortung='%d',pRingTone='%d',cHausIcon='%d',cKonto='%d',",
 		Spieler[playerid][pMinutesAfterPayday],Spieler[playerid][pAntiOfflineFlucht],Spieler[playerid][HatGeworben],Spieler[playerid][RpChat],Spieler[playerid][pPremium],Spieler[playerid][GeworbenPlaya],Spieler[playerid][pScheinSperre],
 		Spieler[playerid][DigiHud],Spieler[playerid][pStartbonus],Spieler[playerid][pGutschein],Spieler[playerid][pCoins],Spieler[playerid][cLeben],Spieler[playerid][cServerLeiste],Spieler[playerid][cUpdate],Spieler[playerid][cPickup],Spieler[playerid][cFahrzeug],Spieler[playerid][cSound],Spieler[playerid][pTeleAnzeige],Spieler[playerid][pHandyFortung],Spieler[playerid][pRingTone],
 		Spieler[playerid][cHausIcon],Spieler[playerid][cKonto]);
 		strcat(mainquery,query);
 	    strdel(query,0,sizeof(query));
 
-		format(query,sizeof(query),"pFirmaLeader='%d',pFirmaMember='%d',pOrgLeader='%d',pOrgMember='%d',pParteiLeader='%d',pParteiMember='%d',pLohn='%d',WaitPerso='%d',pMarried='%s',pBuyClothes='%d',pIll='%d',pConterminatedTime='%d',pBitchSkill='%d',pBitchFuckCount='%d',pMedicHealplayerSkill='%d',pMedicHealCount='%d' WHERE Name='%s'",
+		mysql_format(MySQL_R394,query,sizeof(query),"pFirmaLeader='%d',pFirmaMember='%d',pOrgLeader='%d',pOrgMember='%d',pParteiLeader='%d',pParteiMember='%d',pLohn='%d',WaitPerso='%d',pMarried='%e',pBuyClothes='%d',pIll='%d',pConterminatedTime='%d',pBitchSkill='%d',pBitchFuckCount='%d',pMedicHealplayerSkill='%d',pMedicHealCount='%d' WHERE Name='%e'",
 		Spieler[playerid][pFirmaLeader],Spieler[playerid][pFirmaMember],Spieler[playerid][pOrgLeader],Spieler[playerid][pOrgMember],Spieler[playerid][pParteiLeader],Spieler[playerid][pParteiMember],Spieler[playerid][pLohn],Spieler[playerid][WaitPerso],
 		Spieler[playerid][pMarried],Spieler[playerid][pBuyClothes],Spieler[playerid][pIll],Spieler[playerid][pConterminatedTime],Spieler[playerid][pBitchSkill],Spieler[playerid][pBitchFuckCount],Spieler[playerid][pMedicHealplayerSkill],Spieler[playerid][pMedicHealCount],Spieler[playerid][pName]);
 	    strcat(mainquery,query);
@@ -83603,7 +83641,7 @@ stock SaveAccount(playerid)
 					Pfahrzeug[slot][playerid][Sideskirt],Pfahrzeug[slot][playerid][Lamps],Pfahrzeug[slot][playerid][Nitro],Pfahrzeug[slot][playerid][Exhaust],Pfahrzeug[slot][playerid][Wheels],Pfahrzeug[slot][playerid][Stereo],
 					Pfahrzeug[slot][playerid][Hydraulics],Pfahrzeug[slot][playerid][FrontBumper],Pfahrzeug[slot][playerid][RearBumper],Pfahrzeug[slot][playerid][VentRight],Pfahrzeug[slot][playerid][VentLeft]);
 				    strcat(mainquery,query);
-					format(query,sizeof(query),"angemeldet='%d',atime='%d',atAnmeldung='%d',preis='%d',nummernschild='%s',neon='%d',motordown='%d',tank='%f',km='%d',towed='%d',towedfreeprice='%d',towedreason='%s',kganja='%d',kkokain='%d',kopium='%d',kspice='%d',kmats='%d',klunch='%d',kc4='%d',",
+					mysql_format(MySQL_R394,query,sizeof(query),"angemeldet='%d',atime='%d',atAnmeldung='%d',preis='%d',nummernschild='%e',neon='%d',motordown='%d',tank='%f',km='%d',towed='%d',towedfreeprice='%d',towedreason='%e',kganja='%d',kkokain='%d',kopium='%d',kspice='%d',kmats='%d',klunch='%d',kc4='%d',",
 					Pfahrzeug[slot][playerid][Angemeldet],Pfahrzeug[slot][playerid][AnmeldeTime],Pfahrzeug[slot][playerid][AnAnmeldung],Pfahrzeug[slot][playerid][Preis],Pfahrzeug[slot][playerid][Nummernschild],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][Neon],
 					MotorDown[Pfahrzeug[slot][playerid][Vehicle]],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][Tank],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][Kilometer],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][Abgeschleppt],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][AbgeschlepptPreis],
 					vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][AbgeschlepptGrund],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][KofferraumGanja],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][KofferraumKokain],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][KofferraumOpium],
@@ -85502,7 +85540,7 @@ stock CreatePlayerVehicle(playerid,vehiclemodelid,Float:xpos,Float:ypos,Float:zp
 }
 stock SaveOnlyOnePveh(playerid,slot)
 {
-    new mainquery[2048],query[768];
+    new mainquery[2600],query[1100];
 	if(Pfahrzeug[slot][playerid][modelid] != 0)
 	{
     	GetVehicleHealth(Pfahrzeug[slot][playerid][Vehicle],Pfahrzeug[slot][playerid][HP]);
@@ -85512,7 +85550,7 @@ stock SaveOnlyOnePveh(playerid,slot)
 		Pfahrzeug[slot][playerid][Sideskirt],Pfahrzeug[slot][playerid][Lamps],Pfahrzeug[slot][playerid][Nitro],Pfahrzeug[slot][playerid][Exhaust],Pfahrzeug[slot][playerid][Wheels],Pfahrzeug[slot][playerid][Stereo],
 		Pfahrzeug[slot][playerid][Hydraulics],Pfahrzeug[slot][playerid][FrontBumper],Pfahrzeug[slot][playerid][RearBumper],Pfahrzeug[slot][playerid][VentRight],Pfahrzeug[slot][playerid][VentLeft]);
 	    strcat(mainquery,query);
-		format(query,sizeof(query),"angemeldet='%d',atime='%d',atAnmeldung='%d',preis='%d',nummernschild='%s',neon='%d',motordown='%d',tank='%f',km='%d',towed='%d',towedfreeprice='%d',towedreason='%s',kganja='%d',kkokain='%d',kopium='%d',kspice='%d',kmats='%d',klunch='%d',kc4='%d',",
+		mysql_format(MySQL_R394,query,sizeof(query),"angemeldet='%d',atime='%d',atAnmeldung='%d',preis='%d',nummernschild='%e',neon='%d',motordown='%d',tank='%f',km='%d',towed='%d',towedfreeprice='%d',towedreason='%e',kganja='%d',kkokain='%d',kopium='%d',kspice='%d',kmats='%d',klunch='%d',kc4='%d',",
 		Pfahrzeug[slot][playerid][Angemeldet],Pfahrzeug[slot][playerid][AnmeldeTime],Pfahrzeug[slot][playerid][AnAnmeldung],Pfahrzeug[slot][playerid][Preis],Pfahrzeug[slot][playerid][Nummernschild],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][Neon],
 		MotorDown[Pfahrzeug[slot][playerid][Vehicle]],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][Tank],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][Kilometer],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][Abgeschleppt],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][AbgeschlepptPreis],
 		vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][AbgeschlepptGrund],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][KofferraumGanja],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][KofferraumKokain],vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][KofferraumOpium],
@@ -85661,7 +85699,7 @@ stock CreateFraktionsVehicle(vehiclemodelid,fraktid,Float:xpos,Float:ypos,Float:
 }
 stock SaveOnlyOneFveh(fv)
 {
-    new mainquery[2048],query[768];
+    new mainquery[2600],query[1100];
 	if(Fahrzeug[fv][modelid] != 0)
 	{
         GetVehiclePos(Fahrzeug[fv][Vehicle],Fahrzeug[fv][posx],Fahrzeug[fv][posy],Fahrzeug[fv][posz]);
@@ -85669,7 +85707,7 @@ stock SaveOnlyOneFveh(fv)
 		format(query,sizeof(query),"UPDATE server_ffahrzeuge SET Fraktion='%d',Rang='%d',modelid='%d',Farbe1='%d',Farbe2='%d',Paintjob='%d',HP='%f',posx='%f',posy='%f',posz='%f',posa='%f',Abgeschlossen='%d',Abgeschleppt='%d',Interior='%d',VirtualWorld='%d',",
 		Fahrzeug[fv][Fraktion],Fahrzeug[fv][FraktionsRang],Fahrzeug[fv][modelid],Fahrzeug[fv][Colour1],Fahrzeug[fv][Colour2],Fahrzeug[fv][Paintjob],Fahrzeug[fv][HP],Fahrzeug[fv][posx],Fahrzeug[fv][posy],Fahrzeug[fv][posz],Fahrzeug[fv][posa],Fahrzeug[fv][Abgeschlossen],vFahrzeug[Fahrzeug[fv][Vehicle]][Abgeschleppt],Fahrzeug[fv][Interior],Fahrzeug[fv][VirtualWorld]);
 	    strcat(mainquery,query);
-		format(query,sizeof(query),"AbgeschlepptPreis='%d',AbgeschlepptGrund='%s',Nummernschild='%s',Neon='%d',Spoiler='%d',Hood='%d',Roof='%d',Sideskirt='%d',Lamps='%d',Nitro='%d',Exhaust='%d',Wheels='%d',Stereo='%d',Hydraulics='%d',FrontBumper='%d',RearBumper='%d',VentRight='%d',VentLeft='%d',",
+		mysql_format(MySQL_R394,query,sizeof(query),"AbgeschlepptPreis='%d',AbgeschlepptGrund='%e',Nummernschild='%e',Neon='%d',Spoiler='%d',Hood='%d',Roof='%d',Sideskirt='%d',Lamps='%d',Nitro='%d',Exhaust='%d',Wheels='%d',Stereo='%d',Hydraulics='%d',FrontBumper='%d',RearBumper='%d',VentRight='%d',VentLeft='%d',",
 		vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptPreis],vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptGrund],Fahrzeug[fv][Nummernschild],vFahrzeug[Fahrzeug[fv][Vehicle]][Neon],Fahrzeug[fv][Hood],Fahrzeug[fv][Roof],Fahrzeug[fv][Sideskirt],Fahrzeug[fv][Lamps],Fahrzeug[fv][Nitro],Fahrzeug[fv][Exhaust],Fahrzeug[fv][Wheels],
 		Fahrzeug[fv][Stereo],Fahrzeug[fv][Hydraulics],Fahrzeug[fv][FrontBumper],Fahrzeug[fv][RearBumper],Fahrzeug[fv][VentRight],Fahrzeug[fv][VentLeft]);
 	    strcat(mainquery,query);
