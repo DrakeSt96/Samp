@@ -53,9 +53,6 @@
 #if !defined MySQL_Datenbank
 	#define MySQL_Datenbank "CONFIG_FEHLT"
 #endif
-#if !defined ADMIN_DIENST_PASSWORT
-	#define ADMIN_DIENST_PASSWORT "CONFIG_FEHLT"
-#endif
 
 //-[ Passwort-Hashing (F-10) ]-//
 // Speicherformat der Spalte spieler.Passwort:  <Salt><32 Hex-Zeichen MD5>
@@ -277,7 +274,13 @@ new AntiBunny[MAX_PLAYERS];
 
 //-[ Login Fehlversuch-Schutz ]-//
 #define MAX_LOGIN_VERSUCHE 3
+// Nach MAX_LOGIN_VERSUCHE Fehlversuchen wird die IP fuer LOGIN_SPERRZEIT Sekunden
+// gesperrt. Die Sperre liegt im Speicher (keine neue DB-Spalte noetig) und
+// ueberlebt damit einen Reconnect - aber nicht den Serverneustart.
+#define LOGIN_SPERRZEIT 300
 new LoginFehlversuche[MAX_PLAYERS];
+new LoginSperreIP[MAX_PLAYERS][16];
+new LoginSperreBis[MAX_PLAYERS];
 
 //-[ MySQL Erweiterte Verbindung ]-//
 new MySQL_R394;
@@ -1061,7 +1064,7 @@ enum pAcc_daten
 	pGWFPSWarns,
  	bool:pSupcar,
 	pSupcarVehicle,
-	pPassword[32],
+	pPassword[33],
 	pEmail[64],
 	bool:pOnRegister,
     pTutorialObject[154],
@@ -5173,7 +5176,7 @@ public OnGameModeInit()
 		{
 	 		ReportListitem[i][rID][r] = -1;
 		 	ReportListitem[i][rTime][r] = 0;
-		 	strmid(ReportListitem[i][rText][r],"NONE",strlen("NONE"),90);
+		 	strmid(ReportListitem[i][rText][r],"NONE",0,strlen("NONE"),90);
 		 	ReportListitem[i][rAccepted][r] = false;
 		}
 	}
@@ -11235,6 +11238,12 @@ public OnPlayerConnect(playerid)
     AddPlayer(playerid);
     LoginFehlversuche[playerid] = 0;
     if(IsPlayerNPC(playerid))return 1;
+    // Ein Reconnect hebt die Bruteforce-Sperre nicht auf: solange die IP gesperrt
+    // ist, bleibt der Fehlversuchszaehler auf dem Maximum stehen.
+    if(LoginSperre_Aktiv(playerid) > 0) LoginFehlversuche[playerid] = MAX_LOGIN_VERSUCHE;
+    // Ein Reconnect hebt die Bruteforce-Sperre nicht auf: solange die IP gesperrt
+    // ist, bleibt der Fehlversuchszaehler auf dem Maximum stehen.
+    if(LoginSperre_Aktiv(playerid) > 0) LoginFehlversuche[playerid] = MAX_LOGIN_VERSUCHE;
     SetPlayerColor(playerid,SAMP_WEISS);
 	TogglePlayerClock(playerid,0);
 	DestroyBuildings(playerid);
@@ -13827,9 +13836,12 @@ public OnPlayerDeath(playerid,killerid,reason)
 			format(string,sizeof(string),"Fire-Depatment-Kill: Spieler: %s hat einen Member von der Fire Depatment erschossen. Strafe wurde ausgeteilt.",Spieler[killerid][pName]);
 			SendAdminMessage(SAMP_WEISS,string);
 			SCM(killerid,SAMP_WEISS,""IINFO" da du ein Member in einer (NoDm) Fraktion getötet hast wurden dir soeben (5000) Euro abgezogen! Und an die getöten Spieler gesand!");
-			ACMoney(killerid,-5000);
+			new schmerzgeld = GetACMoney(killerid);
+			if(schmerzgeld > 5000) schmerzgeld = 5000;
+			if(schmerzgeld < 0) schmerzgeld = 0;
+			ACMoney(killerid,-schmerzgeld);
 			SCM(playerid,SAMP_WEISS,""IINFO" du hast soeben Geld erhalten (Schmerzensgeld), Da du in einer (NoDm Fraktion) bist.");
-			ACMoney(playerid,5000);
+			ACMoney(playerid,schmerzgeld);
 	 	}
 	 	return 1;
 	}
@@ -13841,9 +13853,12 @@ public OnPlayerDeath(playerid,killerid,reason)
 			format(string,sizeof(string),"ADAC_Kill: Spieler: %s hat einen Member von der POD erschossen. Strafe wurde ausgeteilt.",Spieler[killerid][pName]);
 			SendAdminMessage(SAMP_WEISS,string);
 			SCM(killerid,SAMP_WEISS,""IINFO" da du ein Member in einer (NoDm) Fraktion getötet hast wurden dir soeben (5000) Euro abgezogen! Und an die getöten Spieler gesand!");
-			ACMoney(killerid,-5000);
+			new schmerzgeld = GetACMoney(killerid);
+			if(schmerzgeld > 5000) schmerzgeld = 5000;
+			if(schmerzgeld < 0) schmerzgeld = 0;
+			ACMoney(killerid,-schmerzgeld);
 			SCM(playerid,SAMP_WEISS,""IINFO" du hast soeben Geld erhalten (Schmerzensgeld), Da du in einer (NoDm Fraktion) bist.");
-			ACMoney(playerid,5000);
+			ACMoney(playerid,schmerzgeld);
 	 	}
 	 	return 1;
 	}
@@ -14971,6 +14986,20 @@ public OnPlayerText(playerid,text[])
     format(string,sizeof(string),""#HTML_BLAU""ClanTag":"#HTML_WEISS" Der Befehl: %s gibt es hier nicht versuchs mit ((/hilfe))",cmdtext);
  	return SCM(playerid,WEISS,string);
 }*/
+// HINWEIS: zcmd.inc definiert am Ende  #define OnPlayerCommandText zcmd_OnPlayerCommandText .
+// Spielereingaben laufen deshalb NICHT durch diese Fassung, sondern durch die
+// Fassung in "pawno/include/Gloabe Includes/zcmd.inc" - dort steht die
+// Laengenpruefung fuer funcname bereits (if (pos > MAX_FUNC_NAME - 5) return 0;).
+// Diese Fassung hier wird nur noch bei internen Aufrufen der Form
+// OnPlayerCommandText(playerid,"/befehl") im Script benutzt; die Grenzpruefung
+// unten muss deshalb trotzdem stehen bleiben.
+// HINWEIS: zcmd.inc definiert am Ende  #define OnPlayerCommandText zcmd_OnPlayerCommandText .
+// Spielereingaben laufen deshalb NICHT durch diese Fassung, sondern durch die
+// Fassung in "pawno/include/Gloabe Includes/zcmd.inc" - dort steht die
+// Laengenpruefung fuer funcname bereits (if (pos > MAX_FUNC_NAME - 5) return 0;).
+// Diese Fassung hier wird nur noch bei internen Aufrufen der Form
+// OnPlayerCommandText(playerid,"/befehl") im Script benutzt; die Grenzpruefung
+// unten muss deshalb trotzdem stehen bleiben.
 public OnPlayerCommandText(playerid, cmdtext[])
 {
     new
@@ -16524,7 +16553,7 @@ COMMAND:changepasswort(playerid,params[])
 	if(!isPlayerAnAdmin(playerid,6))return ADMIN_MSG(playerid);
     if(sscanf(params,"s[24]s[31]",pID,passwort))return SCM(playerid,SAMP_WEISS,""#IINFO" /changepasswort [Name][Neuespasswort]");
 	if(strlen(passwort) > 30)return SCM(playerid,SAMP_WEISS,""#IINFO" /changepasswort [Name][Neuespasswort darf maximal 30 Zeichen beinhalten]");
-	format(query,sizeof(query),"SELECT * FROM spieler WHERE Name = '%s'",pID);
+	mysql_format(MySQL_R394,query,sizeof(query),"SELECT * FROM spieler WHERE Name = '%e'",pID);
     mysql_function_query(MySQL_R394,query,true,"sql_array","ssiiii",pID,passwort,d_script_passwort,playerid,0,MySQL_R394);
     return 1;
 }
@@ -16541,7 +16570,7 @@ COMMAND:changename(playerid,params[])
 	if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
     if(Spieler[pID][pAdminOnduty] == true)return SCM(playerid,SAMP_WEISS,"Spieler ist im Admindienst.");
 	if(!strcmp(name,Spieler[pID][pName],true))return SCM(playerid,SAMP_WEISS,"Spieler hat bereits den selben Namen!");
-	format(query,sizeof(query),"SELECT * FROM spieler WHERE Name = '%s'",name);
+	mysql_format(MySQL_R394,query,sizeof(query),"SELECT * FROM spieler WHERE Name = '%e'",name);
 	mysql_function_query(MySQL_R394,query,true,"sql_array","ssiiii",query,name,d_script_name,playerid,pID,MySQL_R394);
 	return 1;
 }
@@ -24452,7 +24481,7 @@ COMMAND:writenewspaper(playerid,params[])
 	new string[128],cmd[30],text[125];
 	if(!isPlayerInFrakt(playerid,10))return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 	if(!isPlayerAMember(playerid,3))return SCM(playerid,SAMP_WEISS,"Nicht den jeweiligen Rang.");
-	if(sscanf(params,"IINFO" ,cmd,text))return SCM(playerid,SAMP_WEISS,""IINFO" /writenewspaper [1-8/Veröffentlichen/Zurückziehen][Text]");
+	if(sscanf(params,"s[30]s[125]",cmd,text))return SCM(playerid,SAMP_WEISS,""IINFO" /writenewspaper [1-8/Veröffentlichen/Zurückziehen][Text]");
 	if(strlen(text) > 120)return SCM(playerid,SAMP_WEISS,""IINFO" /writenewspaper [1-8/Veröffentlichen/Zurückziehen][Text darf maximal 120 Zeichen beinhalten]");
 	if(strcmp(cmd,"1",true) == 0)
 	{
@@ -24953,7 +24982,7 @@ COMMAND:aorginvite(playerid,params[])
 	new pID,string[128],org;
 	if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"ui",pID,org))return SCM(playerid,SAMP_WEISS,""IINFO" /aorginvite [playerid/Name][Unternehmen]");
-	if(OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
+	if(org < 1 || org >= MAX_ORGANISATIONS || OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
 	if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 	if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
@@ -24981,7 +25010,7 @@ COMMAND:aparteiinvite(playerid,params[])
 	new pID,string[128],p;
 	if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"ui",pID,p))return SCM(playerid,SAMP_WEISS,""IINFO" /aparteiinvite [playerid/Name][Partei]");
-	if(PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
+	if(p < 1 || p >= MAX_PARTEI || PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
 	if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 	if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
@@ -25009,7 +25038,7 @@ COMMAND:aorguninvite(playerid,params[])
 	new pID,string[128],org;
     if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"ui",pID,org))return SCM(playerid,SAMP_WEISS,""IINFO" /aorginvite [playerid/Name][Unternehmen]");
-	if(OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
+	if(org < 1 || org >= MAX_ORGANISATIONS || OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
 	if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 	if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
@@ -25037,7 +25066,7 @@ COMMAND:aparteiuninvite(playerid,params[])
 	new pID,string[128],p;
     if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"ui",pID,p))return SCM(playerid,SAMP_WEISS,""IINFO" /aparteiinvite [playerid/Name][Partei]");
-	if(PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/parteien)");
+	if(p < 1 || p >= MAX_PARTEI || PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/parteien)");
 	if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 	if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
@@ -25062,7 +25091,7 @@ COMMAND:aorgmember(playerid,params[])
 	new string[1000],onlinemembers = 0,org;
     if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"i",org))return SCM(playerid,SAMP_WEISS,""IINFO" /aorgmember [Unternehmen]");
-	if(OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
+	if(org < 1 || org >= MAX_ORGANISATIONS || OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
 	ForEachPlayer(i)
     {
 		if(IsPlayerConnected(i) && !IsPlayerNPC(i))
@@ -25092,7 +25121,7 @@ COMMAND:aparteimember(playerid,params[])
 	new string[1000],onlinemembers = 0,p;
     if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"i",p))return SCM(playerid,SAMP_WEISS,""IINFO" /aparteimember [Parteien]");
-	if(PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
+	if(p < 1 || p >= MAX_PARTEI || PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
 	ForEachPlayer(i)
     {
 		if(IsPlayerConnected(i) && !IsPlayerNPC(i))
@@ -25126,7 +25155,7 @@ COMMAND:aorgdelete(playerid,params[])
 	new org,string[128];
 	if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"i",org))return SCM(playerid,SAMP_WEISS,""IINFO" /aorgdelete [Unternehmen]");
-	if(OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
+	if(org < 1 || org >= MAX_ORGANISATIONS || OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
 	if(strcmp(Spieler[playerid][pName],OrgInfo[org][OrgOwner],true) == 0)
 	{
 		format(string,sizeof(string),""ACINFO" Du hast die Firma: "IINFO2"%s"#HTML_WEISS" aufgelöst.",OrgInfo[org][OrgName]);
@@ -25168,7 +25197,7 @@ COMMAND:aparteidelete(playerid,params[])
 	new p,string[128];
 	if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"i",p))return SCM(playerid,SAMP_WEISS,""IINFO" /aprteidelete [Partei]");
-	if(PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
+	if(p < 1 || p >= MAX_PARTEI || PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
 	if(strcmp(Spieler[playerid][pName],PartInfo[p][ParteiOwner],true) == 0)
 	{
 		format(string,sizeof(string),""ACINFO" Du hast die Partei "IINFO2"%s"#HTML_WEISS" aufgelöst.",PartInfo[p][ParteiName]);
@@ -25208,7 +25237,7 @@ COMMAND:aorgsetmotto(playerid,params[])
 	new motto[90],org,string[128];
 	if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"s[90]i",motto,org))return SCM(playerid,SAMP_WEISS,""IINFO" /aorgsetmotto [Motto][Unternehmen]");
-	if(OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
+	if(org < 1 || org >= MAX_ORGANISATIONS || OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
 	if(strlen(motto) > 90)return SCM(playerid,SAMP_WEISS,""IINFO" /aorgcreate [Motto darf maximal 90 Zeichen beinhalten][Unternehmen]");
 	strmid(OrgInfo[org][OrgMotto],motto,0,strlen(motto),128);
 	format(string,sizeof(string),""ACINFO" Du hast das Motto der Firma in "IINFO2"%s"#HTML_WEISS" umgeändert.",OrgInfo[org][OrgMotto]);
@@ -25232,7 +25261,7 @@ COMMAND:aparteisetmotto(playerid,params[])
 	new motto[90],p,string[128];
 	if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"s[90]i",motto,p))return SCM(playerid,SAMP_WEISS,""IINFO" /aparteisetmotto [Motto][Partei]");
-	if(PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
+	if(p < 1 || p >= MAX_PARTEI || PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
 	if(strlen(motto) > 90)return SCM(playerid,SAMP_WEISS,""IINFO" /aparteisetmotto [Motto darf maximal 90 Zeichen beinhalten][Partei]");
 	strmid(PartInfo[p][ParteiMotto],motto,0,strlen(motto),128);
 	format(string,sizeof(string),""ACINFO" Du hast das Motto der Partei in "IINFO2"%s"#HTML_WEISS" umgeändert.",PartInfo[p][ParteiMotto]);
@@ -25256,7 +25285,7 @@ COMMAND:aorgname(playerid,params[])
 	new name[32],org,string[128];
 	if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"s[32]i",name,org))return SCM(playerid,SAMP_WEISS,""IINFO" /aorgname [Name][Unternehmen]");
-	if(OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
+	if(org < 1 || org >= MAX_ORGANISATIONS || OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
 	if(strlen(name) > 30)return SCM(playerid,SAMP_WEISS,""IINFO" /aorgname [Name darf maximal 30 Zeichen beinhalten][Unternehmen]");
 	strmid(OrgInfo[org][OrgName],name,0,strlen(name),32);
 	format(string,sizeof(string),""ACINFO" Du hast den Namen der Firma in "IINFO2"%s"#HTML_WEISS" umgeändert.",OrgInfo[org][OrgName]);
@@ -25280,7 +25309,7 @@ COMMAND:aparteiname(playerid,params[])
 	new name[32],p,string[128];
 	if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"s[32]i",name,p))return SCM(playerid,SAMP_WEISS,""IINFO" /aparteiname [Name][Partei]");
-	if(PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
+	if(p < 1 || p >= MAX_PARTEI || PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
 	if(strlen(name) > 30)return SCM(playerid,SAMP_WEISS,""IINFO" /aparteiname [Name darf maximal 30 Zeichen beinhalten][Partei]");
 	strmid(PartInfo[p][ParteiName],name,0,strlen(name),32);
 	format(string,sizeof(string),""ACINFO" Du hast den Namen der Partei in "IINFO2"%s"#HTML_WEISS" umgeändert.",PartInfo[p][ParteiName]);
@@ -25304,7 +25333,7 @@ COMMAND:aorgmakeleader(playerid,params[])
 	new pID,string[128],org;
     if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"ui",pID,org))return SCM(playerid,SAMP_WEISS,""IINFO" /aorgmakeleader [playerid/Name][Unternehmen]");
-	if(OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
+	if(org < 1 || org >= MAX_ORGANISATIONS || OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
 	if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 	if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
@@ -25332,7 +25361,7 @@ COMMAND:aparteimakeleader(playerid,params[])
 	new pID,string[128],p;
     if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"ui",pID,p))return SCM(playerid,SAMP_WEISS,""IINFO" /aparteimakeleader [playerid/Name][Partei]");
-	if(PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
+	if(p < 1 || p >= MAX_PARTEI || PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
 	if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 	if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
@@ -25360,7 +25389,7 @@ COMMAND:aorgtakeleader(playerid,params[])
 	new pID,string[128],org;
     if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"ui",pID,org))return SCM(playerid,SAMP_WEISS,""IINFO" /aorgtakeleader [playerid/Name][Unternehmen]");
-	if(OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
+	if(org < 1 || org >= MAX_ORGANISATIONS || OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
 	if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 	if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
@@ -25389,7 +25418,7 @@ COMMAND:aparteitakeleader(playerid,params[])
 	new pID,string[128],p;
     if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
 	if(sscanf(params,"ui",pID,p))return SCM(playerid,SAMP_WEISS,""IINFO" /aparteitakeleader [playerid/Name][Partei]");
-	if(PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
+	if(p < 1 || p >= MAX_PARTEI || PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
 	if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 	if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
@@ -26648,7 +26677,7 @@ COMMAND:set(playerid,params[])
 	{
 	    if(!isPlayerAnAdmin(playerid,7) || !isPlayerAnAdmin(playerid,-1))return ADMIN_MSG(playerid);
 	    if(menge<0||menge>100000000)return SCM(playerid,SAMP_WEISS,""IINFO" /set coins [playerid/Name][0-100000000]");
-		Spieler[pID][pGutschein] = menge;
+		Spieler[pID][pCoins] = menge;
 		format(string,sizeof(string),""ACINFO" der Admin "IINFO2"%s"#HTML_WEISS"  hat dir deine Coins auf "IINFO2"%i"#HTML_WEISS" gesetzt.",Spieler[playerid][pName],menge);
 		SCM(pID,SAMP_WEISS,string);
 		format(string,sizeof(string),""IINFO" du hast dem Spieler "IINFO2"%s"#HTML_WEISS"  die Coins auf "IINFO2"%i"#HTML_WEISS" gesetzt.",Spieler[pID][pName],menge);
@@ -28056,7 +28085,7 @@ COMMAND:samenkaufen(playerid,params[])
 		    if(isPlayerInFrakt(playerid,9) || isPlayerInFrakt(playerid,12))return SCM(playerid,SAMP_WEISS,"{FF6666}Dealer:{FFFFFF} Habe leider nichts mehr sry.");
 			new preiberechnung = menge*200;
 		    if((GetACMoney(playerid) - preiberechnung) < 0)return SCM(playerid,SAMP_WEISS,"{FF6666}Dealer:{FFFFFF} Cho´ so viel Geld hast du gar nicht.");
-			if((Spieler[playerid][pGanjaSammen] + menge) > 100)return SCM(playerid,SAMP_WEISS,"{FF6666}Dealer:{FFFFFF} So viel schaffst du nicht zu tragen.");
+			if((Spieler[playerid][pKokainSammen] + menge) > 100)return SCM(playerid,SAMP_WEISS,"{FF6666}Dealer:{FFFFFF} So viel schaffst du nicht zu tragen.");
 		    Spieler[playerid][pKokainSammen] += menge;
 		    SetPlayerPosEx(playerid,1298.7894,-854.7486,43.5029);
 		    SetPlayerFacingAngle(playerid,310.5711);
@@ -29147,7 +29176,7 @@ COMMAND:drace(playerid,params[])
 		 	RaceInfo[r][rcp][1] = 0;
 		 	RaceInfo[r][rcp][2] = 0;
 	 	}
-	    format(query,sizeof(query),"SELECT * FROM server_race WHERE race='%s'",RaceName[r]);
+	    mysql_format(MySQL_R394,query,sizeof(query),"SELECT * FROM server_race WHERE race='%e'",RaceName[r]);
 		mysql_function_query(MySQL_R394,query,true,"sql_array2","siii",RaceName[r],d_script_rennen,Spieler[playerid][pFraktion],MySQL_R394);
 		return 1;
     }
@@ -30656,7 +30685,7 @@ COMMAND:unban(playerid,params[])
  	if(!isPlayerAnAdmin(playerid,2))return ADMIN_MSG(playerid);
   	if(sscanf(params,"s[24]s[31]",namestring,reason))return SCM(playerid,SAMP_WEISS,""IINFO" /unban [Spielername][Grund]");
     if(strlen(reason) > 30)return SCM(playerid,SAMP_WEISS,""IINFO" /unban [Spielername][Grund darf maximal 30 Zeichen beinhalten]");
-    format(query,sizeof(query),"SELECT * FROM server_bans WHERE Name='%s'",namestring);
+    mysql_format(MySQL_R394,query,sizeof(query),"SELECT * FROM server_bans WHERE Name='%e'",namestring);
 	mysql_function_query(MySQL_R394,query,true,"sql_array","ssiiii",namestring,reason,db_script_uban,playerid,0,MySQL_R394);
  	return 1;
 }
@@ -30669,7 +30698,7 @@ COMMAND:addmultiacc(playerid,params[])
 	new namestring[24],query[128];
  	if(!isPlayerAnAdmin(playerid,2))return ADMIN_MSG(playerid);
   	if(sscanf(params,"s[24]",namestring))return SCM(playerid,SAMP_WEISS,""IINFO" /addmultiacc [Spielername]");
-    format(query,sizeof(query),"SELECT * FROM server_maccounts WHERE Name='%s'",namestring);
+    mysql_format(MySQL_R394,query,sizeof(query),"SELECT * FROM server_maccounts WHERE Name='%e'",namestring);
 	mysql_function_query(MySQL_R394,query,true,"sql_array2","siii",namestring,db_script_maccount,playerid,MySQL_R394);
  	return 1;
 }
@@ -30682,7 +30711,7 @@ COMMAND:delmultiacc(playerid,params[])
 	new namestring[24],query[128];
  	if(!isPlayerAnAdmin(playerid,2))return ADMIN_MSG(playerid);
   	if(sscanf(params,"s[24]",namestring))return SCM(playerid,SAMP_WEISS,""IINFO" /delmultiacc [Spielername]");
-    format(query,sizeof(query),"SELECT * FROM server_maccounts WHERE Name='%s'",namestring);
+    mysql_format(MySQL_R394,query,sizeof(query),"SELECT * FROM server_maccounts WHERE Name='%e'",namestring);
 	mysql_function_query(MySQL_R394,query,true,"sql_array2","siii",namestring,d_script_frakv,playerid,MySQL_R394);
  	return 1;
 }
@@ -32552,6 +32581,7 @@ COMMAND:accept(playerid,params[])
 		pID = Spieler[playerid][pSeller];
 		if(pID == playerid)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst dir selbst keine Waffen verkaufen!");
 		if(!IsPlayerConnected(pID))return SCM(playerid,SAMP_WEISS,"Spieler nicht eingeloggt.");
+		if(Spieler[pID][pMaterials] < Spieler[playerid][pVerbrauch])return SCM(playerid,SAMP_WEISS,""IINFO" der Verkaeufer hat nicht mehr genug Materials, der Handel wurde abgebrochen.");
 		if(!ProxDetectorS(5.0,playerid,pID))return SCM(playerid,SAMP_WEISS,""IINFO" der angegebene Spieler ist nicht in deiner Nähe!");
 		format(string,sizeof(string),""IINFO" du hast %s (ID:%i) für %i Materials eine %s mit %i Munition für %i$ verkauft",SpielerName(playerid),playerid,Spieler[playerid][pVerbrauch],SpielerWaffenName(Spieler[playerid][pMenge]),Spieler[playerid][pMenge2],Spieler[playerid][pKaufPreis]);
 		SCM(pID,SAMP_WEISS,string);
@@ -32622,6 +32652,7 @@ COMMAND:accept(playerid,params[])
 		pID = Spieler[playerid][pSeller];
 		if(pID == playerid)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst dir kein Ganja verkaufen!");
 		if(!IsPlayerConnected(pID))return SCM(playerid,SAMP_WEISS,"Spieler nicht eingeloggt.");
+		if(Spieler[pID][pGanja] < Spieler[playerid][pVerbrauch])return SCM(playerid,SAMP_WEISS,""IINFO" der Verkaeufer hat nicht mehr genug Ganja, der Handel wurde abgebrochen.");
 		if(!ProxDetectorS(5.0,playerid,pID))return SCM(playerid,SAMP_WEISS,""IINFO" der angegebene Spieler ist nicht in deiner Nähe!");
 		format(string,sizeof(string),""IINFO" du hast %s (ID:%i) die %ig Ganja für %i$ abgekauft.",SpielerName(pID),pID,Spieler[playerid][pMenge],Spieler[playerid][pKaufPreis]);
 		SCM(playerid,SAMP_WEISS,string);
@@ -32653,6 +32684,7 @@ COMMAND:accept(playerid,params[])
 		pID = Spieler[playerid][pSeller];
 		if(pID == playerid)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst dir kein Kokain verkaufen!");
 		if(!IsPlayerConnected(pID))return SCM(playerid,SAMP_WEISS,"Spieler nicht eingeloggt.");
+		if(Spieler[pID][pKokain] < Spieler[playerid][pVerbrauch])return SCM(playerid,SAMP_WEISS,""IINFO" der Verkaeufer hat nicht mehr genug Kokain, der Handel wurde abgebrochen.");
 		if(!ProxDetectorS(5.0,playerid,pID))return SCM(playerid,SAMP_WEISS,""IINFO" der angegebene Spieler ist nicht in deiner Nähe!");
 		format(string,sizeof(string),""IINFO" du hast %s (ID:%i) die %ig Kokain für %i$ abgekauft.",SpielerName(pID),pID,Spieler[playerid][pMenge],Spieler[playerid][pKaufPreis]);
 		SCM(playerid,SAMP_WEISS,string);
@@ -32684,6 +32716,7 @@ COMMAND:accept(playerid,params[])
 		pID = Spieler[playerid][pSeller];
 		if(pID == playerid)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst dir kein Spice verkaufen!");
 		if(!IsPlayerConnected(pID))return SCM(playerid,SAMP_WEISS,"Spieler nicht eingeloggt.");
+		if(Spieler[pID][pSpice] < Spieler[playerid][pVerbrauch])return SCM(playerid,SAMP_WEISS,""IINFO" der Verkaeufer hat nicht mehr genug Spice, der Handel wurde abgebrochen.");
 		if(!ProxDetectorS(5.0,playerid,pID))return SCM(playerid,SAMP_WEISS,""IINFO" der angegebene Spieler ist nicht in deiner Nähe!");
 		format(string,sizeof(string),""IINFO" du hast %s (ID:%i) die %ig Spice für %i$ abgekauft.",SpielerName(pID),pID,Spieler[playerid][pMenge],Spieler[playerid][pKaufPreis]);
 		SCM(playerid,SAMP_WEISS,string);
@@ -32715,6 +32748,7 @@ COMMAND:accept(playerid,params[])
 		pID = Spieler[playerid][pSeller];
 		if(pID == playerid)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst dir kein Opium Pillen verkaufen!");
 		if(!IsPlayerConnected(pID))return SCM(playerid,SAMP_WEISS,"Spieler nicht eingeloggt.");
+		if(Spieler[pID][pOpium] < Spieler[playerid][pVerbrauch])return SCM(playerid,SAMP_WEISS,""IINFO" der Verkaeufer hat nicht mehr genug Opium Pillen, der Handel wurde abgebrochen.");
 		if(!ProxDetectorS(5.0,playerid,pID))return SCM(playerid,SAMP_WEISS,""IINFO" der angegebene Spieler ist nicht in deiner Nähe!");
 		format(string,sizeof(string),""IINFO" du hast %s (ID:%i) die %i Opium Pillen für %i$ abgekauft.",SpielerName(pID),pID,Spieler[playerid][pMenge],Spieler[playerid][pKaufPreis]);
 		SCM(playerid,SAMP_WEISS,string);
@@ -44752,7 +44786,7 @@ COMMAND:sellfish(playerid,params[])
 	    format(string,sizeof(string),""IINFO" du hast einen %s für %i$ verkauft!",Fische[Spieler[playerid][pFishID][fishid]],cash);
 	    SCM(playerid,SAMP_WEISS,string);
 	    ACMoney(playerid,cash);
-	    BizInfo[biz][biz_geldkasse] += cash;
+	    BizInfo[biz][biz_geldkasse] -= cash;
 		Spieler[playerid][pFishID][fishid] = -1;
 		Spieler[playerid][pFischgewicht][fishid] = 0;
 	    return 1;
@@ -53904,10 +53938,32 @@ public OnVehiclePaintjob(playerid,vehicleid,paintjobid)
 }
 public OnQueryError(errorid,error[],callback[],query[],connectionHandle)
 {
-	new logstring[900],queryteil[512],querylen = strlen(query);
-	if(querylen > sizeof(queryteil)-1) querylen = sizeof(queryteil)-1;
-	strmid(queryteil,query,0,querylen,sizeof(queryteil));
-	format(logstring,sizeof(logstring),"MySQL-Fehler %d | Handle: %d | Callback: %s | Meldung: %s | Query (%d Zeichen): %s",errorid,connectionHandle,callback,error,strlen(query),queryteil);
+	new logstring[900],queryteil[512],qi,qj,imwert;
+	// Die Werte zwischen Hochkommata werden ausgeblendet. Sonst landen
+	// Passwort-Hashes und andere Spielerdaten im Klartext in der Logdatei
+	// und auf der Serverkonsole. Struktur und Tabellen bleiben lesbar,
+	// das genuegt zur Fehlersuche.
+	while(query[qi] != 0 && qj < sizeof(queryteil)-5)
+	{
+		if(query[qi] == '\'')
+		{
+			queryteil[qj++] = '\'';
+			if(!imwert)
+			{
+				queryteil[qj++] = '.';
+				queryteil[qj++] = '.';
+				queryteil[qj++] = '.';
+			}
+			imwert = !imwert;
+		}
+		else if(!imwert)
+		{
+			queryteil[qj++] = query[qi];
+		}
+		qi++;
+	}
+	queryteil[qj] = 0;
+	format(logstring,sizeof(logstring),"MySQL-Fehler %d | Handle: %d | Callback: %s | Meldung: %s | Query (%d Zeichen, Werte ausgeblendet): %s",errorid,connectionHandle,callback,error,strlen(query),queryteil);
 	Log("Server_MySQL_Error.txt",logstring);
 	print(logstring);
 	return 1;
@@ -60818,7 +60874,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			if(!response)return 1;
 			new query[128];
 	        if(strcmp(inputtext,SpielerName(playerid),true)==0)return SendClientMessage(playerid,SAMP_WEISS,"Du kannst dich nicht selbst in die Freundeliste eintragen!");
-	        mysql_format(MySQL_R394,query,sizeof(query),"SELECT * FROM spieler WHERE Name='%s'",inputtext);
+	        mysql_format(MySQL_R394,query,sizeof(query),"SELECT * FROM spieler WHERE Name='%e'",inputtext);
 	        mysql_function_query(MySQL_R394,query,true,"CheckSpielerExists","is",playerid,inputtext);
 			return 1;
 		}
@@ -60872,7 +60928,16 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					return 1;
 			    }
 			    format(stringlogin,sizeof(stringlogin),"SELECT * FROM spieler WHERE Name = '%s'",SpielerName(playerid));
-			    if(LoginFehlversuche[playerid] >= MAX_LOGIN_VERSUCHE)return 1;
+			    if(LoginFehlversuche[playerid] >= MAX_LOGIN_VERSUCHE)
+			    {
+			        new sperrzeit = LoginSperre_Aktiv(playerid);
+			        if(sperrzeit > 0)
+			        {
+			            format(stringlogin,sizeof(stringlogin),""#ERROR" Zu viele Fehlversuche. Bitte warte noch %i:%02d Minuten.",sperrzeit/60,sperrzeit%60);
+			            SCM(playerid,SAMP_WEISS,stringlogin);
+			        }
+			        return 1;
+			    }
 			    mysql_function_query(MySQL_R394,stringlogin,true,"l_script_account","isi",playerid,inputtext,1);
 			}
 		    return 1;
@@ -60905,7 +60970,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		   		}
 			    else
 			    {
-				    strmid(Spieler[playerid][pPassword],inputtext,0,strlen(inputtext),32);
+				    strmid(Spieler[playerid][pPassword],inputtext,0,strlen(inputtext),33);
 				    ShowPlayerDialog(playerid,DIALOG_REGISTER5,DIALOG_STYLE_INPUT,""#HTML_BLAU"E-Mail eingabe",""#HTML_WEISS"Bitte teile uns deine E-Mail Adresse zu.\nDie könnte wichtig sein falls du dein Passwort Vergessen hast oder sonstiges","Weiter","Verlassen");
                     HideLoginScreen(playerid);
                     StopAudioStreamForPlayer(playerid);
@@ -62231,7 +62296,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			if(response == 0)return 1;
 		    else
 		    {
-			    if(!strlen(inputtext))
+			    if(!strlen(inputtext) || strlen(inputtext) >= 8)
 			    {
 				    format(string,sizeof(string),"Gebe nun den Betrag ein den du in den Lotto-Jackpot einzahlen möchtest.\nMomentaner Jackpot bei: %i$",fsteuern[Lottojackpot]);
 					ShowPlayerDialog(playerid,DIALOG_LOTTO_JACKPOTPAY,DIALOG_STYLE_INPUT,"Lotto",string,"Einzahlen","Abbrechen");
@@ -62475,7 +62540,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		    }
 		    if(response == 1)
 		    {
-			    if(!strlen(inputtext) || strlen(inputtext) > 32)
+			    if(!strlen(inputtext) || strlen(inputtext) > 31)
 			    {
 					format(string,sizeof(string),"Gutscheinerstellung Fortschritt:\nGutscheincode: %s\nGebe nun den Gutscheinnamen ein:",Gutschein[MakeGutschein[playerid]][gutscheincode]);
 				    ShowPlayerDialog(playerid,GUTSCHEIN_DIALOG_NAME,DIALOG_STYLE_INPUT,"Gutscheinerstellung Schritt 2",string,"Weiter","Zurück");
@@ -62483,7 +62548,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				}
 				else
 				{
-				    strmid(Gutschein[MakeGutschein[playerid]][gutscheinname],inputtext,0,strlen(inputtext),64);
+				    strmid(Gutschein[MakeGutschein[playerid]][gutscheinname],inputtext,0,strlen(inputtext),32);
 				    format(string,sizeof(string),"Gutscheinerstellung Fortschritt:\nGutscheincode: %s\nGutscheinname: %s\nGebe nun die Gutscheinbeschreibung ein:",Gutschein[MakeGutschein[playerid]][gutscheincode],Gutschein[MakeGutschein[playerid]][gutscheinname]);
 				    ShowPlayerDialog(playerid,GUTSCHEIN_DIALOG_DESC,DIALOG_STYLE_INPUT,"Gutscheinerstellung Schritt 3",string,"Weiter","Zurück");
 					return 1;
@@ -65274,8 +65339,6 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 	    case DIALOG_BUYHANDY:
 	    {
 		    new biz = ReturnBizID(playerid),string[128],givemwst;
-		    if(biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keinem Handyladen.");
-		    if(listitem < 0 || listitem > 3)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 			if(response == 0)
 		    {
 				ShowPlayerHandyMenu(playerid);
@@ -65283,6 +65346,11 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		    }
 		    if(response == 1)
 		    {
+			    // Erst hier pruefen, damit der Zurueck-Weg (response == 0) weiter
+			    // ins Handymenue fuehrt und nicht in einer Fehlermeldung endet.
+			    // Die Liste hat sizeof(HandyInfo)-1 = 4 Eintraege -> 0 bis 3.
+			    if(biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keinem Handyladen.");
+			    if(listitem < 0 || listitem > 3)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 				if((GetACMoney(playerid) - BizInfo[biz][biz_artikel][listitem]) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 			    givemwst = floatround((BizInfo[biz][biz_artikel][listitem]/100)*fsteuern[Mwst],floatround_ceil);
     			HideHandyDraw(playerid);
@@ -65389,7 +65457,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		case DIALOG_BUYHANDYCOINS:
 		{
 			new string[350],coins = strval(inputtext),biz = ReturnBizID(playerid),givemwst;
-			if(biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keinem Handyladen.");
+			// Der Zurueck-Weg (response == 0) benutzt biz nicht und muss weiter ins Handymenue fuehren.
+			if(response != 0 && biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keinem Handyladen.");
 			if(response == 0)
 		    {
 				ShowPlayerHandyMenu(playerid);
@@ -66781,8 +66850,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 	    case DIALOG_BUWTHINGSINBIZ:
 		{
 			new string[128],biz = ReturnBizID(playerid),givemwst;
-			if(biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keinem Laden.");
 		    if(response == 0)return 1;
+			if(biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keinem Laden.");
 		    else
 		    {
 			    switch(listitem)
@@ -66842,9 +66911,14 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 							}
 							case 5://handyladen
 							{
+								// Kein \n vor dem ersten Eintrag: sonst hat die Liste eine leere
+								// erste Zeile und listitem ist gegenueber HandyInfo/biz_artikel
+								// um 1 verschoben (DIALOG_BUYHANDY rechnet mit pHandy = listitem+1
+								// und Preis biz_artikel[listitem]).
 								for(new i=1;i<sizeof(HandyInfo);i++)
 								{
-									format(string,sizeof(string),"%s\n%s "IINFO2"%i$",string,HandyInfo[i][Handyname],BizInfo[biz][biz_artikel][i-1]);
+									if(i > 1)strcat(string,"\n");
+									format(string,sizeof(string),"%s%s "IINFO2"%i$",string,HandyInfo[i][Handyname],BizInfo[biz][biz_artikel][i-1]);
 								}
 								ShowPlayerDialog(playerid,DIALOG_BUYHANDY,DIALOG_STYLE_LIST,""ClanTagDialoge" Handyladen -> Handy's",string,"Kaufen","Zurück");
 							}
@@ -67720,6 +67794,9 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 	    case BIZ_DIALOG_PREIS_opt:
 		{
 			new Menge = strval(inputtext),biz = GetBusinessOwnerOrCoOwner(playerid,Spieler[playerid][pName]),string[256];
+			// Muss VOR beiden Zweigen stehen: schon der Zurueck-Weg (response == 0)
+			// liest BizInfo[biz][biz_art] und wuerde bei biz == -1 daneben greifen.
+			if(biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht an deinem Business.");
 			if(response == 0)
 		    {
 			    switch(BizInfo[biz][biz_art])
@@ -67852,6 +67929,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 	    case BIZ_DIALOG_AUSWAHL_EINZAHLEN:
 		{
 			new Menge = strval(inputtext),biz = GetBusinessOwnerOrCoOwner(playerid,Spieler[playerid][pName]),string[256];
+			// Nur fuer den Bestaetigen-Weg: response == 0 fuehrt weiterhin ins Businessmenue.
+			if(response != 0 && biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht an deinem Business.");
 			if(response == 0)
 		    {
 			    ShowPlayerDialog(playerid,DIALOG_BIZ_MENU,DIALOG_STYLE_LIST,""ClanTagDialoge"Businessverwaltung",""#HTML_BLAU"1."#HTML_WEISS" Einzahlen\n"#HTML_BLAU"2."#HTML_WEISS" Auszahlen\n"#HTML_BLAU"3."#HTML_WEISS" Preise ändern","Auswählen","Abbrechen");
@@ -67887,6 +67966,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		case BIZ_DIALOG_AUSWAHL_AUSZAHLEN:
 		{
 			new Menge = strval(inputtext),biz = GetBusinessOwnerOrCoOwner(playerid,Spieler[playerid][pName]),string[256];
+			// Nur fuer den Bestaetigen-Weg: response == 0 fuehrt weiterhin ins Businessmenue.
+			if(response != 0 && biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht an deinem Business.");
 			if(response == 0)
 		    {
 			    ShowPlayerDialog(playerid,DIALOG_BIZ_MENU,DIALOG_STYLE_LIST,""ClanTagDialoge"Businessverwaltung",""#HTML_BLAU"1."#HTML_WEISS" Einzahlen\n"#HTML_BLAU"2."#HTML_WEISS" Auszahlen\n"#HTML_BLAU"3."#HTML_WEISS" Preise ändern","Auswählen","Abbrechen");
@@ -67922,6 +68003,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		case BIZ_DIALOG_BESCHREIBUNG:
 		{
 			new string[250],biz = GetBusinessOwnerOrCoOwner(playerid,Spieler[playerid][pName]);
+			// Nur fuer den Bestaetigen-Weg: response == 0 fuehrt weiterhin ins Businessmenue.
+			if(response != 0 && biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht an deinem Business.");
 			if(response == 0)
 		    {
 			    ShowPlayerDialog(playerid,DIALOG_BIZ_MENU,DIALOG_STYLE_LIST,""ClanTagDialoge"Businessverwaltung",""#HTML_BLAU"1."#HTML_WEISS" Einzahlen\n"#HTML_BLAU"2."#HTML_WEISS" Auszahlen\n"#HTML_BLAU"3."#HTML_WEISS" Preise ändern","Auswählen","Abbrechen");
@@ -67993,6 +68076,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		{
 			new string[500],sm = ReturnSmarkID(playerid);
 			if(response == 0)return 1;
+			if(sm == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in/an eurem Schwarzmarkt.");
 			else
 			{
 				switch(listitem)
@@ -68054,6 +68138,9 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		case SMARK_MENU_PREISE_opt:
 		{
 			new Menge = strval(inputtext),sm = ReturnSmarkID(playerid),string[256];
+			// Muss VOR beiden Zweigen stehen: schon der Zurueck-Weg (response == 0)
+			// liest SmarkInfo[sm][sartikel][i] und wuerde bei sm == -1 daneben greifen.
+			if(sm == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keinem Schwarzmarkt.");
 			if(response == 0)
 			{
 				for(new i=0;i<sizeof(sBuyInfo);i++){ format(string,sizeof(string),"%s\n%s	%i$",string,sBuyInfo[i][sbuyweaponname],SmarkInfo[sm][sartikel][i]); }
@@ -68101,6 +68188,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		case SMARK_MENU_BESCHREIBUNG:
 		{
 			new string[250],sm = ReturnSmarkID(playerid);
+			// Nur fuer den Bestaetigen-Weg: response == 0 fuehrt weiterhin ins Schwarzmarktmenue.
+			if(response != 0 && sm == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in/an eurem Schwarzmarkt.");
 			if(response == 0)return ShowPlayerDialog(playerid,SMARK_MENU,DIALOG_STYLE_LIST,"Schwarzmarkt","Preis Einstellungen\nBeschreibung\nGeld einzahlen\nGeld auszahlen\nMaterials einzahlen\nMaterials auszahlen","Auswählen","Abbrechen");
 			else
 		    {
@@ -68124,6 +68213,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		case SMARK_MENU_GELD_EINZAHLEN:
 		{
 			new Menge = strval(inputtext),string[256],sm = ReturnSmarkID(playerid);
+			// Nur fuer den Bestaetigen-Weg: response == 0 fuehrt weiterhin ins Schwarzmarktmenue.
+			if(response != 0 && sm == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in/an eurem Schwarzmarkt.");
 			if(response == 0)return ShowPlayerDialog(playerid,SMARK_MENU,DIALOG_STYLE_LIST,"Schwarzmarkt","Preis Einstellungen\nBeschreibung\nGeld einzahlen\nGeld auszahlen\nMaterials einzahlen\nMaterials auszahlen","Auswählen","Abbrechen");
 			else
 		    {
@@ -68160,6 +68251,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		case SMARK_MENU_GELD_AUSZAHLEN:
 		{
 			new Menge = strval(inputtext),string[256],sm = ReturnSmarkID(playerid);
+			// Nur fuer den Bestaetigen-Weg: response == 0 fuehrt weiterhin ins Schwarzmarktmenue.
+			if(response != 0 && sm == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in/an eurem Schwarzmarkt.");
 			if(response == 0)return ShowPlayerDialog(playerid,SMARK_MENU,DIALOG_STYLE_LIST,"Schwarzmarkt","Preis Einstellungen\nBeschreibung\nGeld einzahlen\nGeld auszahlen\nMaterials einzahlen\nMaterials auszahlen","Auswählen","Abbrechen");
 			else
 		    {
@@ -68196,6 +68289,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		case SMARK_MENU_MATERIALS_EINZAHLEN:
 		{
 			new Menge = strval(inputtext),string[256],sm = ReturnSmarkID(playerid);
+			// Nur fuer den Bestaetigen-Weg: response == 0 fuehrt weiterhin ins Schwarzmarktmenue.
+			if(response != 0 && sm == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in/an eurem Schwarzmarkt.");
 			if(response == 0)return ShowPlayerDialog(playerid,SMARK_MENU,DIALOG_STYLE_LIST,"Schwarzmarkt","Preis Einstellungen\nBeschreibung\nGeld einzahlen\nGeld auszahlen\nMaterials einzahlen\nMaterials auszahlen","Auswählen","Abbrechen");
 			else
 		    {
@@ -68228,6 +68323,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		case SMARK_MENU_MATERIALS_AUSZAHLEN:
 		{
 			new Menge = strval(inputtext),string[256],sm = ReturnSmarkID(playerid);
+			// Nur fuer den Bestaetigen-Weg: response == 0 fuehrt weiterhin ins Schwarzmarktmenue.
+			if(response != 0 && sm == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in/an eurem Schwarzmarkt.");
 			if(response == 0)return ShowPlayerDialog(playerid,SMARK_MENU,DIALOG_STYLE_LIST,"Schwarzmarkt","Preis Einstellungen\nBeschreibung\nGeld einzahlen\nGeld auszahlen\nMaterials einzahlen\nMaterials auszahlen","Auswählen","Abbrechen");
 			else
 		    {
@@ -68943,8 +69040,8 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 	    case DIALOG_APORTEN:
 		{
 			new string[128];
-			if(listitem < 0 || listitem >= sizeof(APorten))return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 		    if(response == 0)return 1;
+			if(listitem < 0 || listitem >= sizeof(APorten))return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 		    if(response == 1)
 		    {
 			    if(IsPlayerInAnyVehicle(playerid))
@@ -72679,7 +72776,6 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 
 		case DIALOG_REPORTANNAHME:
 		{
-			if(listitem < 0 || listitem > 29)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 			new clickedlistitem = Spieler[playerid][pReportSelect],string[1000],headerstring[64];
 			if(response == 0)
 			{
@@ -72689,6 +72785,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			}
 			else
 			{
+				if(listitem < 0 || listitem > 29)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 				if(!IsPlayerConnected(ReportListitem[listitem][rID][clickedlistitem]) || ReportListitem[listitem][rID][clickedlistitem] == -1)
 				{
 					for(new i=0;i<30;i++)
@@ -77605,6 +77702,7 @@ public l_script_account(playerid,pass[],passwortstate)
 		    Log("Login_Fehlversuche.txt",loginlog);
 		    if(LoginFehlversuche[playerid] >= MAX_LOGIN_VERSUCHE)
 		    {
+		        LoginSperre_Setzen(playerid);
 		        SCM(playerid,SAMP_WEISS,""ACINFO" Zu viele fehlgeschlagene Login-Versuche! Du wirst vom Server geworfen.");
 		        format(loginlog,sizeof(loginlog),"KICK nach %d Fehlversuchen - Spieler: %s | IP: %s",MAX_LOGIN_VERSUCHE,SpielerName(playerid),SpielerIP(playerid));
 		        Log("Login_Fehlversuche.txt",loginlog);
@@ -77976,7 +78074,7 @@ public l_script_account(playerid,pass[],passwortstate)
 	    Spieler[playerid][WaitPerso] = strval(result);
 	    strdel(result,0,sizeof(result));
 	    cache_get_field_content(0,"pMarried",result);
-	    strmid(Spieler[playerid][pMarried],result,0,strlen(result),sizeof(result));
+	    strmid(Spieler[playerid][pMarried],result,0,strlen(result),24);
 	    strdel(result,0,sizeof(result));
 	    strdel(result,0,sizeof(result));
 	    cache_get_field_content(0,"pBuyClothes",result);
@@ -78829,7 +78927,7 @@ public sql_array(index[],index2[],sqlresultid,extraid,extraid2,SconnectionHandle
 			    format(Pfahrzeug[slot][extraid2][Besitzer],24,"%s",index2);
 		    }
 	   	}
-	    format(query,sizeof(query),"UPDATE spieler SET Name='%s' WHERE Name='%s'",index2,Spieler[extraid2][pName]);
+	    mysql_format(MySQL_R394,query,sizeof(query),"UPDATE spieler SET Name='%e' WHERE Name='%e'",index2,Spieler[extraid2][pName]);
 	    mysql_function_query(MySQL_R394,query,false,"","");
 	    format(query,sizeof(query),""IINFO" du hast den Name von %s zu %s umbenannt!",Spieler[extraid2][pName],index2);
 	    SCM(extraid,SAMP_WEISS,query);
@@ -78848,9 +78946,9 @@ public sql_array(index[],index2[],sqlresultid,extraid,extraid2,SconnectionHandle
 			SCM(extraid,SAMP_WEISS,""IINFO" banfall existiert nicht in der Datenbank!");
 			return 1;
 	 	}
-		format(query,sizeof(query),"DELETE FROM server_bans WHERE Name = '%s'",index);
+		mysql_format(MySQL_R394,query,sizeof(query),"DELETE FROM server_bans WHERE Name = '%e'",index);
 	   	mysql_function_query(MySQL_R394,query,false,"","");
-	   	format(query, sizeof(query), "DELETE FROM `server_hddbans` WHERE `name` = '%s'",index);
+	   	mysql_format(MySQL_R394,query,sizeof(query),"DELETE FROM `server_hddbans` WHERE `name` = '%e'",index);
 	   	mysql_function_query(MySQL_R394,query,false,"","");
 	    format(query,sizeof(query),""ACINFO" der Admin "IINFO2"%s"HTML_WEISS" hat den Spieler "IINFO2"%s"#HTML_WEISS" entbannt. Grund: "IINFO2"%s",
 		Spieler[extraid][pName],index,index2);
@@ -79081,7 +79179,7 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 			    strdel(result,0,sizeof(result));
 				cache_get_field_content(bid,"BlitzerOrt",result);
 			    format(Blitzer[bid][BlitzerOrt],64,"%s",result);
-			    strmid(Blitzer[bid][BlitzerOrt],result,0,strlen(result),sizeof(result));
+			    strmid(Blitzer[bid][BlitzerOrt],result,0,strlen(result),64);
 			    strdel(result,0,sizeof(result));
 				cache_get_field_content(bid,"sperreX",result);
 			    Blitzer[bid][sperreX] = floatstr(result);
@@ -79283,7 +79381,7 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 		    while(wtafel<rows)
 			{
 				cache_get_field_content(wtafel,"Text",result);
-			    strmid(Werbetafeln[wtafel][wtafeltext],result,0,strlen(result),sizeof(result));
+			    strmid(Werbetafeln[wtafel][wtafeltext],result,0,strlen(result),64);
 			    strdel(result,0,sizeof(result));
 				Werbetafelobject[wtafel] = CreateDynamicObject(Werbetafeln[wtafel][wtafelobjectid],Werbetafeln[wtafel][wtafelx],Werbetafeln[wtafel][wtafely],Werbetafeln[wtafel][wtafelz],Werbetafeln[wtafel][wtafelxrot],Werbetafeln[wtafel][wtafelyrot],Werbetafeln[wtafel][wtafelzrot]);
 				SetDynamicObjectMaterialText(Werbetafelobject[wtafel],Werbetafeln[wtafel][wtafeltmindex],Werbetafeln[wtafel][wtafeltext],Werbetafeln[wtafel][wtafeltmsize],Werbetafeln[wtafel][wtafeltfonts],Werbetafeln[wtafel][wtafeltfontsize],Werbetafeln[wtafel][wtafeltbold],Werbetafeln[wtafel][wtafeltfontcolor],Werbetafeln[wtafel][wtafeltbackcolor],Werbetafeln[wtafel][wtafeltaligment]);
@@ -79382,7 +79480,7 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 			    SmarkInfo[sm+1][smaterials] = strval(result);
 			    strdel(result,0,sizeof(result));
 				cache_get_field_content(sm,"swerbetext",result);
-			    strmid(SmarkInfo[sm+1][swerbetext],result,0,strlen(result),sizeof(result));
+			    strmid(SmarkInfo[sm+1][swerbetext],result,0,strlen(result),64);
 			    strdel(result,0,sizeof(result));
 				cache_get_field_content(sm,"sprice",result);
 			    SmarkInfo[sm+1][sprice] = strval(result);
@@ -79524,28 +79622,28 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 			fsteuern[NewspaperPreis] = strval(result);
 			strdel(result,0,sizeof(result));
 	  		cache_get_field_content(0,"NewspaperText1",result);
-			strmid(fsteuern[NewspaperText1],result,0,strlen(result),sizeof(result));
+			strmid(fsteuern[NewspaperText1],result,0,strlen(result),128);
 			strdel(result,0,sizeof(result));
 	        cache_get_field_content(0,"NewspaperText2",result);
-			strmid(fsteuern[NewspaperText2],result,0,strlen(result),sizeof(result));
+			strmid(fsteuern[NewspaperText2],result,0,strlen(result),128);
 			strdel(result,0,sizeof(result));
 			cache_get_field_content(0,"NewspaperText3",result);
-			strmid(fsteuern[NewspaperText3],result,0,strlen(result),sizeof(result));
+			strmid(fsteuern[NewspaperText3],result,0,strlen(result),128);
 			strdel(result,0,sizeof(result));
 			cache_get_field_content(0,"NewspaperText4",result);
-			strmid(fsteuern[NewspaperText4],result,0,strlen(result),sizeof(result));
+			strmid(fsteuern[NewspaperText4],result,0,strlen(result),128);
 			strdel(result,0,sizeof(result));
 			cache_get_field_content(0,"NewspaperText5",result);
-			strmid(fsteuern[NewspaperText5],result,0,strlen(result),sizeof(result));
+			strmid(fsteuern[NewspaperText5],result,0,strlen(result),128);
 			strdel(result,0,sizeof(result));
 			cache_get_field_content(0,"NewspaperText6",result);
-			strmid(fsteuern[NewspaperText6],result,0,strlen(result),sizeof(result));
+			strmid(fsteuern[NewspaperText6],result,0,strlen(result),128);
 			strdel(result,0,sizeof(result));
 			cache_get_field_content(0,"NewspaperText7",result);
-			strmid(fsteuern[NewspaperText7],result,0,strlen(result),sizeof(result));
+			strmid(fsteuern[NewspaperText7],result,0,strlen(result),128);
 			strdel(result,0,sizeof(result));
 			cache_get_field_content(0,"NewspaperText8",result);
-			strmid(fsteuern[NewspaperText8],result,0,strlen(result),sizeof(result));
+			strmid(fsteuern[NewspaperText8],result,0,strlen(result),128);
 			strdel(result,0,sizeof(result));
 			cache_get_field_content(0,"NewsPaperRealeased",result);
 			fsteuern[NewsPaperRealeased] = strval(result);
@@ -79563,7 +79661,7 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 			fsteuern[EisenLagger2] = strval(result);
 			strdel(result,0,sizeof(result));
 			cache_get_field_content(0,"Kartfahrer1",result);
-			strmid(fsteuern[Kartfahrer1],result,0,strlen(result),sizeof(result));
+			strmid(fsteuern[Kartfahrer1],result,0,strlen(result),24);
 			strdel(result,0,sizeof(result));
 			cache_get_field_content(0,"KartTime1",result);
 			fsteuern[KartTime1] = strval(result);
@@ -80071,13 +80169,13 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 			BizInfo[biz+1][biz_locked] = strval(result);
 			strdel(result,0,sizeof(result));
 			cache_get_field_content(biz,"biz_besitzer",result);
-		    strmid(BizInfo[biz+1][biz_besitzer],result,0,strlen(result),sizeof(result));
+		    strmid(BizInfo[biz+1][biz_besitzer],result,0,strlen(result),24);
 			strdel(result,0,sizeof(result));
 			cache_get_field_content(biz,"biz_teilhaber",result);
-		    strmid(BizInfo[biz+1][biz_teilhaber],result,0,strlen(result),sizeof(result));
+		    strmid(BizInfo[biz+1][biz_teilhaber],result,0,strlen(result),24);
 			strdel(result,0,sizeof(result));
 			cache_get_field_content(biz,"biz_beschreibung",result);
-			strmid(BizInfo[biz+1][biz_beschreibung],result,0,strlen(result),sizeof(result));
+			strmid(BizInfo[biz+1][biz_beschreibung],result,0,strlen(result),150);
 			strdel(result,0,sizeof(result));
 			new savestring[20];
 			for(new i=0;i<15;i++)
@@ -80354,7 +80452,7 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 	    cache_get_data(rows,fields);
 		if(!rows)
 		{
-			format(query,sizeof(query),"INSERT INTO server_race (`race`,`fID`) VALUES ('%s','%d')",index,extraid);
+			mysql_format(MySQL_R394,query,sizeof(query),"INSERT INTO server_race (`race`,`fID`) VALUES ('%e','%d')",index,extraid);
 		    mysql_function_query(MySQL_R394,query,false,"","");
 	    }
 	    return 1;
@@ -80364,7 +80462,7 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 	    cache_get_data(rows,fields);
 		if(rows)
 		{
-			format(query,sizeof(query),"DELETE FROM server_race WHERE race = '%s'",index);
+			mysql_format(MySQL_R394,query,sizeof(query),"DELETE FROM server_race WHERE race = '%e'",index);
 		    mysql_function_query(MySQL_R394,query,false,"","");
 	    }
 	    return 1;
@@ -80379,7 +80477,7 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 		}
 		getdate(jahr,monat,tag);
 		gettime(stunde,minute,sekunde);
-		format(query,sizeof(query),"INSERT INTO `server_maccounts` (`Name`,`Datum`,`Uhrzeit`,`Admin`) VALUES ('%s','%04d-%02d-%02d','%02d:%02d:%02d','%s')",index,jahr,monat,tag,stunde,minute,sekunde,Spieler[extraid][pName]);
+		mysql_format(MySQL_R394,query,sizeof(query),"INSERT INTO `server_maccounts` (`Name`,`Datum`,`Uhrzeit`,`Admin`) VALUES ('%e','%04d-%02d-%02d','%02d:%02d:%02d','%e')",index,jahr,monat,tag,stunde,minute,sekunde,Spieler[extraid][pName]);
 		mysql_function_query(MySQL_R394,query,false,"","");
 	 	format(query,sizeof(query),""ACINFO" der Admin %s (ID:%i) hat den Spieler %s auf die Multiaccountliste gesetzt.",Spieler[extraid][pName],extraid,index);
 		SendAdminMessage(SAMP_WEISS,query);
@@ -80393,7 +80491,7 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 			SCM(extraid,SAMP_WEISS,"Multiaccount existiert nicht in der Datenbank.");
 			return 1;
 		}
-	    format(query,sizeof(query),"DELETE FROM server_maccounts WHERE Name = '%s'",index);
+	    mysql_format(MySQL_R394,query,sizeof(query),"DELETE FROM server_maccounts WHERE Name = '%e'",index);
 	   	mysql_function_query(MySQL_R394,query,false,"","");
 	 	format(query,sizeof(query),""ACINFO" der Admin %s (ID:%i) hat den Spieler %s von der Multiaccountliste gelöscht.",Spieler[extraid][pName],extraid,index);
 		SendAdminMessage(SAMP_WEISS,query);
@@ -80624,10 +80722,10 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 				Firma[f+1][FirmaTyp] = strval(result);
 				strdel(result,0,sizeof(result));
 				cache_get_field_content(f,"FirmaName",result);
-			    strmid(Firma[f+1][FirmaName],result,0,strlen(result),sizeof(result));
+			    strmid(Firma[f+1][FirmaName],result,0,strlen(result),32);
 			    strdel(result,0,sizeof(result));
 			    cache_get_field_content(f,"FirmaOwner",result);
-			    strmid(Firma[f+1][FirmaOwner],result,0,strlen(result),sizeof(result));
+			    strmid(Firma[f+1][FirmaOwner],result,0,strlen(result),24);
 			    strdel(result,0,sizeof(result));
 				cache_get_field_content(f,"FirmaKasse",result);
 				Firma[f+1][FirmaKasse] = strval(result);
@@ -80653,13 +80751,13 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 		    while(org<rows)
 			{
 				cache_get_field_content(org,"OrgName",result);
-			    strmid(OrgInfo[org+1][OrgName],result,0,strlen(result),sizeof(result));
+			    strmid(OrgInfo[org+1][OrgName],result,0,strlen(result),32);
 			    strdel(result,0,sizeof(result));
 			    cache_get_field_content(org,"OrgOwner",result);
-			    strmid(OrgInfo[org+1][OrgOwner],result,0,strlen(result),sizeof(result));
+			    strmid(OrgInfo[org+1][OrgOwner],result,0,strlen(result),24);
 			    strdel(result,0,sizeof(result));
 			    cache_get_field_content(org,"OrgMotto",result);
-			    strmid(OrgInfo[org+1][OrgMotto],result,0,strlen(result),sizeof(result));
+			    strmid(OrgInfo[org+1][OrgMotto],result,0,strlen(result),128);
 			    strdel(result,0,sizeof(result));
 			    cache_get_field_content(org,"OrgKasse",result);
 				OrgInfo[org+1][OrgKasse] = strval(result);
@@ -80682,13 +80780,13 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 		    while(org<rows)
 			{
 				cache_get_field_content(org,"ParteiName",result);
-			    strmid(PartInfo[org+1][ParteiName],result,0,strlen(result),sizeof(result));
+			    strmid(PartInfo[org+1][ParteiName],result,0,strlen(result),32);
 			    strdel(result,0,sizeof(result));
 			    cache_get_field_content(org,"ParteiOwner",result);
-			    strmid(PartInfo[org+1][ParteiOwner],result,0,strlen(result),sizeof(result));
+			    strmid(PartInfo[org+1][ParteiOwner],result,0,strlen(result),24);
 			    strdel(result,0,sizeof(result));
 			    cache_get_field_content(org,"ParteiMotto",result);
-			    strmid(PartInfo[org+1][ParteiMotto],result,0,strlen(result),sizeof(result));
+			    strmid(PartInfo[org+1][ParteiMotto],result,0,strlen(result),128);
 			    strdel(result,0,sizeof(result));
 			    cache_get_field_content(org,"ParteiKasse",result);
 				PartInfo[org+1][ParteiKasse] = strval(result);
@@ -81068,7 +81166,7 @@ stock OnGameModeSave()
 	strdel(mainquery,0,sizeof(mainquery));
     for(;fvr<MAX_FRAKTIONNEN;fvr++)
 	{
-		format(mainquery,sizeof(mainquery),"UPDATE server_frakdefi SET Geld='%d',Opium='%d',Ganja='%d',Kokain='%d',C4='%d',Materials='%d',WaffenPack='%d',WaffenSlots='%d',Heal='%d',HealSlots='%d',Armour='%d',ArmourSlots='%d',HaveVBInvite='%d',VBFraktion='%d',F0='%s',F1='%s',F2='%s',F3='%s',F4='%s',F5='%s',F6='%s',GFFID='%d',GFOWNER='%d',GFKILLS='%d',GFDEATHS='%d' WHERE fID='%d'",
+		mysql_format(MySQL_R394,mainquery,sizeof(mainquery),"UPDATE server_frakdefi SET Geld='%d',Opium='%d',Ganja='%d',Kokain='%d',C4='%d',Materials='%d',WaffenPack='%d',WaffenSlots='%d',Heal='%d',HealSlots='%d',Armour='%d',ArmourSlots='%d',HaveVBInvite='%d',VBFraktion='%d',F0='%e',F1='%e',F2='%e',F3='%e',F4='%e',F5='%e',F6='%e',GFFID='%d',GFOWNER='%d',GFKILLS='%d',GFDEATHS='%d' WHERE fID='%d'",
 		fverwaltungen[fvr][Geld],fverwaltungen[fvr][Opium],fverwaltungen[fvr][Ganja],fverwaltungen[fvr][Kokain],fverwaltungen[fvr][C4],fverwaltungen[fvr][Materials],fverwaltungen[fvr][WaffenPack],fverwaltungen[fvr][WaffenSlots],fverwaltungen[fvr][Heal],fverwaltungen[fvr][HealSlots],fverwaltungen[fvr][Armour],fverwaltungen[fvr][ArmourSlots],fverwaltungen[fvr][HaveVBInvite],fverwaltungen[fvr][VBFraktion],
 		frank0[fvr],frank1[fvr],frank2[fvr],frank3[fvr],frank4[fvr],frank5[fvr],frank6[fvr],fverwaltungen[fvr][GangFightfID],fverwaltungen[fvr][GangFightOwner],fverwaltungen[fvr][GangFightKills],fverwaltungen[fvr][GangFightDeaths],fvr);
 		mysql_function_query(MySQL_R394,mainquery,false,"","");
@@ -81121,7 +81219,7 @@ stock OnGameModeSave()
 		Fahrzeug[fv][Fraktion],Fahrzeug[fv][FraktionsRang],Fahrzeug[fv][modelid],Fahrzeug[fv][Colour1],Fahrzeug[fv][Colour2],Fahrzeug[fv][Paintjob],Fahrzeug[fv][HP],Fahrzeug[fv][posx],Fahrzeug[fv][posy],Fahrzeug[fv][posz],Fahrzeug[fv][posa],Fahrzeug[fv][Abgeschlossen],vFahrzeug[Fahrzeug[fv][Vehicle]][Abgeschleppt],Fahrzeug[fv][Interior],Fahrzeug[fv][VirtualWorld]);
 	    strcat(mainquery,query);
 		mysql_format(MySQL_R394,query,sizeof(query),"AbgeschlepptPreis='%d',AbgeschlepptGrund='%e',Nummernschild='%e',Neon='%d',Spoiler='%d',Hood='%d',Roof='%d',Sideskirt='%d',Lamps='%d',Nitro='%d',Exhaust='%d',Wheels='%d',Stereo='%d',Hydraulics='%d',FrontBumper='%d',RearBumper='%d',VentRight='%d',VentLeft='%d',",
-		vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptPreis],vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptGrund],Fahrzeug[fv][Nummernschild],vFahrzeug[Fahrzeug[fv][Vehicle]][Neon],Fahrzeug[fv][Hood],Fahrzeug[fv][Roof],Fahrzeug[fv][Sideskirt],Fahrzeug[fv][Lamps],Fahrzeug[fv][Nitro],Fahrzeug[fv][Exhaust],Fahrzeug[fv][Wheels],Fahrzeug[fv][Stereo],
+		vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptPreis],vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptGrund],Fahrzeug[fv][Nummernschild],vFahrzeug[Fahrzeug[fv][Vehicle]][Neon],Fahrzeug[fv][Spoiler],Fahrzeug[fv][Hood],Fahrzeug[fv][Roof],Fahrzeug[fv][Sideskirt],Fahrzeug[fv][Lamps],Fahrzeug[fv][Nitro],Fahrzeug[fv][Exhaust],Fahrzeug[fv][Wheels],Fahrzeug[fv][Stereo],
 		Fahrzeug[fv][Hydraulics],Fahrzeug[fv][FrontBumper],Fahrzeug[fv][RearBumper],Fahrzeug[fv][VentRight],Fahrzeug[fv][VentLeft]);
 	    strcat(mainquery,query);
 		format(query,sizeof(query),"KaufPreis='%d',FraktionsRang='%d',Motorschaden='%d',FailGas='%d',Tank='%f',Kilometerstand='%d',KofferraumGanja='%d',KofferraumKokain='%d',KofferraumMaterials='%d',KofferraumOpium='%d',KofferraumSpice='%d',KofferraumLunchpakete='%d',KofferraumC4='%d',KofferraumWerkzeugkasten='%d',KofferraumBenzinkanister='%d',Handbremse='%d' WHERE id='%d'",
@@ -81164,7 +81262,7 @@ stock OnGameModeSave()
 	strdel(query,0,sizeof(query));
 	while(partei<MAX_PARTEI && PartInfo[partei][ParteiCreatet] != 0)
 	{
-		mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_patei SET ParteiName='%e',ParteiOwner='%s',ParteiMotto='%e',ParteiKasse='%d',ParteiMBeitrag='%d' WHERE id='%d'",PartInfo[partei][ParteiName],PartInfo[partei][ParteiOwner],PartInfo[partei][ParteiMotto],PartInfo[org][ParteiKasse],PartInfo[org][ParteiMBeitrag],partei);
+		mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_patei SET ParteiName='%e',ParteiOwner='%s',ParteiMotto='%e',ParteiKasse='%d',ParteiMBeitrag='%d' WHERE id='%d'",PartInfo[partei][ParteiName],PartInfo[partei][ParteiOwner],PartInfo[partei][ParteiMotto],PartInfo[partei][ParteiKasse],PartInfo[partei][ParteiMBeitrag],partei);
 		mysql_function_query(MySQL_R394,query,false,"","");
 		partei++;
 	}
@@ -81463,6 +81561,7 @@ stock ACMoney(playerid,money)
 {
 	if(!IsPlayerConnected(playerid))return 0;
 	Spieler[playerid][pCash] = Spieler[playerid][pCash]+money;
+	if(Spieler[playerid][pCash] < 0)Spieler[playerid][pCash] = 0;
     //GivePlayerMoney(playerid,money);
    	new test123[350];
 	format(test123,sizeof(test123),"%d Euro",Spieler[playerid][pCash]);
@@ -82299,6 +82398,34 @@ stock IstAccountPasswort(playerid,eingabe[])
 	if(!strlen(eingabe)) return 0;
 	if(ScriptPW_Verify(gespeichert,eingabe)) return 1;
 	return 0;
+}
+//-[ Bruteforce-Schutz: IP-Sperre im Speicher, ueberlebt einen Reconnect ]-//
+// Rueckgabe: 0 = keine Sperre, sonst die Restdauer in Sekunden.
+stock LoginSperre_Aktiv(playerid)
+{
+	new ip[16];
+	GetPlayerIp(playerid,ip,sizeof(ip));
+	if(!strlen(ip)) return 0;
+	for(new i=0;i<MAX_PLAYERS;i++)
+	{
+		if(LoginSperreBis[i] > gettime() && !strcmp(LoginSperreIP[i],ip,true)) return LoginSperreBis[i] - gettime();
+	}
+	return 0;
+}
+stock LoginSperre_Setzen(playerid)
+{
+	new ip[16],platz = -1;
+	GetPlayerIp(playerid,ip,sizeof(ip));
+	if(!strlen(ip)) return 0;
+	for(new i=0;i<MAX_PLAYERS;i++)
+	{
+		if(!strcmp(LoginSperreIP[i],ip,true)) { platz = i; break; }
+		if(platz == -1 && LoginSperreBis[i] <= gettime()) platz = i;
+	}
+	if(platz == -1) platz = 0;
+	format(LoginSperreIP[platz],16,"%s",ip);
+	LoginSperreBis[platz] = gettime() + LOGIN_SPERRZEIT;
+	return 1;
 }
 stock Log(log[],text[])
 {
@@ -84286,7 +84413,7 @@ stock CreateToten(playerid)
 }
 stock CreateBlitzer(playerid,geschwinigkeit,ortschaft[])
 {
-	new string[650],query[256];
+	new string[650],query[512];
     for(new i=0;i<MAX_BLITZER;i++)
 	{
 	 	if(Blitzer[i][Erstellt] == 0)
@@ -84304,7 +84431,7 @@ stock CreateBlitzer(playerid,geschwinigkeit,ortschaft[])
 			SCM(playerid,SAMP_WEISS,string);
 			format(SP_INFO,sizeof(SP_INFO),"** %s %s stellt einen Blitzer auf **",SpielerFraktionsRangName(playerid),SpielerName(playerid));
 			PlayerTalkPublic(playerid,SAMP_PublicChatColor,SP_INFO,10);
-			format(query,sizeof(query),"INSERT INTO server_blitzer (`id`,`BlitzerGeschwindigkeit`,`BlitzerOrt`,`sperreX`,`sperreY`,`sperreZ`,`HP`) VALUES ('%d','%d','%s','%f','%f','%f','%d')",i,Blitzer[i][BlitzerGeschwindigkeit],Blitzer[i][BlitzerOrt],Blitzer[i][sperreX],Blitzer[i][sperreY],Blitzer[i][sperreZ],Blitzer[i][EGmBhHp]);
+			mysql_format(MySQL_R394,query,sizeof(query),"INSERT INTO server_blitzer (`id`,`BlitzerGeschwindigkeit`,`BlitzerOrt`,`sperreX`,`sperreY`,`sperreZ`,`HP`) VALUES ('%d','%d','%e','%f','%f','%f','%d')",i,Blitzer[i][BlitzerGeschwindigkeit],Blitzer[i][BlitzerOrt],Blitzer[i][sperreX],Blitzer[i][sperreY],Blitzer[i][sperreZ],Blitzer[i][EGmBhHp]);
 		    mysql_function_query(MySQL_R394,query,false,"","");
 			return i;
 		}
@@ -85708,7 +85835,7 @@ stock SaveOnlyOneFveh(fv)
 		Fahrzeug[fv][Fraktion],Fahrzeug[fv][FraktionsRang],Fahrzeug[fv][modelid],Fahrzeug[fv][Colour1],Fahrzeug[fv][Colour2],Fahrzeug[fv][Paintjob],Fahrzeug[fv][HP],Fahrzeug[fv][posx],Fahrzeug[fv][posy],Fahrzeug[fv][posz],Fahrzeug[fv][posa],Fahrzeug[fv][Abgeschlossen],vFahrzeug[Fahrzeug[fv][Vehicle]][Abgeschleppt],Fahrzeug[fv][Interior],Fahrzeug[fv][VirtualWorld]);
 	    strcat(mainquery,query);
 		mysql_format(MySQL_R394,query,sizeof(query),"AbgeschlepptPreis='%d',AbgeschlepptGrund='%e',Nummernschild='%e',Neon='%d',Spoiler='%d',Hood='%d',Roof='%d',Sideskirt='%d',Lamps='%d',Nitro='%d',Exhaust='%d',Wheels='%d',Stereo='%d',Hydraulics='%d',FrontBumper='%d',RearBumper='%d',VentRight='%d',VentLeft='%d',",
-		vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptPreis],vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptGrund],Fahrzeug[fv][Nummernschild],vFahrzeug[Fahrzeug[fv][Vehicle]][Neon],Fahrzeug[fv][Hood],Fahrzeug[fv][Roof],Fahrzeug[fv][Sideskirt],Fahrzeug[fv][Lamps],Fahrzeug[fv][Nitro],Fahrzeug[fv][Exhaust],Fahrzeug[fv][Wheels],
+		vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptPreis],vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptGrund],Fahrzeug[fv][Nummernschild],vFahrzeug[Fahrzeug[fv][Vehicle]][Neon],Fahrzeug[fv][Spoiler],Fahrzeug[fv][Hood],Fahrzeug[fv][Roof],Fahrzeug[fv][Sideskirt],Fahrzeug[fv][Lamps],Fahrzeug[fv][Nitro],Fahrzeug[fv][Exhaust],Fahrzeug[fv][Wheels],
 		Fahrzeug[fv][Stereo],Fahrzeug[fv][Hydraulics],Fahrzeug[fv][FrontBumper],Fahrzeug[fv][RearBumper],Fahrzeug[fv][VentRight],Fahrzeug[fv][VentLeft]);
 	    strcat(mainquery,query);
 		format(query,sizeof(query),"KaufPreis='%d',Motorschaden='%d',FailGas='%d',Tank='%f',Kilometerstand='%d',KofferraumGanja='%d',KofferraumKokain='%d',KofferraumMaterials='%d',KofferraumOpium='%d',KofferraumSpice='%d',KofferraumLunchpakete='%d',KofferraumC4='%d',KofferraumWerkzeugkasten='%d',KofferraumBenzinkanister='%d',Handbremse='%d' WHERE id='%d'",
@@ -86284,7 +86411,7 @@ stock DeleteReport(playerid)
 			{
 			 	ReportListitem[i][rID][r] = -1;
 			 	ReportListitem[i][rTime][r] = 0;
-			 	strmid(ReportListitem[i][rText][r],"NONE",strlen("NONE"),90);
+			 	strmid(ReportListitem[i][rText][r],"NONE",0,strlen("NONE"),90);
 			 	ReportListitem[i][rAccepted][r] = false;
  			}
 		}
@@ -89991,7 +90118,7 @@ stock CheckHDDBan(playerid)
                 }
             }
         }
-        format(query, sizeof(query),"SELECT * FROM `server_hddbans` WHERE `IP` LIKE '%s%%' AND `GPCI` LIKE '%s' LIMIT 1",pIp,serial);
+        mysql_format(MySQL_R394,query,sizeof(query),"SELECT * FROM `server_hddbans` WHERE `IP` LIKE '%e%%' AND `GPCI` LIKE '%e' LIMIT 1",pIp,serial);
         print(query);
 		mysql_function_query(MySQL_R394,query,true,"OnBanCheck","d",playerid);
     }
