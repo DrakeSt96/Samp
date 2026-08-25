@@ -8,7 +8,7 @@
     Die Plugin-Include <sampvoice> selbst wird in ScriptInc.inc geladen, weil
     sie zu den Plugin-Includes gehoert und nicht zum Modul.
 
-    Reihenfolge ist bindend: config -> core -> proximity.
+    Reihenfolge ist bindend: config -> core -> proximity -> radio.
 */
 
 #if defined _voice_included
@@ -19,3 +19,4 @@
 #include "voice_config.inc"
 #include "voice_core.inc"
 #include "voice_proximity.inc"
+#include "voice_radio.inc"

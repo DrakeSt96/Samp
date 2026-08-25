@@ -57,7 +57,31 @@ enum e_VoicePlayerData
     // "no microphone" hint was already shown once, do not repeat it.
     bool:vpMicroNotified,
     // Watchdog cut the transmission off. Blocks re-keying until release.
-    bool:vpCutOff
+    bool:vpCutOff,
+
+    // --- radio (phase 2) ---
+
+    // Radio push to talk is currently held and the player is a speaker.
+    bool:vpRadioActive,
+    // Channel the radio key transmits on, VOICE_CHANNEL_NONE when none.
+    vpActiveChannel,
+    // Channels this player is attached to as a listener. VOICE_CHANNEL_NONE
+    // marks a free slot. The admin channel is kept outside of this list, it
+    // is not a channel a player chooses.
+    vpMonitor[VOICE_MAX_MONITORED],
+    // Attached to the admin announcement channel.
+    bool:vpOnAdminChannel,
+    // GetTickCount() of the last channel switch. Feeds the switch rate limit.
+    vpLastSwitch,
+
+    // Snapshot of the membership this player was last synchronised for. The
+    // watchdog compares it against the live values, so a promotion or a
+    // dismissal takes effect without a relog and without the faction system
+    // having to know that a voice system exists.
+    vpSeenFraktion,
+    vpSeenRang,
+    vpSeenOrg,
+    vpSeenPartei
 }
 
 new VoicePlayer[MAX_PLAYERS][e_VoicePlayerData];
@@ -109,6 +133,19 @@ stock VoiceResetPlayerData(playerid)
     VoicePlayer[playerid][vpEnabled]        = true;
     VoicePlayer[playerid][vpMicroNotified]  = false;
     VoicePlayer[playerid][vpCutOff]         = false;
+
+    VoicePlayer[playerid][vpRadioActive]    = false;
+    VoicePlayer[playerid][vpActiveChannel]  = VOICE_CHANNEL_NONE;
+    VoicePlayer[playerid][vpOnAdminChannel] = false;
+    VoicePlayer[playerid][vpLastSwitch]     = 0;
+    VoicePlayer[playerid][vpSeenFraktion]   = -1;
+    VoicePlayer[playerid][vpSeenRang]       = -1;
+    VoicePlayer[playerid][vpSeenOrg]        = -1;
+    VoicePlayer[playerid][vpSeenPartei]     = -1;
+    for(new s = 0; s < VOICE_MAX_MONITORED; s++)
+    {
+        VoicePlayer[playerid][vpMonitor][s] = VOICE_CHANNEL_NONE;
+    }
     return 1;
 }
 
@@ -219,6 +256,10 @@ stock VoiceTrySetupPlayer(playerid)
 
     SendClientMessage(playerid, VOICE_COLOR, "[Voice] Sprachchat aktiv. Y gedrueckt halten zum Sprechen, /reichweite fuer die Lautstaerke.");
 
+    // Puts the player on every channel their faction, organisation and party
+    // entitle them to, and picks a sensible transmit channel.
+    VoiceRefreshPlayer(playerid, false);
+
     if(!SvHasMicro(playerid) && !VoicePlayer[playerid][vpMicroNotified])
     {
         VoicePlayer[playerid][vpMicroNotified] = true;
@@ -232,6 +273,11 @@ stock VoiceTrySetupPlayer(playerid)
 stock VoiceStopAllTransmissions(playerid)
 {
     if(playerid < 0 || playerid >= MAX_PLAYERS) return 0;
+
+    if(VoicePlayer[playerid][vpRadioActive])
+    {
+        VoiceRadioStop(playerid, false);
+    }
 
     if(VoicePlayer[playerid][vpProxActive])
     {
@@ -257,6 +303,7 @@ stock VoiceTeardownPlayer(playerid)
     if(playerid < 0 || playerid >= MAX_PLAYERS) return 0;
 
     VoiceStopAllTransmissions(playerid);
+    VoiceDetachFromAllChannels(playerid);
 
     if(VoicePlayer[playerid][vpProxStream] != SV_NULL)
     {
@@ -286,6 +333,8 @@ stock VoiceInitSystem()
 
     SvInit(VOICE_BITRATE);
     VoiceSystemReady = true;
+
+    VoiceCreateChannels();
 
     if(VoiceWatchdogTimer != -1)
     {
@@ -317,6 +366,8 @@ stock VoiceShutdownSystem()
         VoiceResetPlayerData(i);
     }
 
+    VoiceDestroyChannels();
+
     VoiceSystemReady = false;
     return 1;
 }
@@ -341,7 +392,12 @@ stock VoiceOnPlayerDisconnect(playerid)
 
 stock VoiceOnPlayerSpawn(playerid)
 {
-    VoiceTrySetupPlayer(playerid);
+    // When the setup runs here it refreshes on its own, otherwise a spawn is
+    // still a good moment to re-check: joining a faction usually ends in one.
+    if(!VoiceTrySetupPlayer(playerid) && VoiceIsReady(playerid))
+    {
+        VoiceRefreshPlayer(playerid, false);
+    }
     return 1;
 }
 
@@ -372,6 +428,29 @@ public VoiceWatchdog()
             // Picks up a handshake that arrived after the last spawn.
             VoiceTrySetupPlayer(i);
             continue;
+        }
+
+        // The client plugin can go away while the player stays connected (a
+        // crash of the .asi, a manual unload). The plugin then drops them from
+        // every stream without telling the script, so the state is rebuilt from
+        // scratch instead of pointing at attachments that no longer exist.
+        if(SvGetVersion(i) == 0)
+        {
+            VoiceTeardownPlayer(i);
+            continue;
+        }
+
+        // Promotion, dismissal, faction or clan change: the faction system
+        // writes into Spieler[][...] without knowing about voice, so the
+        // change is picked up here instead of hooking 37 write sites.
+        // A transmission attempt re-checks the live values anyway, this only
+        // moves the listener attachments and tells the player what happened.
+        if(VoicePlayer[i][vpSeenFraktion] != Spieler[i][pFraktion]  ||
+           VoicePlayer[i][vpSeenRang]     != Spieler[i][pFraktRang] ||
+           VoicePlayer[i][vpSeenOrg]      != Spieler[i][pOrgMember] ||
+           VoicePlayer[i][vpSeenPartei]   != Spieler[i][pParteiMember])
+        {
+            VoiceRefreshPlayer(i, true);
         }
 
         // Taped down push to talk key: cut the transmission and refuse to

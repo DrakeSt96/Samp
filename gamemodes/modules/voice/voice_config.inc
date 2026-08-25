@@ -71,7 +71,15 @@
 #define VOICE_MAX_MONITORED             (3)
 
 // Faction rank from which a member may transmit. Lower ranks listen only.
+// Organisations and parties have no rank system in this gamemode - there only
+// membership exists - so this applies to faction channels only.
 #define VOICE_RANK_TRANSMIT             (1)
+
+// Mirror the requirement of the existing text radio /d for the voice radio:
+// a member needs a radio (pFunkgeraet), sits in a faction vehicle of their own
+// faction, or stands at a faction terminal. Set to 0 to let rank alone decide.
+// Applies to faction channels only, organisations and parties have no such item.
+#define VOICE_FACTION_REQUIRE_RADIO     (1)
 
 // Admin level required for the voice admin commands.
 #define VOICE_ADMIN_LEVEL               (2)
@@ -108,6 +116,9 @@
 
 // Chat colour of voice system messages. Matches the existing scheme.
 #define VOICE_COLOR                     (0x33CCFFAA)
+
+// Sound played when a channel is busy or a transmission is refused.
+#define VOICE_SOUND_BUSY                (1085)
 
 // Textdraw position of the "currently speaking" indicator.
 #define VOICE_TD_POS_X                  (12.0)

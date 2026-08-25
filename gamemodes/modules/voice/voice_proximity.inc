@@ -89,31 +89,6 @@ stock VoiceSetRange(playerid, range, bool:announce = true)
 }
 
 // ---------------------------------------------------------------------------
-// Plugin callbacks
-// ---------------------------------------------------------------------------
-
-public SV_VOID:OnPlayerActivationKeyPress(SV_UINT:playerid, SV_UINT:keyid)
-{
-    if(keyid == VOICE_KEY_PROXIMITY)
-    {
-        VoiceProximityStart(playerid);
-    }
-    return;
-}
-
-public SV_VOID:OnPlayerActivationKeyRelease(SV_UINT:playerid, SV_UINT:keyid)
-{
-    if(keyid == VOICE_KEY_PROXIMITY)
-    {
-        VoiceProximityStop(playerid);
-        // The watchdog cut-off is lifted only by a real key release, so a taped
-        // down key cannot simply keep going after the cut.
-        VoicePlayer[playerid][vpCutOff] = false;
-    }
-    return;
-}
-
-// ---------------------------------------------------------------------------
 // Commands
 // ---------------------------------------------------------------------------
 
