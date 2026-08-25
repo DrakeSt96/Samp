@@ -1,0 +1,13 @@
+# Zugangsdaten - duerfen nicht ins Repository
+server.cfg
+gamemodes/config.inc
+
+# Kompilate
+gamemodes/*.amx
+npcmodes/*.amx
+
+# Laufzeitdaten
+scriptfiles/*.txt
+scriptfiles/*.db
+server_log.txt
+crashinfo.txt

@@ -1,6 +1,6 @@
 echo Executing Server Config...
 lanmode 0
-rcon_password wasndas
+rcon_password HIER_EIN_EIGENES_RCON_PASSWORT_EINTRAGEN
 maxplayers 500
 port 7777
 hostname « Lade Script! »

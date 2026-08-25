@@ -1,0 +1,20 @@
+/*
+    Serverkonfiguration - VORLAGE
+    ------------------------------------------------------------------
+    Diese Datei nach "config.inc" kopieren und die echten Werte eintragen.
+    config.inc wird von .gitignore ausgeschlossen und darf NICHT
+    ins Repository eingecheckt werden.
+
+        cp gamemodes/config.inc.example gamemodes/config.inc
+
+    Wird keine config.inc angelegt, greifen die Notfallwerte in
+    script.pwn und der Server verbindet sich nicht zur Datenbank.
+*/
+
+#define MySQL_Host      "localhost"
+#define MySQL_User      "samp"          // KEIN root verwenden
+#define MySQL_Passwort  ""              // hier das echte Passwort eintragen
+#define MySQL_Datenbank "samp1"
+
+// Passwort fuer den Admindienst (/aduty). Frei waehlbar, mindestens 12 Zeichen.
+#define ADMIN_DIENST_PASSWORT "HIER_EIN_EIGENES_PASSWORT_EINTRAGEN"
