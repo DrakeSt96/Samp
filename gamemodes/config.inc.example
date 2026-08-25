@@ -16,5 +16,17 @@
 #define MySQL_Passwort  ""              // hier das echte Passwort eintragen
 #define MySQL_Datenbank "samp1"
 
-// Passwort fuer den Admindienst (/aduty). Frei waehlbar, mindestens 12 Zeichen.
-#define ADMIN_DIENST_PASSWORT "HIER_EIN_EIGENES_PASSWORT_EINTRAGEN"
+
+// Der Admindienst (/aduty) verlangt seit dem Sicherheitsfix das
+// persoenliche Accountpasswort des jeweiligen Admins - hier ist
+// dafuer nichts einzutragen.
+
+// Salt-Laenge fuer Passwort-Hashes.
+//   NEUINSTALLATION (Schema aus Datenbank/samp_server.sql, varchar(64)):
+//     die beiden Zeilen unten direkt einkommentieren.
+//   BESTEHENDER SERVER (Spalte noch varchar(34)):
+//     erst Datenbank/migration_passwort_salt.sql einspielen, dann
+//     einkommentieren. Vorher nicht - sonst schneidet MySQL den Hash ab.
+//   Ohne die Zeilen laeuft alles mit 2 Zeichen Salt, das ist sicher.
+//#define SCRIPT_PW_COLLEN  (64)
+//#define SCRIPT_PW_SALTLEN (32)

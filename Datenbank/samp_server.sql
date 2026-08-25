@@ -1281,7 +1281,7 @@ CREATE TABLE `spieler` (
   `Name` varchar(24) NOT NULL,
   `Online` int(2) NOT NULL,
   `Email` varchar(128) NOT NULL,
-  `Passwort` varchar(34) NOT NULL,
+  `Passwort` varchar(64) NOT NULL,
   `Tutorial` int(2) NOT NULL,
   `Admin` int(2) NOT NULL,
   `Verwarnungen` int(2) NOT NULL,

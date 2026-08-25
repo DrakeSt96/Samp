@@ -57,6 +57,97 @@
 	#define ADMIN_DIENST_PASSWORT "CONFIG_FEHLT"
 #endif
 
+//-[ Passwort-Hashing (F-10) ]-//
+// Speicherformat der Spalte spieler.Passwort:  <Salt><32 Hex-Zeichen MD5>
+// Der MD5 wird ueber die Zeichenkette  Salt + Klartextpasswort  gebildet.
+//
+// MIGRATION: Ein Eintrag mit exakt 32 Zeichen ist ein alter, ungesalzener
+// MD5-Hash. Er bleibt gueltig und wird beim naechsten erfolgreichen Login
+// automatisch auf das neue Format umgeschrieben. Es wird niemand ausgesperrt.
+//
+// Die Saltlaenge wird beim Pruefen IMMER aus strlen(gespeichert)-32 abgeleitet
+// und nie aus dem Define. SCRIPT_PW_SALTLEN darf deshalb jederzeit geaendert
+// werden, ohne bestehende Accounts zu entwerten.
+//
+// SCRIPT_PW_COLLEN muss der echten Breite der Spalte spieler.Passwort
+// entsprechen (aktuell varchar(34)). Der Salt wird hart auf
+// SCRIPT_PW_COLLEN-32 begrenzt, damit MySQL den Hash niemals abschneidet.
+// Erst nach einem ALTER TABLE darf SCRIPT_PW_COLLEN erhoeht werden.
+#if !defined SCRIPT_PW_COLLEN
+	#define SCRIPT_PW_COLLEN (34)
+#endif
+#if !defined SCRIPT_PW_SALTLEN
+	#define SCRIPT_PW_SALTLEN (2)
+#endif
+#define SCRIPT_PW_MAXSALT (SCRIPT_PW_COLLEN - 32)
+#define SCRIPT_PW_BUF (97)
+
+stock ScriptPW_MakeSalt(dest[], destsize)
+{
+	new zeichen[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	new i, laenge = SCRIPT_PW_SALTLEN;
+	if(laenge > SCRIPT_PW_MAXSALT) laenge = SCRIPT_PW_MAXSALT;
+	if(laenge > destsize - 1) laenge = destsize - 1;
+	if(laenge < 1) laenge = 1;
+	for(i = 0; i < laenge; i++)
+	{
+		dest[i] = zeichen[random(sizeof(zeichen) - 1)];
+	}
+	dest[i] = 0;
+	return i;
+}
+
+stock ScriptPW_Hash(salt[], pass[], dest[], destsize)
+{
+	new roh[SCRIPT_PW_BUF + 64];
+	format(roh, sizeof(roh), "%s%s", salt, pass);
+	format(dest, destsize, "%s", MD5_Hash(roh));
+	return 1;
+}
+
+stock ScriptPW_Create(pass[], dest[], destsize)
+{
+	new salt[SCRIPT_PW_BUF], hash[33];
+	ScriptPW_MakeSalt(salt, sizeof(salt));
+	ScriptPW_Hash(salt, pass, hash, sizeof(hash));
+	format(dest, destsize, "%s%s", salt, hash);
+	return 1;
+}
+
+stock ScriptPW_CreateStr(pass[])
+{
+	new dest[SCRIPT_PW_BUF];
+	ScriptPW_Create(pass, dest, sizeof(dest));
+	return dest;
+}
+
+// Rueckgabe: 0 = falsch, 1 = korrekt (neues Format), 2 = korrekt (alter MD5)
+stock ScriptPW_Verify(gespeichert[], pass[])
+{
+	new laenge = strlen(gespeichert), hash[33], salt[SCRIPT_PW_BUF];
+	if(laenge < 32) return 0;
+	if(laenge == 32)
+	{
+		format(hash, sizeof(hash), "%s", MD5_Hash(pass));
+		if(!strcmp(hash, gespeichert, true)) return 2;
+		return 0;
+	}
+	if(laenge - 32 >= SCRIPT_PW_BUF) return 0;
+	strmid(salt, gespeichert, 0, laenge - 32, sizeof(salt));
+	ScriptPW_Hash(salt, pass, hash, sizeof(hash));
+	if(!strcmp(hash, gespeichert[laenge - 32], true)) return 1;
+	return 0;
+}
+
+//-[ Dialog-Schutz F-08 ]-//
+// Die native-Alias-Zeile MUSS vor dem #define stehen, sonst schreibt sich das Makro selbst um.
+// Der Alias heisst absichtlich SPD_Native und nicht ShowPlayerDialogNative,
+// damit der Praeprozessor ihn nicht als Teiltreffer ersetzt.
+native SPD_Native(playerid,dialogid,style,const caption[],const info[],const button1[],const button2[]) = ShowPlayerDialog;
+#define DIALOG_PVAR_NAME		"AktiverDialog"
+#define DIALOG_PVAR_OFFSET		1
+#define ShowPlayerDialog		SPD_Safe
+
 //-[ ServerNameDefines ]-//
 #define ERROR "{CD0000}ERROR!:{FAFAFA} "
 #define ServerNameOhneFarbe "Invincible - Life"
@@ -184,6 +275,10 @@ new Text:Display_Bankkonto;
 //-[ Erweiterter AntiCheat ]-//
 new AntiBunny[MAX_PLAYERS];
 
+//-[ Login Fehlversuch-Schutz ]-//
+#define MAX_LOGIN_VERSUCHE 3
+new LoginFehlversuche[MAX_PLAYERS];
+
 //-[ MySQL Erweiterte Verbindung ]-//
 new MySQL_R394;
 
@@ -243,6 +338,7 @@ new PlayerText:Handy_Draw_Info[MAX_PLAYERS];
 #define MAX_ORGCOST						500000
 #define MAX_PARTEICOST					750000
 #define MAX_REGISTEREDINSAMETIME        500
+#define MAX_ADMINPW_VERSUCHE            3
 #define MAX_TUTORIAL_MONEY				2490
 #define AC_WEAPONPAUSE 					0
 #define DIALOG_BANKICK                  19471
@@ -11137,6 +11233,7 @@ public OnPlayerConnect(playerid)
 	ShowLoad(playerid);
     mapicon(playerid);
     AddPlayer(playerid);
+    LoginFehlversuche[playerid] = 0;
     if(IsPlayerNPC(playerid))return 1;
     SetPlayerColor(playerid,SAMP_WEISS);
 	TogglePlayerClock(playerid,0);
@@ -11601,6 +11698,7 @@ public OnPlayerDisconnect(playerid,reason)
     //Weiteres
     new string[128];
     RemovePlayer(playerid);
+    LoginFehlversuche[playerid] = 0;
     if(IsPlayerNPC(playerid))return 1;
     if(GetPVarInt(playerid,"Eingeloggt") == 1)
 	{
@@ -47197,7 +47295,7 @@ COMMAND:aduty(playerid,params[])
 		}
 	}
 	else{
-		ShowPlayerDialog(playerid,ADMIN_PASSWORT,DIALOG_STYLE_PASSWORD,""ClanTagDialoge" Admin Passwort",""#HTML_WEISS"Bitte logge dich mit dem Admin Passwort ein um in den Admindienst zu gehen!\nBei Falscher eingabe wirst du vom Server gekickt!","Bestätigen","Abbrechen");
+		ShowPlayerDialog(playerid,ADMIN_PASSWORT,DIALOG_STYLE_PASSWORD,""ClanTagDialoge" Admin Passwort",""#HTML_WEISS"Bitte gib dein "IINFO2"Accountpasswort"#HTML_WEISS" ein um in den Admindienst zu gehen!\nNach mehreren Fehlversuchen wirst du vom Server gekickt!","Bestätigen","Abbrechen");
 	}
 	return 1;
 }
@@ -53806,6 +53904,12 @@ public OnVehiclePaintjob(playerid,vehicleid,paintjobid)
 }
 public OnQueryError(errorid,error[],callback[],query[],connectionHandle)
 {
+	new logstring[900],queryteil[512],querylen = strlen(query);
+	if(querylen > sizeof(queryteil)-1) querylen = sizeof(queryteil)-1;
+	strmid(queryteil,query,0,querylen,sizeof(queryteil));
+	format(logstring,sizeof(logstring),"MySQL-Fehler %d | Handle: %d | Callback: %s | Meldung: %s | Query (%d Zeichen): %s",errorid,connectionHandle,callback,error,strlen(query),queryteil);
+	Log("Server_MySQL_Error.txt",logstring);
+	print(logstring);
 	return 1;
 }
 public OnVehicleRespray(playerid,vehicleid,color1,color2)
@@ -58246,6 +58350,25 @@ public OnPlayerEditDynamicObject(playerid, objectid, response, Float:x, Float:y,
 }
 public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 {
+	//-[ Dialog-Schutz F-08: nur der zuletzt angezeigte Dialog darf antworten ]-//
+	new dlg_erwartet = GetPVarInt(playerid,DIALOG_PVAR_NAME);
+	if(dlg_erwartet == 0 || (dlg_erwartet - DIALOG_PVAR_OFFSET) != dialogid)
+	{
+		// Protokollierung bewusst gedrosselt: ohne Sperre koennte ein Angreifer
+		// durch Fluten von OnDialogResponse Datei-I/O erzwingen.
+		new dlg_jetzt = gettime();
+		if(dlg_jetzt - GetPVarInt(playerid,"FakeDlgLogZeit") >= 5)
+		{
+			new dlg_log[160];
+			SetPVarInt(playerid,"FakeDlgLogZeit",dlg_jetzt);
+			format(dlg_log,sizeof(dlg_log),"FAKE-DIALOG: %s (ID %d) sendete dialogid %d, offen war %d",SpielerName(playerid),playerid,dialogid,dlg_erwartet - DIALOG_PVAR_OFFSET);
+			Log("Server_FakeDialog.txt",dlg_log);
+		}
+		return 1;
+	}
+	// Freigabe VOR dem switch: ein case-Zweig, der denselben Dialog erneut anzeigt,
+	// setzt die PVar ueber SPD_Safe sofort wieder scharf.
+	DeletePVar(playerid,DIALOG_PVAR_NAME);
 	switch(dialogid)
 	{
 		case COIN_SHOP:
@@ -59431,17 +59554,32 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		    {
 		        if(Spieler[playerid][pAdmin] > 0)
 		        {
-					if(!strcmp(inputtext,"admin"))
+					new adminpwmsg[256];
+					if(IstAccountPasswort(playerid,inputtext))
 					{
+					    SetPVarInt(playerid,"apwfails",0);
 					    SetPVarInt(playerid,"admind",1);
+					    format(adminpwmsg,sizeof(adminpwmsg),"%s (ID %d) hat den Admindienst freigeschaltet.",SpielerName(playerid),playerid);
+					    Log("AD_Dienstlogin.txt",adminpwmsg);
 					    OnPlayerCommandText(playerid,"/aduty");
 					    return 1;
 					}
 					else
 					{
-					    TogglePlayerControllable(playerid,false);
-						Kick(playerid);
-						SCM(playerid,SAMP_WEISS,""IINFO" du wurdest vom Server gekickt, da du das Falsche Admin Passwort eingegeben hast!");
+					    new adminpwtry = GetPVarInt(playerid,"apwfails") + 1;
+					    SetPVarInt(playerid,"apwfails",adminpwtry);
+					    format(adminpwmsg,sizeof(adminpwmsg),"%s (ID %d) hat ein falsches Admindienst-Passwort eingegeben (Versuch %d von %d).",SpielerName(playerid),playerid,adminpwtry,MAX_ADMINPW_VERSUCHE);
+					    Log("AD_Dienstlogin.txt",adminpwmsg);
+					    SendAdminMessage(SAMP_WEISS,adminpwmsg);
+					    if(adminpwtry >= MAX_ADMINPW_VERSUCHE)
+					    {
+					        SCM(playerid,SAMP_WEISS,""IINFO" du wurdest vom Server gekickt, da du zu oft das falsche Admin Passwort eingegeben hast!");
+					        TogglePlayerControllable(playerid,false);
+					        SetTimerEx("KickDenSpieler",2000,0,"i",playerid);
+					        return 1;
+					    }
+					    format(adminpwmsg,sizeof(adminpwmsg),""#HTML_WEISS"Falsches Passwort! Bitte gib dein "IINFO2"Accountpasswort"#HTML_WEISS" ein.\nVersuch "IINFO2"%d"#HTML_WEISS" von "IINFO2"%d"#HTML_WEISS" - danach wirst du vom Server gekickt!",adminpwtry,MAX_ADMINPW_VERSUCHE);
+					    ShowPlayerDialog(playerid,ADMIN_PASSWORT,DIALOG_STYLE_PASSWORD,""ClanTagDialoge" Admin Passwort",adminpwmsg,"Weiter","Abbrechen");
 					    return 1;
 					}
 				}
@@ -60734,6 +60872,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					return 1;
 			    }
 			    format(stringlogin,sizeof(stringlogin),"SELECT * FROM spieler WHERE Name = '%s'",SpielerName(playerid));
+			    if(LoginFehlversuche[playerid] >= MAX_LOGIN_VERSUCHE)return 1;
 			    mysql_function_query(MySQL_R394,stringlogin,true,"l_script_account","isi",playerid,inputtext,1);
 			}
 		    return 1;
@@ -77417,15 +77556,37 @@ public l_script_account(playerid,pass[],passwortstate)
 	{
 		if(passwortstate == 1)
 		{
-			cache_get_field_content(0,"Passwort",result);
-			new tmpp[25];
-			strmid(tmpp, MD5_Hash(pass), 0, 24, 25);
-			if(!strcmp(tmpp,result,true))
+			new gespeichert[SCRIPT_PW_BUF],pwstatus;
+			cache_get_field_content(0,"Passwort",gespeichert);
+			pwstatus = ScriptPW_Verify(gespeichert,pass);
+			if(pwstatus == 2)
+			{
+			    mysql_format(MySQL_R394,query,sizeof(query),"UPDATE spieler SET Passwort='%s' WHERE Name='%e'",ScriptPW_CreateStr(pass),SpielerName(playerid));
+			    mysql_function_query(MySQL_R394,query,false,"","");
+			}
+			if(pwstatus)
 		    {
+			    SetAccountPasswortHash(playerid,pass);
 			    format(query,sizeof(query),"SELECT * FROM spieler WHERE Name='%s'",SpielerName(playerid));
+			    LoginFehlversuche[playerid] = 0;
 			   	mysql_function_query(MySQL_R394,query,true,"l_script_account","isi",playerid," ",0);
 			   	return 1;
 			}
+		    LoginFehlversuche[playerid]++;
+		    new loginlog[160];
+		    format(loginlog,sizeof(loginlog),"Falsches Passwort (Versuch %d von %d) - Spieler: %s | IP: %s",LoginFehlversuche[playerid],MAX_LOGIN_VERSUCHE,SpielerName(playerid),SpielerIP(playerid));
+		    Log("Login_Fehlversuche.txt",loginlog);
+		    if(LoginFehlversuche[playerid] >= MAX_LOGIN_VERSUCHE)
+		    {
+		        SCM(playerid,SAMP_WEISS,""ACINFO" Zu viele fehlgeschlagene Login-Versuche! Du wirst vom Server geworfen.");
+		        format(loginlog,sizeof(loginlog),"KICK nach %d Fehlversuchen - Spieler: %s | IP: %s",MAX_LOGIN_VERSUCHE,SpielerName(playerid),SpielerIP(playerid));
+		        Log("Login_Fehlversuche.txt",loginlog);
+		        TogglePlayerControllable(playerid,0);
+		        SetTimerEx("KickDenSpieler",2000,0,"i",playerid);
+		        return 1;
+		    }
+		    format(loginlog,sizeof(loginlog),""#ERROR" Falsches Passwort! Versuch %d von %d.",LoginFehlversuche[playerid],MAX_LOGIN_VERSUCHE);
+		    SCM(playerid,SAMP_WEISS,loginlog);
 		    format(query,sizeof(query),""#HTML_WEISS"Name: "IINFO2"%s"#HTML_WEISS"\nSpielerID die bekommst nach dem einloggen: "IINFO2"%d"#HTML_WEISS"\nDein Account wurde in unsere Datenbank gefunden!\nBitte logge dich nun mit deinen "IINFO2"Daten"#HTML_WEISS" ein!",SpielerName(playerid),playerid);
 			ShowPlayerDialog(playerid,DIALOG_LOGIN,DIALOG_STYLE_PASSWORD,""#HTML_BLAU""#ClanTag":"#HTML_WEISS" Login - Panel",query,"Login","Abbrechen");
 			return 1;
@@ -78582,7 +78743,7 @@ public sql_array(index[],index2[],sqlresultid,extraid,extraid2,SconnectionHandle
 	    }
 	    format(query,sizeof(query),""IINFO" du hast des Passwort von %s zu %s umbenannt!",index,index2);
 	    SCM(extraid,SAMP_WEISS,query);
-	    format(query,sizeof(query),"UPDATE spieler SET Passwort='%s' WHERE Name='%s'",MD5_Hash(index2),index);
+	    mysql_format(MySQL_R394,query,sizeof(query),"UPDATE spieler SET Passwort='%s' WHERE Name='%e'",ScriptPW_CreateStr(index2),index);
 	    mysql_function_query(MySQL_R394,query,false,"","");
 	    return 1;
 	}
@@ -81105,6 +81266,8 @@ stock DestroyVars(playerid)
 		}
 	}
 	SetPVarInt(playerid,"admind",0);
+	SetPVarInt(playerid,"apwfails",0);
+	DeletePVar(playerid,"AccPwHash");
 	if(Spieler[playerid][pSupcar] != false) DestroyDynamic3DTextLabel(supmobil3Dtext[Spieler[playerid][pSupcarVehicle]]),DeleteVehicle(Spieler[playerid][pSupcarVehicle]),Spieler[playerid][pSupcar] = false;
 	CurrentSwitchRaceTracks[playerid] = 0,RescueState[playerid] = false,HandsUpPerson[playerid] = false;
 	BauarbeiterHatErlaubnis[playerid] = 0,BauarbeiterEntladenPunkt[playerid] = -1,BauarbeiterLoad[playerid] = 0,BauarbeiterCheckpoint[playerid] = 0;
@@ -82079,6 +82242,26 @@ stock StopLoopingAnim(playerid)
 	SetPlayerSpecialAction(playerid,SPECIAL_ACTION_NONE);
     return 1;
 }
+//-[ Dialog-Schutz F-08: zentraler Wrapper, Ziel des #define aus Zeile 60 ]-//
+stock SPD_Safe(playerid,dialogid,style,const caption[],const info[],const button1[],const button2[])
+{
+	SetPVarInt(playerid,DIALOG_PVAR_NAME,dialogid + DIALOG_PVAR_OFFSET);
+	return SPD_Native(playerid,dialogid,style,caption,info,button1,button2);
+}
+stock SetAccountPasswortHash(playerid,klartext[])
+{
+	SetPVarString(playerid,"AccPwHash",ScriptPW_CreateStr(klartext));
+	return 1;
+}
+stock IstAccountPasswort(playerid,eingabe[])
+{
+	new gespeichert[SCRIPT_PW_BUF];
+	GetPVarString(playerid,"AccPwHash",gespeichert,sizeof(gespeichert));
+	if(!strlen(gespeichert)) return 0;
+	if(!strlen(eingabe)) return 0;
+	if(ScriptPW_Verify(gespeichert,eingabe)) return 1;
+	return 0;
+}
 stock Log(log[],text[])
 {
 	new string[1000],File:hFile;
@@ -82376,7 +82559,8 @@ stock isPlayerAMember(playerid,rang)
 stock CreateAccount(playerid)
 {
     new query[512];
-    mysql_format(MySQL_R394,query,sizeof(query),"INSERT INTO spieler (Name,Passwort,Email,Geschlecht) VALUES ('%e','%s','%e','%i')",SpielerName(playerid),MD5_Hash(Spieler[playerid][pPassword]),Spieler[playerid][pEmail],Spieler[playerid][pSex]);
+    SetAccountPasswortHash(playerid,Spieler[playerid][pPassword]);
+    mysql_format(MySQL_R394,query,sizeof(query),"INSERT INTO spieler (Name,Passwort,Email,Geschlecht) VALUES ('%e','%s','%e','%i')",SpielerName(playerid),ScriptPW_CreateStr(Spieler[playerid][pPassword]),Spieler[playerid][pEmail],Spieler[playerid][pSex]);
     mysql_function_query(MySQL_R394,query,false,"","");
     format(query,sizeof(query),"SELECT * FROM spieler_waffen WHERE Name='%s'",SpielerName(playerid));
     mysql_function_query(MySQL_R394,query,true,"l_script_swaffen","i",playerid);
@@ -82396,7 +82580,7 @@ stock CreateAccount(playerid)
 }
 stock mysql_SetInt(Table[],Field[],To,Where[],Where2[])
 {
-    new query[128];
+    new query[512];
     new sTable[64],sField[64],sWhere[64],sWhere2[64];
     mysql_escape_string(Table, sTable);
     mysql_escape_string(Field, sField);
@@ -82408,7 +82592,7 @@ stock mysql_SetInt(Table[],Field[],To,Where[],Where2[])
 }
 stock mysql_SetString(Table[],Field[],To[],Where[],Where2[])
 {
-    new query[128];
+    new query[512];
     new sTable[64],sField[64],sWhere[64],sWhere2[64],sTo[64];
     mysql_escape_string(Table, sTable);
     mysql_escape_string(Field, sField);
@@ -82421,7 +82605,7 @@ stock mysql_SetString(Table[],Field[],To[],Where[],Where2[])
 }
 stock mysql_SetFloat(Table[],Field[],Float:To,Where[],Where2[])
 {
-    new query[128];
+    new query[512];
     new sTable[64],sField[64],sWhere[64],sWhere2[64];
     mysql_escape_string(Table, sTable);
     mysql_escape_string(Field, sField);
@@ -85266,7 +85450,7 @@ stock VehicleTuning(playerid,slot)
 }
 stock CreatePlayerVehicle(playerid,vehiclemodelid,Float:xpos,Float:ypos,Float:zpos,Float:angle,nummernschild[],preis)
 {
-	new query[256];
+	new query[512];
     for(new slot=0;slot<MAX_PLAYER_VEHS;slot++)
 	{
 		if(Pfahrzeug[slot][playerid][modelid] == 0)
@@ -85318,7 +85502,7 @@ stock CreatePlayerVehicle(playerid,vehiclemodelid,Float:xpos,Float:ypos,Float:zp
 }
 stock SaveOnlyOnePveh(playerid,slot)
 {
-    new mainquery[1200],query[500];
+    new mainquery[2048],query[768];
 	if(Pfahrzeug[slot][playerid][modelid] != 0)
 	{
     	GetVehicleHealth(Pfahrzeug[slot][playerid][Vehicle],Pfahrzeug[slot][playerid][HP]);
@@ -85420,7 +85604,7 @@ stock IsAFraktionsVeh(playerid)
 }
 stock CreateFraktionsVehicle(vehiclemodelid,fraktid,Float:xpos,Float:ypos,Float:zpos,vworld,interior,Float:angle,respawntime,preis)
 {
-	new queryone[450],querytwo[300],mainquery[800];
+	new queryone[512],querytwo[640],mainquery[1280];
     for(new fv;fv<MAX_FVEHS;fv++)
 	{
 		if(Fahrzeug[fv][Fraktion] == 0)
@@ -85477,7 +85661,7 @@ stock CreateFraktionsVehicle(vehiclemodelid,fraktid,Float:xpos,Float:ypos,Float:
 }
 stock SaveOnlyOneFveh(fv)
 {
-    new mainquery[900],query[400];
+    new mainquery[2048],query[768];
 	if(Fahrzeug[fv][modelid] != 0)
 	{
         GetVehiclePos(Fahrzeug[fv][Vehicle],Fahrzeug[fv][posx],Fahrzeug[fv][posy],Fahrzeug[fv][posz]);
