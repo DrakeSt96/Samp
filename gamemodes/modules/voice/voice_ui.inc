@@ -31,7 +31,7 @@
     #error voice_ui.inc benoetigt voice_radio.inc. Bitte voice.inc einbinden.
 #endif
 
-new PlayerText:VoiceIndicator[MAX_PLAYERS] = {PlayerText:INVALID_TEXT_DRAW, ...};
+new PlayerText:VoiceIndicator[MAX_PLAYERS] = {INVALID_PLAYER_TEXT_DRAW, ...};
 new bool:VoiceIndicatorShown[MAX_PLAYERS];
 
 // ---------------------------------------------------------------------------
@@ -40,7 +40,7 @@ new bool:VoiceIndicatorShown[MAX_PLAYERS];
 
 stock VoiceCreateIndicator(playerid)
 {
-    if(VoiceIndicator[playerid] != PlayerText:INVALID_TEXT_DRAW) return 1;
+    if(VoiceIndicator[playerid] != INVALID_PLAYER_TEXT_DRAW) return 1;
 
     VoiceIndicator[playerid] = CreatePlayerTextDraw(playerid, VOICE_TD_POS_X, VOICE_TD_POS_Y, "_");
     PlayerTextDrawLetterSize(playerid, VoiceIndicator[playerid], 0.220000, 1.100000);
@@ -58,10 +58,10 @@ stock VoiceCreateIndicator(playerid)
 
 stock VoiceDestroyIndicator(playerid)
 {
-    if(VoiceIndicator[playerid] == PlayerText:INVALID_TEXT_DRAW) return 0;
+    if(VoiceIndicator[playerid] == INVALID_PLAYER_TEXT_DRAW) return 0;
 
     PlayerTextDrawDestroy(playerid, VoiceIndicator[playerid]);
-    VoiceIndicator[playerid]      = PlayerText:INVALID_TEXT_DRAW;
+    VoiceIndicator[playerid]      = INVALID_PLAYER_TEXT_DRAW;
     VoiceIndicatorShown[playerid] = false;
     return 1;
 }
@@ -75,7 +75,7 @@ stock VoiceDestroyIndicator(playerid)
 stock VoiceRefreshIndicator(playerid)
 {
     if(!IsPlayerConnected(playerid) || IsPlayerNPC(playerid)) return 0;
-    if(VoiceIndicator[playerid] == PlayerText:INVALID_TEXT_DRAW) return 0;
+    if(VoiceIndicator[playerid] == INVALID_PLAYER_TEXT_DRAW) return 0;
 
     new text[128], name[64];
     text[0] = EOS;

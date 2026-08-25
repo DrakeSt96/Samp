@@ -58,6 +58,10 @@ enum e_VoicePlayerData
     bool:vpMicroNotified,
     // Watchdog cut the transmission off. Blocks re-keying until release.
     bool:vpCutOff,
+    // Proximity key is physically down. Tracked separately from vpProxActive,
+    // which only says whether it is actually going out: while the radio has
+    // priority the key can be held without anything being transmitted.
+    bool:vpProxKeyHeld,
 
     // --- radio (phase 2) ---
 
@@ -218,6 +222,7 @@ stock VoiceResetPlayerData(playerid)
     VoicePlayer[playerid][vpEnabled]        = true;
     VoicePlayer[playerid][vpMicroNotified]  = false;
     VoicePlayer[playerid][vpCutOff]         = false;
+    VoicePlayer[playerid][vpProxKeyHeld]    = false;
 
     VoicePlayer[playerid][vpRadioActive]    = false;
     VoicePlayer[playerid][vpActiveChannel]  = VOICE_CHANNEL_NONE;
@@ -460,6 +465,7 @@ stock VoiceShutdownSystem()
             SvDeleteStream(VoicePlayer[i][vpProxStream]);
             VoicePlayer[i][vpProxStream] = SV_NULL;
         }
+        VoiceDestroyIndicator(i);
         VoiceResetPlayerData(i);
     }
 

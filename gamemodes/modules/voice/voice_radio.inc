@@ -786,6 +786,8 @@ public SV_VOID:OnPlayerActivationKeyPress(SV_UINT:playerid, SV_UINT:keyid)
     }
     else if(keyid == VOICE_KEY_PROXIMITY)
     {
+        VoicePlayer[playerid][vpProxKeyHeld] = true;
+
         // Radio has priority: while it is open, the proximity key does nothing.
         if(!VoicePlayer[playerid][vpRadioActive])
         {
@@ -799,10 +801,27 @@ public SV_VOID:OnPlayerActivationKeyRelease(SV_UINT:playerid, SV_UINT:keyid)
 {
     if(keyid == VOICE_KEY_RADIO)
     {
+        new bool:resume = VoicePlayer[playerid][vpProxKeyHeld];
+        new lastEnd     = VoicePlayer[playerid][vpLastTalkEnd];
+
         VoiceRadioStop(playerid);
+
+        // Whoever still holds the proximity key wanted to talk locally in the
+        // first place - without this they would sit there silently, wondering,
+        // until they let go and pressed again.
+        //
+        // The cooldown timestamp is put back first: handing over from radio to
+        // proximity is not push-to-talk spam, and letting the fresh timestamp
+        // stand would block the handover it is supposed to enable.
+        if(resume)
+        {
+            VoicePlayer[playerid][vpLastTalkEnd] = lastEnd;
+            VoiceProximityStart(playerid);
+        }
     }
     else if(keyid == VOICE_KEY_PROXIMITY)
     {
+        VoicePlayer[playerid][vpProxKeyHeld] = false;
         VoiceProximityStop(playerid);
     }
 
