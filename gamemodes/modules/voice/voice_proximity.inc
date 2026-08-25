@@ -44,6 +44,7 @@ stock VoiceProximityStart(playerid)
 
     VoicePlayer[playerid][vpProxActive] = true;
     VoicePlayer[playerid][vpTalkStart]  = GetTickCount();
+    VoiceIndicateProximity(playerid, true);
     return 1;
 }
 
@@ -59,6 +60,7 @@ stock VoiceProximityStop(playerid)
     VoicePlayer[playerid][vpProxActive]   = false;
     VoicePlayer[playerid][vpTalkStart]    = 0;
     VoicePlayer[playerid][vpLastTalkEnd]  = GetTickCount();
+    VoiceIndicateProximity(playerid, false);
     return 1;
 }
 
@@ -77,6 +79,7 @@ stock VoiceSetRange(playerid, range, bool:announce = true)
 
     VoicePlayer[playerid][vpRange] = range;
     SvUpdateDistanceForLStream(VoicePlayer[playerid][vpProxStream], VoiceRangeDistance[range]);
+    if(VoicePlayer[playerid][vpProxActive]) VoiceIndicateProximity(playerid, true);
 
     if(announce)
     {
@@ -174,9 +177,19 @@ CMD:voicehelp(playerid, params[])
 {
     #pragma unused params
     SendClientMessage(playerid, VOICE_COLOR, "--- Sprachchat ---");
-    SendClientMessage(playerid, VOICE_COLOR, "Y gedrueckt halten: sprechen (Proximity)");
+    SendClientMessage(playerid, VOICE_COLOR, "Y gedrueckt halten: im Nahbereich sprechen");
+    SendClientMessage(playerid, VOICE_COLOR, "X gedrueckt halten: funken (Fraktion, Unternehmen, Partei)");
     SendClientMessage(playerid, VOICE_COLOR, "/reichweite [fluestern|normal|rufen] - Sprechweite umschalten");
     SendClientMessage(playerid, VOICE_COLOR, "/fluestern, /rufen - direkt umschalten");
+    SendClientMessage(playerid, VOICE_COLOR, "/funkkanal [Nr] - Sendekanal waehlen, ohne Nr: Liste");
+    SendClientMessage(playerid, VOICE_COLOR, "/funkinfo - Sendekanal und mitgehoerte Kanaele");
+    SendClientMessage(playerid, VOICE_COLOR, "/vignore [Spieler] - jemanden im Funk ausblenden, /vignoreliste zeigt sie");
     SendClientMessage(playerid, VOICE_COLOR, "/voice - eigenen Sprachchat an- und ausschalten");
+
+    if(isPlayerAnAdmin(playerid, VOICE_ADMIN_LEVEL))
+    {
+        SendClientMessage(playerid, VOICE_COLOR, "--- Admin ---");
+        SendClientMessage(playerid, VOICE_COLOR, "/vmute /vunmute /vkanalmute /vabhoeren /vsperren /vkanaele /durchsage");
+    }
     return 1;
 }

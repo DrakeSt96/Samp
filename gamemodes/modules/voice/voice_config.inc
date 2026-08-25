@@ -136,4 +136,15 @@
 // ---------------------------------------------------------------------------
 
 // Table holding persistent global mutes. Created by voice_mutes.sql.
+// The script never creates it - run the file against the database yourself.
 #define VOICE_MUTE_TABLE                "voice_mutes"
+
+// ---------------------------------------------------------------------------
+// Bitset sizes - derived, do not tune by hand
+// ---------------------------------------------------------------------------
+
+#define VOICE_BITS_PER_CELL             (32)
+// One bit per channel: which channels a player is muted on.
+#define VOICE_MUTE_CELLS                ((VOICE_STREAM_COUNT + VOICE_BITS_PER_CELL - 1) / VOICE_BITS_PER_CELL)
+// One bit per player: whom a player has personally ignored.
+#define VOICE_IGNORE_CELLS              ((MAX_PLAYERS + VOICE_BITS_PER_CELL - 1) / VOICE_BITS_PER_CELL)

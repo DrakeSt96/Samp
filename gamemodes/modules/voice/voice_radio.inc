@@ -282,6 +282,14 @@ stock bool:VoiceMayTransmitOn(playerid, channel, reasonText[], reasonLen)
         #endif
     }
 
+    // Channel mute - the middle tier between a global mute and a personal
+    // ignore. Silences one player on one channel, elsewhere they still talk.
+    if(VoiceIsChannelMuted(playerid, channel))
+    {
+        strcat(reasonText, "Auf diesem Funkkanal bist du stummgeschaltet.", reasonLen);
+        return false;
+    }
+
     // Admin lock. Admins can still talk on a channel they locked.
     if(VoiceChannelLocked[channel] && !isPlayerAnAdmin(playerid, VOICE_ADMIN_LEVEL))
     {
@@ -400,6 +408,10 @@ stock VoiceDetachFromChannel(playerid, channel)
                 VoicePlayer[playerid][vpMonitor][s] = VOICE_CHANNEL_NONE;
             }
         }
+        if(VoicePlayer[playerid][vpListenIn] == channel)
+        {
+            VoicePlayer[playerid][vpListenIn] = VOICE_CHANNEL_NONE;
+        }
     }
 
     if(VoicePlayer[playerid][vpActiveChannel] == channel)
@@ -438,6 +450,7 @@ stock VoiceDetachFromAllChannels(playerid)
         VoicePlayer[playerid][vpMonitor][s] = VOICE_CHANNEL_NONE;
     }
     VoicePlayer[playerid][vpOnAdminChannel] = false;
+    VoicePlayer[playerid][vpListenIn]       = VOICE_CHANNEL_NONE;
     VoicePlayer[playerid][vpActiveChannel]  = VOICE_CHANNEL_NONE;
     VoicePlayer[playerid][vpRadioActive]    = false;
     return 1;
@@ -528,28 +541,71 @@ stock VoiceRefreshPlayer(playerid, bool:announce = true)
     return 1;
 }
 
-// Re-checks every listener of a channel against the live membership. Called at
-// the start of each transmission, which is the only moment the attachment can
-// actually be observed - between transmissions a channel carries no audio.
-// That is what makes a dismissal take effect without a relog.
-stock VoiceSyncChannelListeners(channel)
+// Brings the listeners a channel actually has in line with the listeners it
+// should have, and repairs the cached counter along the way.
+//
+// Called at the start and at the end of every transmission. That is the only
+// moment the attachment is observable at all - between two transmissions a
+// channel carries no audio - which is what makes a dismissal or a promotion
+// take effect without a relog: the dismissed member does not hear the next
+// word spoken.
+//
+// speakerid, when given, is the player about to transmit. Listeners who have
+// personally ignored them are left off the channel for the duration and are
+// picked up again by the sync at the end of the transmission.
+stock VoiceSyncChannelListeners(channel, speakerid = INVALID_PLAYER_ID)
 {
     if(!VoiceIsValidChannel(channel) || VoiceChannelStream[channel] == SV_NULL) return 0;
+
+    new count = 0;
 
     ForEachPlayer(i)
     {
         if(IsPlayerNPC(i)) continue;
-        if(!SvHasListenerInStream(VoiceChannelStream[channel], i)) continue;
 
-        new bool:allowed = (channel == VOICE_CH_ADMIN)
-            ? (isPlayerAnAdmin(i, VOICE_ADMIN_LEVEL) == 1)
-            : VoiceIsEntitled(i, channel);
+        new bool:attached = SvHasListenerInStream(VoiceChannelStream[channel], i);
+        new bool:wanted;
 
-        if(!allowed)
+        if(channel == VOICE_CH_ADMIN)
         {
-            VoiceDetachFromChannel(i, channel);
+            wanted = VoicePlayer[i][vpOnAdminChannel] && isPlayerAnAdmin(i, VOICE_ADMIN_LEVEL) == 1;
+        }
+        else if(VoicePlayer[i][vpListenIn] == channel)
+        {
+            // Admin listening in. Still bound by the listener ceiling.
+            wanted = (isPlayerAnAdmin(i, VOICE_ADMIN_LEVEL) == 1);
+        }
+        else
+        {
+            // vpMonitor is the record of intent, entitlement the right to it.
+            wanted = VoiceIsMonitoring(i, channel) && VoiceIsEntitled(i, channel);
+        }
+
+        // Personal ignore, only for the player who is about to speak.
+        if(wanted && speakerid != INVALID_PLAYER_ID && i != speakerid && VoiceIgnores(i, speakerid))
+        {
+            wanted = false;
+        }
+
+        if(wanted && !attached)
+        {
+            new limit = (channel == VOICE_CH_ADMIN) ? VOICE_ADMIN_MAX_LISTENERS : VOICE_CHANNEL_MAX_LISTENERS;
+            if(count < limit && SvAttachListenerToStream(VoiceChannelStream[channel], i))
+            {
+                count++;
+            }
+        }
+        else if(!wanted && attached)
+        {
+            SvDetachListenerFromStream(VoiceChannelStream[channel], i);
+        }
+        else if(attached)
+        {
+            count++;
         }
     }
+
+    VoiceChannelListeners[channel] = count;
     return 1;
 }
 
@@ -607,9 +663,10 @@ stock VoiceRadioStart(playerid)
         VoiceChannelSpeaker[channel] = INVALID_PLAYER_ID;
     }
 
-    // Membership may have changed since the last transmission. Doing this here
-    // means a dismissed member never hears the next word.
-    VoiceSyncChannelListeners(channel);
+    // Membership may have changed since the last transmission, and listeners
+    // who ignore this speaker have to come off the channel. Doing it here means
+    // a dismissed member never hears the next word.
+    VoiceSyncChannelListeners(channel, playerid);
 
     // Radio outranks proximity: the same voice must not go out twice.
     if(VoicePlayer[playerid][vpProxActive])
@@ -626,6 +683,7 @@ stock VoiceRadioStart(playerid)
     VoiceChannelSpeaker[channel]         = playerid;
     VoicePlayer[playerid][vpRadioActive] = true;
     VoicePlayer[playerid][vpTalkStart]   = GetTickCount();
+    VoiceIndicateRadio(playerid, channel, true);
     return 1;
 }
 
@@ -660,6 +718,16 @@ stock VoiceRadioStop(playerid, bool:fromKeyRelease = true)
     VoicePlayer[playerid][vpRadioActive]  = false;
     VoicePlayer[playerid][vpTalkStart]    = 0;
     VoicePlayer[playerid][vpLastTalkEnd]  = GetTickCount();
+
+    // Listeners that were left off because they ignore this speaker belong
+    // back on the channel now that the transmission is over. The indicator has
+    // to go before that, while the listener list still holds everybody who saw
+    // it come up.
+    if(VoiceIsValidChannel(channel))
+    {
+        VoiceIndicateRadio(playerid, channel, false);
+        VoiceSyncChannelListeners(channel);
+    }
     return 1;
 }
 

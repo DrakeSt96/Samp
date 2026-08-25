@@ -71,6 +71,10 @@ enum e_VoicePlayerData
     vpMonitor[VOICE_MAX_MONITORED],
     // Attached to the admin announcement channel.
     bool:vpOnAdminChannel,
+    // Channel an admin listens in on via /vabhoeren, VOICE_CHANNEL_NONE when
+    // none. Deliberately outside vpMonitor: listening in must not compete for
+    // the slots a player needs for their own faction, company and party.
+    vpListenIn,
     // GetTickCount() of the last channel switch. Feeds the switch rate limit.
     vpLastSwitch,
 
@@ -109,6 +113,87 @@ new VoiceRangeName[VOICE_RANGE_COUNT][12] =
     "Rufen"
 };
 
+
+// ---------------------------------------------------------------------------
+// Mute and ignore state (phase 3)
+// ---------------------------------------------------------------------------
+
+// Globally muted by an admin. Mirrors the plugin's own mute flag, kept here
+// as well because the reason and the persistence belong to the script.
+new bool:VoiceGlobalMute[MAX_PLAYERS];
+new VoiceGlobalMuteReason[MAX_PLAYERS][64];
+
+// One bit per channel: this player may not transmit on that channel.
+new VoiceChannelMute[MAX_PLAYERS][VOICE_MUTE_CELLS];
+
+// One bit per player: whom this player has personally ignored. Enforced on
+// radio channels; in the proximity range the plugin's own client side
+// blacklist is the tool for it, see README.
+new VoiceIgnore[MAX_PLAYERS][VOICE_IGNORE_CELLS];
+
+// ---------------------------------------------------------------------------
+// Bitset helpers
+// ---------------------------------------------------------------------------
+
+stock bool:VoiceBitGet(const bits[], index)
+{
+    if(index < 0) return false;
+    return bool:((bits[index / VOICE_BITS_PER_CELL] & (1 << (index % VOICE_BITS_PER_CELL))) != 0);
+}
+
+stock VoiceBitSet(bits[], index, bool:value)
+{
+    if(index < 0) return 0;
+    if(value) bits[index / VOICE_BITS_PER_CELL] |=  (1 << (index % VOICE_BITS_PER_CELL));
+    else      bits[index / VOICE_BITS_PER_CELL] &= ~(1 << (index % VOICE_BITS_PER_CELL));
+    return 1;
+}
+
+stock VoiceBitClearAll(bits[], cells)
+{
+    for(new i = 0; i < cells; i++) bits[i] = 0;
+    return 1;
+}
+
+// ---------------------------------------------------------------------------
+// Mute queries
+// ---------------------------------------------------------------------------
+
+stock bool:VoiceIsChannelMuted(playerid, channel)
+{
+    if(playerid < 0 || playerid >= MAX_PLAYERS) return false;
+    if(channel < 0 || channel >= VOICE_STREAM_COUNT) return false;
+    return VoiceBitGet(VoiceChannelMute[playerid], channel);
+}
+
+// listener ignores speaker?
+stock bool:VoiceIgnores(listenerid, speakerid)
+{
+    if(listenerid < 0 || listenerid >= MAX_PLAYERS) return false;
+    if(speakerid  < 0 || speakerid  >= MAX_PLAYERS) return false;
+    return VoiceBitGet(VoiceIgnore[listenerid], speakerid);
+}
+
+// Wipes everything that is tied to this player slot. Called on disconnect, so
+// the next occupant does not inherit mutes or ignores. The ignores that OTHER
+// players hold against this slot are cleared too - the slot will belong to
+// somebody else in a moment.
+stock VoiceClearMuteState(playerid)
+{
+    if(playerid < 0 || playerid >= MAX_PLAYERS) return 0;
+
+    VoiceGlobalMute[playerid] = false;
+    VoiceGlobalMuteReason[playerid][0] = EOS;
+    VoiceBitClearAll(VoiceChannelMute[playerid], VOICE_MUTE_CELLS);
+    VoiceBitClearAll(VoiceIgnore[playerid], VOICE_IGNORE_CELLS);
+
+    for(new i = 0; i < MAX_PLAYERS; i++)
+    {
+        VoiceBitSet(VoiceIgnore[i], playerid, false);
+    }
+    return 1;
+}
+
 // ---------------------------------------------------------------------------
 // Forward declarations
 // ---------------------------------------------------------------------------
@@ -137,6 +222,7 @@ stock VoiceResetPlayerData(playerid)
     VoicePlayer[playerid][vpRadioActive]    = false;
     VoicePlayer[playerid][vpActiveChannel]  = VOICE_CHANNEL_NONE;
     VoicePlayer[playerid][vpOnAdminChannel] = false;
+    VoicePlayer[playerid][vpListenIn]       = VOICE_CHANNEL_NONE;
     VoicePlayer[playerid][vpLastSwitch]     = 0;
     VoicePlayer[playerid][vpSeenFraktion]   = -1;
     VoicePlayer[playerid][vpSeenRang]       = -1;
@@ -185,9 +271,13 @@ stock bool:VoiceMayTransmit(playerid, reasonText[], reasonLen)
         strcat(reasonText, "Tote reden nicht.", reasonLen);
         return false;
     }
-    if(SvMutePlayerStatus(playerid))
+    if(VoiceGlobalMute[playerid] || SvMutePlayerStatus(playerid))
     {
-        strcat(reasonText, "Du bist stummgeschaltet.", reasonLen);
+        if(VoiceGlobalMuteReason[playerid][0] != EOS)
+        {
+            format(reasonText, reasonLen, "Du bist stummgeschaltet. Grund: %s", VoiceGlobalMuteReason[playerid]);
+        }
+        else strcat(reasonText, "Du bist stummgeschaltet.", reasonLen);
         return false;
     }
     if(VoicePlayer[playerid][vpCutOff])
@@ -254,6 +344,11 @@ stock VoiceTrySetupPlayer(playerid)
     SvAddKey(playerid, VOICE_KEY_PROXIMITY);
     SvAddKey(playerid, VOICE_KEY_RADIO);
 
+    VoiceCreateIndicator(playerid);
+
+    // A global mute from an earlier session applies again from here on.
+    VoiceLoadMute(playerid);
+
     SendClientMessage(playerid, VOICE_COLOR, "[Voice] Sprachchat aktiv. Y gedrueckt halten zum Sprechen, /reichweite fuer die Lautstaerke.");
 
     // Puts the player on every channel their faction, organisation and party
@@ -316,6 +411,8 @@ stock VoiceTeardownPlayer(playerid)
         SvRemoveAllKeys(playerid);
     }
 
+    VoiceDestroyIndicator(playerid);
+    VoiceClearMuteState(playerid);
     VoiceResetPlayerData(playerid);
     return 1;
 }
