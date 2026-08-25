@@ -1,10 +1,22 @@
-#include </Gloabe Includes/a_samp>
-#include </Gloabe Includes/a_mysql>
-#include </Gloabe Includes/a_http>
-#include </Gloabe Includes/streamer>
-#include </Gloabe Includes/sscanf2>
-#include </Gloabe Includes/md5>
-#include </Gloabe Includes/zcmd>
-#include </Gloabe Includes/AMC1>
-#include </Gloabe Includes/AlteSachenVomScript>
-#include </Gloabe Includes/CoL_Farben>
+// Sammel-Include des Gamemodes - open.mp-Fassung.
+//
+// <open.mp> ersetzt das fruehere <a_samp>. Der Kompatibilitaets-Wrapper
+// a_samp.inc existiert unter open.mp zwar noch, gibt aber eine Warnung aus
+// und leitet ohnehin nur hierher weiter.
+//
+// Die Includes liegen in "Gloabe Includes". Beim Kompilieren muss dieses
+// Verzeichnis im Include-Pfad stehen (in Qawno/Pawno unter Include-Verzeichnis
+// eintragen, auf der Kommandozeile per -i).
+#include <open.mp>
+
+// Plugin-Includes
+#include <a_mysql>        // MySQL R39-4 - NICHT auf R40+ aktualisieren, siehe OPENMP.md
+#include <streamer>       // Streamer 2.9.6 - Plugin muss dieselbe Version haben
+#include <sscanf2>
+#include <md5>
+#include <zcmd>
+
+// Projekteigene Includes
+#include <AMC1>
+#include <AlteSachenVomScript>
+#include <CoL_Farben>

@@ -1,5 +1,7 @@
 # Zugangsdaten - duerfen nicht ins Repository
 server.cfg
+server.cfg.samp-alt
+config.json
 gamemodes/config.inc
 
 # Kompilate

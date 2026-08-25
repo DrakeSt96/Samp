@@ -265,7 +265,7 @@ stock const WeekDays[7][11] = {
 #define DATE_A(%0) ((14 - %0) / 12)
 
 //-[ Natives ]-//
-native gpci(playerid,serial[],len);
+// native gpci(playerid,serial[],len);  // open.mp bringt diese native selbst mit
 
 //-[ Texdraw - Display ]-//
 new Text:Display_HP_Anzeige[MAX_PLAYERS];
@@ -427,8 +427,7 @@ new PlayerText:Handy_Draw_Info[MAX_PLAYERS];
 #define EXTINGUISH_TIME_ONFOOT   		4
 #define EXTINGUISH_TIME_PEEING			10000
 #define EXTINGUISH_TIME_PLAYER			3
-#define SPECIAL_ACTION_PISSING 			68
-#define KEY_N                           131072
+#define KEY_N                           KEY_NO
 #define MOVE_SPEED              		100.0
 #define ACCEL_RATE              		0.03
 #define CAMERA_MODE_NONE    			0
@@ -491,7 +490,7 @@ new AntiCheatStr[500];
 #define ForEachPlayer(%0) for(new index_%0=0,%0=ConnectedPlayerList[0];index_%0<ConnectedPlayers;index_%0++,%0=ConnectedPlayerList[index_%0])
 
 //-[Natives]-//
-native IsValidVehicle(vehicleid);
+// native IsValidVehicle(vehicleid);  // open.mp bringt diese native selbst mit
 
 //-[Check ob jmd die Taste gedrückt hält]-//
 #define HOLDING(%0) ((newkeys & (%0)) == (%0))
@@ -5154,12 +5153,12 @@ public OnGameModeInit()
 	explosiwaffenabf = 0;
     ManualVehicleEngineAndLights();
     DisableInteriorEnterExits();
-    EnableStuntBonusForAll(0);
+    EnableStuntBonusForAll(false);
     LimitGlobalChatRadius(0);
     UsePlayerPedAnims();
-    ShowNameTags(1);
+    ShowNameTags(true);
     ShowPlayerMarkers(0);
-    AllowInteriorWeapons(1);
+    AllowInteriorWeapons(true);
     SetNameTagDrawDistance(MAX_STREAM_NAME_DISTANCE);
     WeatherChange();
     ResetElevatorQueue();
@@ -5768,635 +5767,635 @@ public OnGameModeInit()
 	LoadScreen[0] = TextDrawCreate(-931.333435, -1142.385253,"box");
 	TextDrawLetterSize(LoadScreen[0], 0.000000, 244.933319);
 	TextDrawTextSize(LoadScreen[0], 4560.000000, 0.000000);
-	TextDrawAlignment(LoadScreen[0], 1);
-	TextDrawColor(LoadScreen[0], -1);
-	TextDrawUseBox(LoadScreen[0], 1);
-	TextDrawBoxColor(LoadScreen[0], 69);
+	TextDrawAlignment(LoadScreen[0], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(LoadScreen[0], -1);
+	TextDrawUseBox(LoadScreen[0], true);
+	TextDrawBoxColour(LoadScreen[0], 69);
 	TextDrawSetShadow(LoadScreen[0], 0);
 	TextDrawSetOutline(LoadScreen[0], 0);
-	TextDrawBackgroundColor(LoadScreen[0], 255);
-	TextDrawFont(LoadScreen[0], 1);
-	TextDrawSetProportional(LoadScreen[0], 1);
+	TextDrawBackgroundColour(LoadScreen[0], 255);
+	TextDrawFont(LoadScreen[0], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(LoadScreen[0], true);
 	TextDrawSetShadow(LoadScreen[0], 0);
 
 	LoadScreen[1] = TextDrawCreate(198.666839, 189.170364,"Du wirst mit unserem Server verbunden...~n~Bitte warte einen Moment.");
 	TextDrawLetterSize(LoadScreen[1], 0.342000, 1.649777);
-	TextDrawAlignment(LoadScreen[1], 1);
-	TextDrawColor(LoadScreen[1], -1378294017);
+	TextDrawAlignment(LoadScreen[1], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(LoadScreen[1], -1378294017);
 	TextDrawSetShadow(LoadScreen[1], 0);
 	TextDrawSetOutline(LoadScreen[1], 0);
-	TextDrawBackgroundColor(LoadScreen[1], 255);
-	TextDrawFont(LoadScreen[1], 3);
-	TextDrawSetProportional(LoadScreen[1], 1);
+	TextDrawBackgroundColour(LoadScreen[1], 255);
+	TextDrawFont(LoadScreen[1], TEXT_DRAW_FONT_3);
+	TextDrawSetProportional(LoadScreen[1], true);
 	TextDrawSetShadow(LoadScreen[1], 0);
 	
 	//--[ LeisteLeiste ]--//
 	Server_Leiste[0] = TextDrawCreate(-34.333354, 438.059417,"BOX");
 	TextDrawLetterSize(Server_Leiste[0], 0.400000, 1.600000);
 	TextDrawTextSize(Server_Leiste[0], 2681.000000, 0.000000);
-	TextDrawAlignment(Server_Leiste[0], 1);
-	TextDrawColor(Server_Leiste[0], -256);
-	TextDrawUseBox(Server_Leiste[0], 1);
-	TextDrawBoxColor(Server_Leiste[0], 115);
+	TextDrawAlignment(Server_Leiste[0], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Server_Leiste[0], -256);
+	TextDrawUseBox(Server_Leiste[0], true);
+	TextDrawBoxColour(Server_Leiste[0], 115);
 	TextDrawSetShadow(Server_Leiste[0], 0);
 	TextDrawSetOutline(Server_Leiste[0], 0);
-	TextDrawBackgroundColor(Server_Leiste[0], 255);
-	TextDrawFont(Server_Leiste[0], 1);
-	TextDrawSetProportional(Server_Leiste[0], 1);
+	TextDrawBackgroundColour(Server_Leiste[0], 255);
+	TextDrawFont(Server_Leiste[0], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Server_Leiste[0], true);
 	TextDrawSetShadow(Server_Leiste[0], 0);
 
 	Server_Leiste[1] = TextDrawCreate(0.999885, 438.059204,"Forum:");
 	TextDrawLetterSize(Server_Leiste[1], 0.150665, 0.716444);
-	TextDrawAlignment(Server_Leiste[1], 1);
-	TextDrawColor(Server_Leiste[1], -1);
+	TextDrawAlignment(Server_Leiste[1], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Server_Leiste[1], -1);
 	TextDrawSetShadow(Server_Leiste[1], 0);
 	TextDrawSetOutline(Server_Leiste[1], 0);
-	TextDrawBackgroundColor(Server_Leiste[1], 255);
-	TextDrawFont(Server_Leiste[1], 1);
-	TextDrawSetProportional(Server_Leiste[1], 1);
+	TextDrawBackgroundColour(Server_Leiste[1], 255);
+	TextDrawFont(Server_Leiste[1], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Server_Leiste[1], true);
 	TextDrawSetShadow(Server_Leiste[1], 0);
 
 	Server_Leiste[2] = TextDrawCreate(558.999816, 437.644256,"Teamspeak3:");
 	TextDrawLetterSize(Server_Leiste[2], 0.150665, 0.716444);
-	TextDrawAlignment(Server_Leiste[2], 1);
-	TextDrawColor(Server_Leiste[2], -1);
+	TextDrawAlignment(Server_Leiste[2], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Server_Leiste[2], -1);
 	TextDrawSetShadow(Server_Leiste[2], 0);
 	TextDrawSetOutline(Server_Leiste[2], 0);
-	TextDrawBackgroundColor(Server_Leiste[2], 255);
-	TextDrawFont(Server_Leiste[2], 1);
-	TextDrawSetProportional(Server_Leiste[2], 1);
+	TextDrawBackgroundColour(Server_Leiste[2], 255);
+	TextDrawFont(Server_Leiste[2], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Server_Leiste[2], true);
 	TextDrawSetShadow(Server_Leiste[2], 0);
 	
 	Server_Leiste[3] = TextDrawCreate(591.666442, 438.059112,""Teamspeak3"");
 	TextDrawLetterSize(Server_Leiste[3], 0.150665, 0.716444);
-	TextDrawAlignment(Server_Leiste[3], 1);
-	TextDrawColor(Server_Leiste[3],0xF15433FF);
+	TextDrawAlignment(Server_Leiste[3], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Server_Leiste[3],0xF15433FF);
 	TextDrawSetShadow(Server_Leiste[3], 0);
 	TextDrawSetOutline(Server_Leiste[3], 0);
-	TextDrawBackgroundColor(Server_Leiste[3], 255);
-	TextDrawFont(Server_Leiste[3], 1);
-	TextDrawSetProportional(Server_Leiste[3], 1);
+	TextDrawBackgroundColour(Server_Leiste[3], 255);
+	TextDrawFont(Server_Leiste[3], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Server_Leiste[3], true);
 	TextDrawSetShadow(Server_Leiste[3], 0);
 
 	Server_Leiste[4] = TextDrawCreate(18.333223, 438.059143," "Forum"");
 	TextDrawLetterSize(Server_Leiste[4], 0.150665, 0.716444);
-	TextDrawAlignment(Server_Leiste[4], 1);
-	TextDrawColor(Server_Leiste[4],0xF15433FF);
+	TextDrawAlignment(Server_Leiste[4], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Server_Leiste[4],0xF15433FF);
 	TextDrawSetShadow(Server_Leiste[4], 0);
 	TextDrawSetOutline(Server_Leiste[4], 0);
-	TextDrawBackgroundColor(Server_Leiste[4], 255);
-	TextDrawFont(Server_Leiste[4], 1);
-	TextDrawSetProportional(Server_Leiste[4], 1);
+	TextDrawBackgroundColour(Server_Leiste[4], 255);
+	TextDrawFont(Server_Leiste[4], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Server_Leiste[4], true);
 	TextDrawSetShadow(Server_Leiste[4], 0);
 
 	Server_Leiste[5] = TextDrawCreate(415.666564, 438.474090,"24:30:60");
 	TextDrawLetterSize(Server_Leiste[5], 0.150665, 0.716444);
-	TextDrawAlignment(Server_Leiste[5], 1);
-	TextDrawColor(Server_Leiste[5], -1);
+	TextDrawAlignment(Server_Leiste[5], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Server_Leiste[5], -1);
 	TextDrawSetShadow(Server_Leiste[5], 0);
 	TextDrawSetOutline(Server_Leiste[5], 0);
-	TextDrawBackgroundColor(Server_Leiste[5], 255);
-	TextDrawFont(Server_Leiste[5], 1);
-	TextDrawSetProportional(Server_Leiste[5], 1);
+	TextDrawBackgroundColour(Server_Leiste[5], 255);
+	TextDrawFont(Server_Leiste[5], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Server_Leiste[5], true);
 	TextDrawSetShadow(Server_Leiste[5], 0);
 
 	Server_Leiste[6] = TextDrawCreate(298.333099, 438.888885,""Script_Version"");
 	TextDrawLetterSize(Server_Leiste[6], 0.150665, 0.716444);
-	TextDrawAlignment(Server_Leiste[6], 1);
-	TextDrawColor(Server_Leiste[6], -1);
+	TextDrawAlignment(Server_Leiste[6], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Server_Leiste[6], -1);
 	TextDrawSetShadow(Server_Leiste[6], 0);
 	TextDrawSetOutline(Server_Leiste[6], 0);
-	TextDrawBackgroundColor(Server_Leiste[6], 255);
-	TextDrawFont(Server_Leiste[6], 1);
-	TextDrawSetProportional(Server_Leiste[6], 1);
+	TextDrawBackgroundColour(Server_Leiste[6], 255);
+	TextDrawFont(Server_Leiste[6], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Server_Leiste[6], true);
 	TextDrawSetShadow(Server_Leiste[6], 0);
 
 	Server_Leiste[7] = TextDrawCreate(174.999969, 438.059295,"30.12.2018");
 	TextDrawLetterSize(Server_Leiste[7], 0.150665, 0.716444);
-	TextDrawAlignment(Server_Leiste[7], 1);
-	TextDrawColor(Server_Leiste[7], -1);
+	TextDrawAlignment(Server_Leiste[7], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Server_Leiste[7], -1);
 	TextDrawSetShadow(Server_Leiste[7], 0);
 	TextDrawSetOutline(Server_Leiste[7], 0);
-	TextDrawBackgroundColor(Server_Leiste[7], 255);
-	TextDrawFont(Server_Leiste[7], 1);
-	TextDrawSetProportional(Server_Leiste[7], 1);
+	TextDrawBackgroundColour(Server_Leiste[7], 255);
+	TextDrawFont(Server_Leiste[7], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Server_Leiste[7], true);
 	TextDrawSetShadow(Server_Leiste[7], 0);
 
 	//-----------[ Texdraw - Login ]-----------//
 	TD_LOGIN[0] = TextDrawCreate(-30.333314, 424.785522,"boxunten");
 	TextDrawLetterSize(TD_LOGIN[0], 0.247997, 11.547259);
 	TextDrawTextSize(TD_LOGIN[0], 1189.000000, 0.000000);
-	TextDrawAlignment(TD_LOGIN[0], 1);
-	TextDrawColor(TD_LOGIN[0], -256);
-	TextDrawUseBox(TD_LOGIN[0], 1);
-	TextDrawBoxColor(TD_LOGIN[0], 101);
+	TextDrawAlignment(TD_LOGIN[0], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[0], -256);
+	TextDrawUseBox(TD_LOGIN[0], true);
+	TextDrawBoxColour(TD_LOGIN[0], 101);
 	TextDrawSetShadow(TD_LOGIN[0], 0);
 	TextDrawSetOutline(TD_LOGIN[0], 0);
-	TextDrawBackgroundColor(TD_LOGIN[0], 255);
-	TextDrawFont(TD_LOGIN[0], 1);
-	TextDrawSetProportional(TD_LOGIN[0], 1);
+	TextDrawBackgroundColour(TD_LOGIN[0], 255);
+	TextDrawFont(TD_LOGIN[0], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(TD_LOGIN[0], true);
 	TextDrawSetShadow(TD_LOGIN[0], 0);
 
 	TD_LOGIN[1] = TextDrawCreate(-17.666639, 424.785369,"strichunten");
 	TextDrawLetterSize(TD_LOGIN[1], 0.266665, -0.291557);
 	TextDrawTextSize(TD_LOGIN[1], 1198.000000, 0.000000);
-	TextDrawAlignment(TD_LOGIN[1], 1);
-	TextDrawColor(TD_LOGIN[1], -256);
-	TextDrawUseBox(TD_LOGIN[1], 1);
-	TextDrawBoxColor(TD_LOGIN[1], -1061109505);
+	TextDrawAlignment(TD_LOGIN[1], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[1], -256);
+	TextDrawUseBox(TD_LOGIN[1], true);
+	TextDrawBoxColour(TD_LOGIN[1], -1061109505);
 	TextDrawSetShadow(TD_LOGIN[1], 0);
 	TextDrawSetOutline(TD_LOGIN[1], 0);
-	TextDrawBackgroundColor(TD_LOGIN[1], 255);
-	TextDrawFont(TD_LOGIN[1], 0);
-	TextDrawSetProportional(TD_LOGIN[1], 1);
+	TextDrawBackgroundColour(TD_LOGIN[1], 255);
+	TextDrawFont(TD_LOGIN[1], TEXT_DRAW_FONT_0);
+	TextDrawSetProportional(TD_LOGIN[1], true);
 	TextDrawSetShadow(TD_LOGIN[1], 0);
 
 	TD_LOGIN[2] = TextDrawCreate(-59.999965, -36.488544,"boxoben");
 	TextDrawLetterSize(TD_LOGIN[2], 0.247997, 11.547259);
 	TextDrawTextSize(TD_LOGIN[2], 1163.000000, 0.000000);
-	TextDrawAlignment(TD_LOGIN[2], 1);
-	TextDrawColor(TD_LOGIN[2], -256);
-	TextDrawUseBox(TD_LOGIN[2], 1);
-	TextDrawBoxColor(TD_LOGIN[2], 101);
+	TextDrawAlignment(TD_LOGIN[2], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[2], -256);
+	TextDrawUseBox(TD_LOGIN[2], true);
+	TextDrawBoxColour(TD_LOGIN[2], 101);
 	TextDrawSetShadow(TD_LOGIN[2], 0);
 	TextDrawSetOutline(TD_LOGIN[2], 0);
-	TextDrawBackgroundColor(TD_LOGIN[2], 255);
-	TextDrawFont(TD_LOGIN[2], 1);
-	TextDrawSetProportional(TD_LOGIN[2], 1);
+	TextDrawBackgroundColour(TD_LOGIN[2], 255);
+	TextDrawFont(TD_LOGIN[2], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(TD_LOGIN[2], true);
 	TextDrawSetShadow(TD_LOGIN[2], 0);
 
 	TD_LOGIN[3] = TextDrawCreate(-23.666643, 70.118675,"strichunten");
 	TextDrawLetterSize(TD_LOGIN[3], 0.265998, -0.245927);
 	TextDrawTextSize(TD_LOGIN[3], 1196.000000, 0.000000);
-	TextDrawAlignment(TD_LOGIN[3], 1);
-	TextDrawColor(TD_LOGIN[3], -256);
-	TextDrawUseBox(TD_LOGIN[3], 1);
-	TextDrawBoxColor(TD_LOGIN[3], -1061109505);
+	TextDrawAlignment(TD_LOGIN[3], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[3], -256);
+	TextDrawUseBox(TD_LOGIN[3], true);
+	TextDrawBoxColour(TD_LOGIN[3], -1061109505);
 	TextDrawSetShadow(TD_LOGIN[3], 0);
 	TextDrawSetOutline(TD_LOGIN[3], 0);
-	TextDrawBackgroundColor(TD_LOGIN[3], 255);
-	TextDrawFont(TD_LOGIN[3], 0);
-	TextDrawSetProportional(TD_LOGIN[3], 1);
+	TextDrawBackgroundColour(TD_LOGIN[3], 255);
+	TextDrawFont(TD_LOGIN[3], TEXT_DRAW_FONT_0);
+	TextDrawSetProportional(TD_LOGIN[3], true);
 	TextDrawSetShadow(TD_LOGIN[3], 0);
 
 	TD_LOGIN[4] = TextDrawCreate(254.666656, 15.362959,"Invincible");
 	TextDrawLetterSize(TD_LOGIN[4], 0.463333, 1.313778);
-	TextDrawAlignment(TD_LOGIN[4], 1);
-	TextDrawColor(TD_LOGIN[4], -1);
+	TextDrawAlignment(TD_LOGIN[4], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[4], -1);
 	TextDrawSetShadow(TD_LOGIN[4], 0);
 	TextDrawSetOutline(TD_LOGIN[4], 0);
-	TextDrawBackgroundColor(TD_LOGIN[4], 255);
-	TextDrawFont(TD_LOGIN[4], 3);
-	TextDrawSetProportional(TD_LOGIN[4], 1);
+	TextDrawBackgroundColour(TD_LOGIN[4], 255);
+	TextDrawFont(TD_LOGIN[4], TEXT_DRAW_FONT_3);
+	TextDrawSetProportional(TD_LOGIN[4], true);
 	TextDrawSetShadow(TD_LOGIN[4], 0);
 
 	TD_LOGIN[5] = TextDrawCreate(279.333160, 31.125928,"Reallife");
 	TextDrawLetterSize(TD_LOGIN[5], 0.458332, 1.313778);
-	TextDrawAlignment(TD_LOGIN[5], 1);
-	TextDrawColor(TD_LOGIN[5], -1061109505);
+	TextDrawAlignment(TD_LOGIN[5], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[5], -1061109505);
 	TextDrawSetShadow(TD_LOGIN[5], 0);
 	TextDrawSetOutline(TD_LOGIN[5], 0);
-	TextDrawBackgroundColor(TD_LOGIN[5], 255);
-	TextDrawFont(TD_LOGIN[5], 3);
-	TextDrawSetProportional(TD_LOGIN[5], 1);
+	TextDrawBackgroundColour(TD_LOGIN[5], 255);
+	TextDrawFont(TD_LOGIN[5], TEXT_DRAW_FONT_3);
+	TextDrawSetProportional(TD_LOGIN[5], true);
 	TextDrawSetShadow(TD_LOGIN[5], 0);
 
 	TD_LOGIN[6] = TextDrawCreate(234.000045, 23.244445,"-");
 	TextDrawLetterSize(TD_LOGIN[6], 8.923007, 1.098074);
-	TextDrawAlignment(TD_LOGIN[6], 1);
-	TextDrawColor(TD_LOGIN[6], -1);
+	TextDrawAlignment(TD_LOGIN[6], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[6], -1);
 	TextDrawSetShadow(TD_LOGIN[6], 0);
 	TextDrawSetOutline(TD_LOGIN[6], 0);
-	TextDrawBackgroundColor(TD_LOGIN[6], 255);
-	TextDrawFont(TD_LOGIN[6], 3);
-	TextDrawSetProportional(TD_LOGIN[6], 1);
+	TextDrawBackgroundColour(TD_LOGIN[6], 255);
+	TextDrawFont(TD_LOGIN[6], TEXT_DRAW_FONT_3);
+	TextDrawSetProportional(TD_LOGIN[6], true);
 	TextDrawSetShadow(TD_LOGIN[6], 0);
 
 	TD_LOGIN[7] = TextDrawCreate(0.999997, 60.162944,"24:30:60");
 	TextDrawLetterSize(TD_LOGIN[7], 0.146666, 0.753777);
-	TextDrawAlignment(TD_LOGIN[7], 1);
-	TextDrawColor(TD_LOGIN[7], -1);
+	TextDrawAlignment(TD_LOGIN[7], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[7], -1);
 	TextDrawSetShadow(TD_LOGIN[7], 0);
 	TextDrawSetOutline(TD_LOGIN[7], 0);
-	TextDrawBackgroundColor(TD_LOGIN[7], 255);
-	TextDrawFont(TD_LOGIN[7], 1);
-	TextDrawSetProportional(TD_LOGIN[7], 1);
+	TextDrawBackgroundColour(TD_LOGIN[7], 255);
+	TextDrawFont(TD_LOGIN[7], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(TD_LOGIN[7], true);
 	TextDrawSetShadow(TD_LOGIN[7], 0);
 
 	TD_LOGIN[8] = TextDrawCreate(612.999877, 60.162948,"21.12.2017");
 	TextDrawLetterSize(TD_LOGIN[8], 0.146666, 0.753777);
-	TextDrawAlignment(TD_LOGIN[8], 1);
-	TextDrawColor(TD_LOGIN[8], -1);
+	TextDrawAlignment(TD_LOGIN[8], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[8], -1);
 	TextDrawSetShadow(TD_LOGIN[8], 0);
 	TextDrawSetOutline(TD_LOGIN[8], 0);
-	TextDrawBackgroundColor(TD_LOGIN[8], 255);
-	TextDrawFont(TD_LOGIN[8], 1);
-	TextDrawSetProportional(TD_LOGIN[8], 1);
+	TextDrawBackgroundColour(TD_LOGIN[8], 255);
+	TextDrawFont(TD_LOGIN[8], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(TD_LOGIN[8], true);
 	TextDrawSetShadow(TD_LOGIN[8], 0);
 
 	TD_LOGIN[9] = TextDrawCreate(600.666442, 0.014794,""Script_Version"");
 	TextDrawLetterSize(TD_LOGIN[9], 0.158000, 0.919703);
-	TextDrawAlignment(TD_LOGIN[9], 1);
-	TextDrawColor(TD_LOGIN[9], -1);
+	TextDrawAlignment(TD_LOGIN[9], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[9], -1);
 	TextDrawSetShadow(TD_LOGIN[9], 0);
 	TextDrawSetOutline(TD_LOGIN[9], 0);
-	TextDrawBackgroundColor(TD_LOGIN[9], 255);
-	TextDrawFont(TD_LOGIN[9], 1);
-	TextDrawSetProportional(TD_LOGIN[9], 1);
+	TextDrawBackgroundColour(TD_LOGIN[9], 255);
+	TextDrawFont(TD_LOGIN[9], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(TD_LOGIN[9], true);
 	TextDrawSetShadow(TD_LOGIN[9], 0);
 
 	TD_LOGIN[10] = TextDrawCreate(4.333321, 428.518707,"box1");
 	TextDrawLetterSize(TD_LOGIN[10], 0.400999, 1.662220);
 	TextDrawTextSize(TD_LOGIN[10], 112.000000, 0.000000);
-	TextDrawAlignment(TD_LOGIN[10], 1);
-	TextDrawColor(TD_LOGIN[10], -256);
-	TextDrawUseBox(TD_LOGIN[10], 1);
-	TextDrawBoxColor(TD_LOGIN[10], -1061109505);
+	TextDrawAlignment(TD_LOGIN[10], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[10], -256);
+	TextDrawUseBox(TD_LOGIN[10], true);
+	TextDrawBoxColour(TD_LOGIN[10], -1061109505);
 	TextDrawSetShadow(TD_LOGIN[10], 0);
 	TextDrawSetOutline(TD_LOGIN[10], 0);
-	TextDrawBackgroundColor(TD_LOGIN[10], 255);
-	TextDrawFont(TD_LOGIN[10], 1);
-	TextDrawSetProportional(TD_LOGIN[10], 1);
+	TextDrawBackgroundColour(TD_LOGIN[10], 255);
+	TextDrawFont(TD_LOGIN[10], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(TD_LOGIN[10], true);
 	TextDrawSetShadow(TD_LOGIN[10], 0);
 
 	TD_LOGIN[11] = TextDrawCreate(5.666656, 429.763092,"box1");
 	TextDrawLetterSize(TD_LOGIN[11], 0.375333, 1.409185);
 	TextDrawTextSize(TD_LOGIN[11], 111.000000, 0.000000);
-	TextDrawAlignment(TD_LOGIN[11], 1);
-	TextDrawColor(TD_LOGIN[11], -256);
-	TextDrawUseBox(TD_LOGIN[11], 1);
-	TextDrawBoxColor(TD_LOGIN[11], 240);
+	TextDrawAlignment(TD_LOGIN[11], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[11], -256);
+	TextDrawUseBox(TD_LOGIN[11], true);
+	TextDrawBoxColour(TD_LOGIN[11], 240);
 	TextDrawSetShadow(TD_LOGIN[11], 0);
 	TextDrawSetOutline(TD_LOGIN[11], 0);
-	TextDrawBackgroundColor(TD_LOGIN[11], 255);
-	TextDrawFont(TD_LOGIN[11], 1);
-	TextDrawSetProportional(TD_LOGIN[11], 1);
+	TextDrawBackgroundColour(TD_LOGIN[11], 255);
+	TextDrawFont(TD_LOGIN[11], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(TD_LOGIN[11], true);
 	TextDrawSetShadow(TD_LOGIN[11], 0);
 
 	TD_LOGIN[12] = TextDrawCreate(23.333305, 431.007446,"Serverinformationen");
 	TextDrawLetterSize(TD_LOGIN[12], 0.145666, 1.019260);
-	TextDrawAlignment(TD_LOGIN[12], 1);
-	TextDrawColor(TD_LOGIN[12], -1);
+	TextDrawAlignment(TD_LOGIN[12], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[12], -1);
 	TextDrawSetShadow(TD_LOGIN[12], 0);
 	TextDrawSetOutline(TD_LOGIN[12], 0);
-	TextDrawBackgroundColor(TD_LOGIN[12], 255);
-	TextDrawFont(TD_LOGIN[12], 2);
-	TextDrawSetProportional(TD_LOGIN[12], 1);
+	TextDrawBackgroundColour(TD_LOGIN[12], 255);
+	TextDrawFont(TD_LOGIN[12], TEXT_DRAW_FONT_2);
+	TextDrawSetProportional(TD_LOGIN[12], true);
 	TextDrawSetShadow(TD_LOGIN[12], 0);
 	TextDrawSetSelectable(TD_LOGIN[12], true);
 
 	TD_LOGIN[13] = TextDrawCreate(523.333251, 428.933502,"box1");
 	TextDrawLetterSize(TD_LOGIN[13], 0.717998, 1.608294);
 	TextDrawTextSize(TD_LOGIN[13], 631.000000, 0.000000);
-	TextDrawAlignment(TD_LOGIN[13], 1);
-	TextDrawColor(TD_LOGIN[13], -256);
-	TextDrawUseBox(TD_LOGIN[13], 1);
-	TextDrawBoxColor(TD_LOGIN[13], -1061109505);
+	TextDrawAlignment(TD_LOGIN[13], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[13], -256);
+	TextDrawUseBox(TD_LOGIN[13], true);
+	TextDrawBoxColour(TD_LOGIN[13], -1061109505);
 	TextDrawSetShadow(TD_LOGIN[13], 0);
 	TextDrawSetOutline(TD_LOGIN[13], 0);
-	TextDrawBackgroundColor(TD_LOGIN[13], 255);
-	TextDrawFont(TD_LOGIN[13], 1);
-	TextDrawSetProportional(TD_LOGIN[13], 1);
+	TextDrawBackgroundColour(TD_LOGIN[13], 255);
+	TextDrawFont(TD_LOGIN[13], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(TD_LOGIN[13], true);
 	TextDrawSetShadow(TD_LOGIN[13], 0);
 
 	TD_LOGIN[14] = TextDrawCreate(262.333343, 428.933410,"box1");
 	TextDrawLetterSize(TD_LOGIN[14], 0.717998, 1.608294);
 	TextDrawTextSize(TD_LOGIN[14], 369.000000, 0.000000);
-	TextDrawAlignment(TD_LOGIN[14], 1);
-	TextDrawColor(TD_LOGIN[14], -256);
-	TextDrawUseBox(TD_LOGIN[14], 1);
-	TextDrawBoxColor(TD_LOGIN[14], -1061109505);
+	TextDrawAlignment(TD_LOGIN[14], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[14], -256);
+	TextDrawUseBox(TD_LOGIN[14], true);
+	TextDrawBoxColour(TD_LOGIN[14], -1061109505);
 	TextDrawSetShadow(TD_LOGIN[14], 0);
 	TextDrawSetOutline(TD_LOGIN[14], 0);
-	TextDrawBackgroundColor(TD_LOGIN[14], 255);
-	TextDrawFont(TD_LOGIN[14], 1);
-	TextDrawSetProportional(TD_LOGIN[14], 1);
+	TextDrawBackgroundColour(TD_LOGIN[14], 255);
+	TextDrawFont(TD_LOGIN[14], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(TD_LOGIN[14], true);
 	TextDrawSetShadow(TD_LOGIN[14], 0);
 
 	TD_LOGIN[15] = TextDrawCreate(263.666748, 429.763061,"box1");
 	TextDrawLetterSize(TD_LOGIN[15], 0.375333, 1.409185);
 	TextDrawTextSize(TD_LOGIN[15], 368.000000, 0.000000);
-	TextDrawAlignment(TD_LOGIN[15], 1);
-	TextDrawColor(TD_LOGIN[15], -256);
-	TextDrawUseBox(TD_LOGIN[15], 1);
-	TextDrawBoxColor(TD_LOGIN[15], 240);
+	TextDrawAlignment(TD_LOGIN[15], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[15], -256);
+	TextDrawUseBox(TD_LOGIN[15], true);
+	TextDrawBoxColour(TD_LOGIN[15], 240);
 	TextDrawSetShadow(TD_LOGIN[15], 0);
 	TextDrawSetOutline(TD_LOGIN[15], 0);
-	TextDrawBackgroundColor(TD_LOGIN[15], 255);
-	TextDrawFont(TD_LOGIN[15], 1);
-	TextDrawSetProportional(TD_LOGIN[15], 1);
+	TextDrawBackgroundColour(TD_LOGIN[15], 255);
+	TextDrawFont(TD_LOGIN[15], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(TD_LOGIN[15], true);
 	TextDrawSetShadow(TD_LOGIN[15], 0);
 
 	TD_LOGIN[16] = TextDrawCreate(524.333435, 429.763031,"box1");
 	TextDrawLetterSize(TD_LOGIN[16], 0.375333, 1.409185);
 	TextDrawTextSize(TD_LOGIN[16], 630.000000, 0.000000);
-	TextDrawAlignment(TD_LOGIN[16], 1);
-	TextDrawColor(TD_LOGIN[16], -256);
-	TextDrawUseBox(TD_LOGIN[16], 1);
-	TextDrawBoxColor(TD_LOGIN[16], 240);
+	TextDrawAlignment(TD_LOGIN[16], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[16], -256);
+	TextDrawUseBox(TD_LOGIN[16], true);
+	TextDrawBoxColour(TD_LOGIN[16], 240);
 	TextDrawSetShadow(TD_LOGIN[16], 0);
 	TextDrawSetOutline(TD_LOGIN[16], 0);
-	TextDrawBackgroundColor(TD_LOGIN[16], 255);
-	TextDrawFont(TD_LOGIN[16], 1);
-	TextDrawSetProportional(TD_LOGIN[16], 1);
+	TextDrawBackgroundColour(TD_LOGIN[16], 255);
+	TextDrawFont(TD_LOGIN[16], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(TD_LOGIN[16], true);
 	TextDrawSetShadow(TD_LOGIN[16], 0);
 
 	TD_LOGIN[17] = TextDrawCreate(298.666656, 430.592651,"Einloggen");
 	TextDrawLetterSize(TD_LOGIN[17], 0.145666, 1.019260);
-	TextDrawAlignment(TD_LOGIN[17], 1);
-	TextDrawColor(TD_LOGIN[17], -1);
+	TextDrawAlignment(TD_LOGIN[17], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[17], -1);
 	TextDrawSetShadow(TD_LOGIN[17], 0);
 	TextDrawSetOutline(TD_LOGIN[17], 0);
-	TextDrawBackgroundColor(TD_LOGIN[17], 255);
-	TextDrawFont(TD_LOGIN[17], 2);
-	TextDrawSetProportional(TD_LOGIN[17], 1);
+	TextDrawBackgroundColour(TD_LOGIN[17], 255);
+	TextDrawFont(TD_LOGIN[17], TEXT_DRAW_FONT_2);
+	TextDrawSetProportional(TD_LOGIN[17], true);
 	TextDrawSetShadow(TD_LOGIN[17], 0);
 	TextDrawSetSelectable(TD_LOGIN[17], true);
 
 	TD_LOGIN[18] = TextDrawCreate(555.333496, 430.492645,"Serverstatus");
 	TextDrawLetterSize(TD_LOGIN[18], 0.145666, 1.019260);
-	TextDrawAlignment(TD_LOGIN[18], 1);
-	TextDrawColor(TD_LOGIN[18], -1);
+	TextDrawAlignment(TD_LOGIN[18], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[18], -1);
 	TextDrawSetShadow(TD_LOGIN[18], 0);
 	TextDrawSetOutline(TD_LOGIN[18], 0);
-	TextDrawBackgroundColor(TD_LOGIN[18], 255);
-	TextDrawFont(TD_LOGIN[18], 2);
-	TextDrawSetProportional(TD_LOGIN[18], 1);
+	TextDrawBackgroundColour(TD_LOGIN[18], 255);
+	TextDrawFont(TD_LOGIN[18], TEXT_DRAW_FONT_2);
+	TextDrawSetProportional(TD_LOGIN[18], true);
 	TextDrawSetShadow(TD_LOGIN[18], 0);
 	TextDrawSetSelectable(TD_LOGIN[18], true);
 
 	TD_LOGIN[19] = TextDrawCreate(600.666442, 0.014794,"Version: 1.6.4");
 	TextDrawLetterSize(TD_LOGIN[19], 0.158000, 0.919703);
-	TextDrawAlignment(TD_LOGIN[19], 1);
-	TextDrawColor(TD_LOGIN[19], -1);
+	TextDrawAlignment(TD_LOGIN[19], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[19], -1);
 	TextDrawSetShadow(TD_LOGIN[19], 0);
 	TextDrawSetOutline(TD_LOGIN[19], 0);
-	TextDrawBackgroundColor(TD_LOGIN[19], 255);
-	TextDrawFont(TD_LOGIN[19], 1);
-	TextDrawSetProportional(TD_LOGIN[19], 1);
+	TextDrawBackgroundColour(TD_LOGIN[19], 255);
+	TextDrawFont(TD_LOGIN[19], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(TD_LOGIN[19], true);
 	TextDrawSetShadow(TD_LOGIN[19], 0);
 
 	TD_LOGIN[20] = TextDrawCreate(254.666656, 15.362959,"Invincible");
 	TextDrawLetterSize(TD_LOGIN[20], 0.463333, 1.313778);
-	TextDrawAlignment(TD_LOGIN[20], 1);
-	TextDrawColor(TD_LOGIN[20], -1);
+	TextDrawAlignment(TD_LOGIN[20], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(TD_LOGIN[20], -1);
 	TextDrawSetShadow(TD_LOGIN[20], 0);
 	TextDrawSetOutline(TD_LOGIN[20], 0);
-	TextDrawBackgroundColor(TD_LOGIN[20], 255);
-	TextDrawFont(TD_LOGIN[20], 3);
-	TextDrawSetProportional(TD_LOGIN[20], 1);
+	TextDrawBackgroundColour(TD_LOGIN[20], 255);
+	TextDrawFont(TD_LOGIN[20], TEXT_DRAW_FONT_3);
+	TextDrawSetProportional(TD_LOGIN[20], true);
 	TextDrawSetShadow(TD_LOGIN[20], 0);
 	
 	//[Rest]//
 	Display_Bankkonto = TextDrawCreate(530.000000, 130.000000,"- Bankkonto -");
-	TextDrawBackgroundColor(Display_Bankkonto, 255);
-	TextDrawFont(Display_Bankkonto, 1);
+	TextDrawBackgroundColour(Display_Bankkonto, 255);
+	TextDrawFont(Display_Bankkonto, TEXT_DRAW_FONT_1);
 	TextDrawLetterSize(Display_Bankkonto, 0.200000, 1.000000);
-	TextDrawColor(Display_Bankkonto, -1);
+	TextDrawColour(Display_Bankkonto, -1);
 	TextDrawSetOutline(Display_Bankkonto, 0);
-	TextDrawSetProportional(Display_Bankkonto, 1);
+	TextDrawSetProportional(Display_Bankkonto, true);
 	TextDrawSetShadow(Display_Bankkonto, 1);
-	TextDrawSetSelectable(Display_Bankkonto, 0);
+	TextDrawSetSelectable(Display_Bankkonto, false);
 
 	CHANGEDraw = TextDrawCreate(6,428,"_");
-	TextDrawFont(CHANGEDraw,2);
-    TextDrawAlignment(CHANGEDraw,0);
+	TextDrawFont(CHANGEDraw,TEXT_DRAW_FONT_2);
+    TextDrawAlignment(CHANGEDraw,TEXT_DRAW_ALIGN:0);
 	TextDrawLetterSize(CHANGEDraw,0.250000,1.750000);
 	TextDrawSetOutline(CHANGEDraw,0);
-	TextDrawSetProportional(CHANGEDraw,1);
+	TextDrawSetProportional(CHANGEDraw,true);
 	TextDrawSetShadow(CHANGEDraw,1);
 
 	WERBEdraw = TextDrawCreate(6,428,"_");
-    TextDrawFont(WERBEdraw,2);
-    TextDrawAlignment(WERBEdraw,0);
+    TextDrawFont(WERBEdraw,TEXT_DRAW_FONT_2);
+    TextDrawAlignment(WERBEdraw,TEXT_DRAW_ALIGN:0);
 	TextDrawLetterSize(WERBEdraw,0.250000,1.750000);
 	TextDrawSetOutline(WERBEdraw,0);
-	TextDrawSetProportional(WERBEdraw,1);
+	TextDrawSetProportional(WERBEdraw,true);
 	TextDrawSetShadow(WERBEdraw,1);
 
 	//-----------[ BincoDrawTD ]-----------//
 	Skinauswahl[0] = TextDrawCreate(524.999938, 343.066589, "box");
 	TextDrawLetterSize(Skinauswahl[0], 0.000000, 7.966667);
 	TextDrawTextSize(Skinauswahl[0], 634.000000, 0.000000);
-	TextDrawAlignment(Skinauswahl[0], 1);
-	TextDrawColor(Skinauswahl[0], -1);
-	TextDrawUseBox(Skinauswahl[0], 1);
-	TextDrawBoxColor(Skinauswahl[0], 124);
+	TextDrawAlignment(Skinauswahl[0], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Skinauswahl[0], -1);
+	TextDrawUseBox(Skinauswahl[0], true);
+	TextDrawBoxColour(Skinauswahl[0], 124);
 	TextDrawSetShadow(Skinauswahl[0], 0);
 	TextDrawSetOutline(Skinauswahl[0], 0);
-	TextDrawBackgroundColor(Skinauswahl[0], 255);
-	TextDrawFont(Skinauswahl[0], 1);
-	TextDrawSetProportional(Skinauswahl[0], 1);
+	TextDrawBackgroundColour(Skinauswahl[0], 255);
+	TextDrawFont(Skinauswahl[0], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Skinauswahl[0], true);
 	TextDrawSetShadow(Skinauswahl[0], 0);
 
 	Skinauswahl[1] = TextDrawCreate(538.999816, 351.777679, "box");
 	TextDrawLetterSize(Skinauswahl[1], 0.000000, 1.333332);
 	TextDrawTextSize(Skinauswahl[1], 621.000000, 0.000000);
-	TextDrawAlignment(Skinauswahl[1], 1);
-	TextDrawColor(Skinauswahl[1], -1);
-	TextDrawUseBox(Skinauswahl[1], 1);
-	TextDrawBoxColor(Skinauswahl[1], -2139062017);
+	TextDrawAlignment(Skinauswahl[1], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Skinauswahl[1], -1);
+	TextDrawUseBox(Skinauswahl[1], true);
+	TextDrawBoxColour(Skinauswahl[1], -2139062017);
 	TextDrawSetShadow(Skinauswahl[1], 0);
 	TextDrawSetOutline(Skinauswahl[1], 0);
-	TextDrawBackgroundColor(Skinauswahl[1], 255);
-	TextDrawFont(Skinauswahl[1], 1);
-	TextDrawSetProportional(Skinauswahl[1], 1);
+	TextDrawBackgroundColour(Skinauswahl[1], 255);
+	TextDrawFont(Skinauswahl[1], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Skinauswahl[1], true);
 	TextDrawSetShadow(Skinauswahl[1], 0);
 
 	Skinauswahl[2] = TextDrawCreate(539.333129, 375.422180, "box");
 	TextDrawLetterSize(Skinauswahl[2], 0.000000, 1.333332);
 	TextDrawTextSize(Skinauswahl[2], 621.000000, 0.000000);
-	TextDrawAlignment(Skinauswahl[2], 1);
-	TextDrawColor(Skinauswahl[2], -1);
-	TextDrawUseBox(Skinauswahl[2], 1);
-	TextDrawBoxColor(Skinauswahl[2], -2139062017);
+	TextDrawAlignment(Skinauswahl[2], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Skinauswahl[2], -1);
+	TextDrawUseBox(Skinauswahl[2], true);
+	TextDrawBoxColour(Skinauswahl[2], -2139062017);
 	TextDrawSetShadow(Skinauswahl[2], 0);
 	TextDrawSetOutline(Skinauswahl[2], 0);
-	TextDrawBackgroundColor(Skinauswahl[2], 255);
-	TextDrawFont(Skinauswahl[2], 1);
-	TextDrawSetProportional(Skinauswahl[2], 1);
+	TextDrawBackgroundColour(Skinauswahl[2], 255);
+	TextDrawFont(Skinauswahl[2], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Skinauswahl[2], true);
 	TextDrawSetShadow(Skinauswahl[2], 0);
 
 	Skinauswahl[3] = TextDrawCreate(540.333068, 398.237030, "box");
 	TextDrawLetterSize(Skinauswahl[3], 0.000000, 1.399999);
 	TextDrawTextSize(Skinauswahl[3], 621.000000, 0.000000);
-	TextDrawAlignment(Skinauswahl[3], 1);
-	TextDrawColor(Skinauswahl[3], -1);
-	TextDrawUseBox(Skinauswahl[3], 1);
-	TextDrawBoxColor(Skinauswahl[3], -2139062017);
+	TextDrawAlignment(Skinauswahl[3], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Skinauswahl[3], -1);
+	TextDrawUseBox(Skinauswahl[3], true);
+	TextDrawBoxColour(Skinauswahl[3], -2139062017);
 	TextDrawSetShadow(Skinauswahl[3], 0);
 	TextDrawSetOutline(Skinauswahl[3], 0);
-	TextDrawBackgroundColor(Skinauswahl[3], 255);
-	TextDrawFont(Skinauswahl[3], 1);
-	TextDrawSetProportional(Skinauswahl[3], 1);
+	TextDrawBackgroundColour(Skinauswahl[3], 255);
+	TextDrawFont(Skinauswahl[3], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Skinauswahl[3], true);
 	TextDrawSetShadow(Skinauswahl[3], 0);
 
 	Skinauswahl[4] = TextDrawCreate(540.333251, 353.022155, "box");
 	TextDrawLetterSize(Skinauswahl[4], 0.000000, 1.066666);
 	TextDrawTextSize(Skinauswahl[4], 620.000000, 0.000000);
-	TextDrawAlignment(Skinauswahl[4], 1);
-	TextDrawColor(Skinauswahl[4], -1);
-	TextDrawUseBox(Skinauswahl[4], 1);
-	TextDrawBoxColor(Skinauswahl[4], 255);
+	TextDrawAlignment(Skinauswahl[4], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Skinauswahl[4], -1);
+	TextDrawUseBox(Skinauswahl[4], true);
+	TextDrawBoxColour(Skinauswahl[4], 255);
 	TextDrawSetShadow(Skinauswahl[4], 0);
 	TextDrawSetOutline(Skinauswahl[4], 0);
-	TextDrawBackgroundColor(Skinauswahl[4], 255);
-	TextDrawFont(Skinauswahl[4], 1);
-	TextDrawSetProportional(Skinauswahl[4], 1);
+	TextDrawBackgroundColour(Skinauswahl[4], 255);
+	TextDrawFont(Skinauswahl[4], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Skinauswahl[4], true);
 	TextDrawSetShadow(Skinauswahl[4], 0);
 
 	Skinauswahl[5] = TextDrawCreate(540.333251, 376.666656, "box");
 	TextDrawLetterSize(Skinauswahl[5], 0.000000, 1.066666);
 	TextDrawTextSize(Skinauswahl[5], 620.000000, 0.000000);
-	TextDrawAlignment(Skinauswahl[5], 1);
-	TextDrawColor(Skinauswahl[5], -1);
-	TextDrawUseBox(Skinauswahl[5], 1);
-	TextDrawBoxColor(Skinauswahl[5], 255);
+	TextDrawAlignment(Skinauswahl[5], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Skinauswahl[5], -1);
+	TextDrawUseBox(Skinauswahl[5], true);
+	TextDrawBoxColour(Skinauswahl[5], 255);
 	TextDrawSetShadow(Skinauswahl[5], 0);
 	TextDrawSetOutline(Skinauswahl[5], 0);
-	TextDrawBackgroundColor(Skinauswahl[5], 255);
-	TextDrawFont(Skinauswahl[5], 1);
-	TextDrawSetProportional(Skinauswahl[5], 1);
+	TextDrawBackgroundColour(Skinauswahl[5], 255);
+	TextDrawFont(Skinauswahl[5], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Skinauswahl[5], true);
 	TextDrawSetShadow(Skinauswahl[5], 0);
 
 	Skinauswahl[6] = TextDrawCreate(541.333190, 399.896331, "box");
 	TextDrawLetterSize(Skinauswahl[6], 0.000000, 1.066666);
 	TextDrawTextSize(Skinauswahl[6], 620.000000, 0.000000);
-	TextDrawAlignment(Skinauswahl[6], 1);
-	TextDrawColor(Skinauswahl[6], -1);
-	TextDrawUseBox(Skinauswahl[6], 1);
-	TextDrawBoxColor(Skinauswahl[6], 255);
+	TextDrawAlignment(Skinauswahl[6], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Skinauswahl[6], -1);
+	TextDrawUseBox(Skinauswahl[6], true);
+	TextDrawBoxColour(Skinauswahl[6], 255);
 	TextDrawSetShadow(Skinauswahl[6], 0);
 	TextDrawSetOutline(Skinauswahl[6], 0);
-	TextDrawBackgroundColor(Skinauswahl[6], 255);
-	TextDrawFont(Skinauswahl[6], 1);
-	TextDrawSetProportional(Skinauswahl[6], 1);
+	TextDrawBackgroundColour(Skinauswahl[6], 255);
+	TextDrawFont(Skinauswahl[6], TEXT_DRAW_FONT_1);
+	TextDrawSetProportional(Skinauswahl[6], true);
 	TextDrawSetShadow(Skinauswahl[6], 0);
 
 	Skinauswahl[7] = TextDrawCreate(565.333374, 352.607360, "Weiter");
 	TextDrawLetterSize(Skinauswahl[7], 0.189000, 1.114666);
-	TextDrawAlignment(Skinauswahl[7], 1);
-	TextDrawColor(Skinauswahl[7], -1);
+	TextDrawAlignment(Skinauswahl[7], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Skinauswahl[7], -1);
 	TextDrawSetShadow(Skinauswahl[7], 0);
 	TextDrawSetOutline(Skinauswahl[7], 0);
-	TextDrawBackgroundColor(Skinauswahl[7], 255);
-	TextDrawFont(Skinauswahl[7], 2);
-	TextDrawSetProportional(Skinauswahl[7], 1);
+	TextDrawBackgroundColour(Skinauswahl[7], 255);
+	TextDrawFont(Skinauswahl[7], TEXT_DRAW_FONT_2);
+	TextDrawSetProportional(Skinauswahl[7], true);
 	TextDrawSetShadow(Skinauswahl[7], 0);
 	TextDrawSetSelectable(Skinauswahl[7], true);
 
 	Skinauswahl[8] = TextDrawCreate(563.333374, 376.251861, "Zurueck");
 	TextDrawLetterSize(Skinauswahl[8], 0.189000, 1.114666);
-	TextDrawAlignment(Skinauswahl[8], 1);
-	TextDrawColor(Skinauswahl[8], -1);
+	TextDrawAlignment(Skinauswahl[8], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Skinauswahl[8], -1);
 	TextDrawSetShadow(Skinauswahl[8], 0);
 	TextDrawSetOutline(Skinauswahl[8], 0);
-	TextDrawBackgroundColor(Skinauswahl[8], 255);
-	TextDrawFont(Skinauswahl[8], 2);
-	TextDrawSetProportional(Skinauswahl[8], 1);
+	TextDrawBackgroundColour(Skinauswahl[8], 255);
+	TextDrawFont(Skinauswahl[8], TEXT_DRAW_FONT_2);
+	TextDrawSetProportional(Skinauswahl[8], true);
 	TextDrawSetShadow(Skinauswahl[8], 0);
 	TextDrawSetSelectable(Skinauswahl[8], true);
 
 	Skinauswahl[9] = TextDrawCreate(555.333557, 399.896362, "Skin Nehmen");
 	TextDrawLetterSize(Skinauswahl[9], 0.189000, 1.114666);
-	TextDrawAlignment(Skinauswahl[9], 1);
-	TextDrawColor(Skinauswahl[9], -1);
+	TextDrawAlignment(Skinauswahl[9], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Skinauswahl[9], -1);
 	TextDrawSetShadow(Skinauswahl[9], 0);
 	TextDrawSetOutline(Skinauswahl[9], 0);
-	TextDrawBackgroundColor(Skinauswahl[9], 255);
-	TextDrawFont(Skinauswahl[9], 2);
-	TextDrawSetProportional(Skinauswahl[9], 1);
+	TextDrawBackgroundColour(Skinauswahl[9], 255);
+	TextDrawFont(Skinauswahl[9], TEXT_DRAW_FONT_2);
+	TextDrawSetProportional(Skinauswahl[9], true);
 	TextDrawSetShadow(Skinauswahl[9], 0);
 	TextDrawSetSelectable(Skinauswahl[9], true);
 
 	Skinauswahl[10] = TextDrawCreate(540.333557, 324.400085, "Skinauswahl");
 	TextDrawLetterSize(Skinauswahl[10], 0.523999, 2.197331);
-	TextDrawAlignment(Skinauswahl[10], 1);
-	TextDrawColor(Skinauswahl[10], -1);
+	TextDrawAlignment(Skinauswahl[10], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Skinauswahl[10], -1);
 	TextDrawSetShadow(Skinauswahl[10], -1);
 	TextDrawSetOutline(Skinauswahl[10], 0);
-	TextDrawBackgroundColor(Skinauswahl[10], 255);
-	TextDrawFont(Skinauswahl[10], 0);
-	TextDrawSetProportional(Skinauswahl[10], 1);
+	TextDrawBackgroundColour(Skinauswahl[10], 255);
+	TextDrawFont(Skinauswahl[10], TEXT_DRAW_FONT_0);
+	TextDrawSetProportional(Skinauswahl[10], true);
 	TextDrawSetShadow(Skinauswahl[10], -1);
 
 	//-[ Das Alte Introdraw von PRP ]-//
 	Introdraw[0] = TextDrawCreate(321.000000,-5.000000,"_");
-	TextDrawAlignment(Introdraw[0],2);
-	TextDrawBackgroundColor(Introdraw[0],0x000000FF);
-	TextDrawFont(Introdraw[0],1);
+	TextDrawAlignment(Introdraw[0],TEXT_DRAW_ALIGN_CENTRE);
+	TextDrawBackgroundColour(Introdraw[0],0x000000FF);
+	TextDrawFont(Introdraw[0],TEXT_DRAW_FONT_1);
 	TextDrawLetterSize(Introdraw[0],0.500000,6.400009);
-	TextDrawColor(Introdraw[0],0x000000FF);
+	TextDrawColour(Introdraw[0],0x000000FF);
 	TextDrawSetOutline(Introdraw[0],0);
-	TextDrawSetProportional(Introdraw[0],1);
+	TextDrawSetProportional(Introdraw[0],true);
 	TextDrawSetShadow(Introdraw[0],1);
-	TextDrawUseBox(Introdraw[0],1);
-	TextDrawBoxColor(Introdraw[0],0x000000FF);
+	TextDrawUseBox(Introdraw[0],true);
+	TextDrawBoxColour(Introdraw[0],0x000000FF);
 	TextDrawTextSize(Introdraw[0],91.000000,663.000000);
 
 	Introdraw[1] = TextDrawCreate(321.000000,405.000000,"_");
-	TextDrawAlignment(Introdraw[1],2);
-	TextDrawBackgroundColor(Introdraw[1],0x000000FF);
-	TextDrawFont(Introdraw[1],1);
+	TextDrawAlignment(Introdraw[1],TEXT_DRAW_ALIGN_CENTRE);
+	TextDrawBackgroundColour(Introdraw[1],0x000000FF);
+	TextDrawFont(Introdraw[1],TEXT_DRAW_FONT_1);
 	TextDrawLetterSize(Introdraw[1],0.500000,6.400009);
-	TextDrawColor(Introdraw[1],0x000000FF);
+	TextDrawColour(Introdraw[1],0x000000FF);
 	TextDrawSetOutline(Introdraw[1],0);
-	TextDrawSetProportional(Introdraw[1],1);
+	TextDrawSetProportional(Introdraw[1],true);
 	TextDrawSetShadow(Introdraw[1],1);
-	TextDrawUseBox(Introdraw[1],1);
-	TextDrawBoxColor(Introdraw[1],0x000000FF);
+	TextDrawUseBox(Introdraw[1],true);
+	TextDrawBoxColour(Introdraw[1],0x000000FF);
 	TextDrawTextSize(Introdraw[1],91.000000,663.000000);
 
 	Introdraw[2] = TextDrawCreate(110,220,""#SERVERNAME"");
-	TextDrawFont(Introdraw[2],0);
-	TextDrawColor(Introdraw[2],SERVERFARBEHEX);
-    TextDrawAlignment(Introdraw[2],0);
+	TextDrawFont(Introdraw[2],TEXT_DRAW_FONT_0);
+	TextDrawColour(Introdraw[2],SERVERFARBEHEX);
+    TextDrawAlignment(Introdraw[2],TEXT_DRAW_ALIGN:0);
 	TextDrawLetterSize(Introdraw[2],0.999990,2.999990);
 	TextDrawSetOutline(Introdraw[2],1);
-	TextDrawSetProportional(Introdraw[2],1);
+	TextDrawSetProportional(Introdraw[2],true);
 	TextDrawSetShadow(Introdraw[2],1);
 
 	Introdraw[3] = TextDrawCreate(110,250,"Willkommen auf "#SERVERTAG"!");
-    TextDrawFont(Introdraw[3],2);
-    TextDrawColor(Introdraw[3],SERVERFARBEHEX);
-    TextDrawAlignment(Introdraw[3],0);
+    TextDrawFont(Introdraw[3],TEXT_DRAW_FONT_2);
+    TextDrawColour(Introdraw[3],SERVERFARBEHEX);
+    TextDrawAlignment(Introdraw[3],TEXT_DRAW_ALIGN:0);
 	TextDrawLetterSize(Introdraw[3],0.300000,0.899990);
-	TextDrawSetProportional(Introdraw[3],1);
+	TextDrawSetProportional(Introdraw[3],true);
 	TextDrawSetShadow(Introdraw[3],1);
 
 	InfoSign = TextDrawCreate(20,190,"LD_CHAT:badchat");
-	TextDrawFont(InfoSign,4);
+	TextDrawFont(InfoSign,TEXT_DRAW_FONT_SPRITE_DRAW);
 	TextDrawTextSize(InfoSign,15,20);
-	TextDrawColor(InfoSign,GELB);
+	TextDrawColour(InfoSign,GELB);
 	
 	Bombdraw = TextDrawCreate(2,170,"_");
 	TextDrawSetShadow(Bombdraw,1);
-	TextDrawFont(Bombdraw,1);
-	TextDrawColor(Bombdraw,0xFFFFFFFF);
-	TextDrawBackgroundColor(Bombdraw,0x000000FF);
-	TextDrawUseBox(Bombdraw,1);
-	TextDrawBoxColor(Bombdraw,0x00000052);
+	TextDrawFont(Bombdraw,TEXT_DRAW_FONT_1);
+	TextDrawColour(Bombdraw,0xFFFFFFFF);
+	TextDrawBackgroundColour(Bombdraw,0x000000FF);
+	TextDrawUseBox(Bombdraw,true);
+	TextDrawBoxColour(Bombdraw,0x00000052);
 	TextDrawTextSize(Bombdraw,-260.000000,20.000000);
 
 	Spawnkilldraw = TextDrawCreate(8,325,"");
-    TextDrawFont(Spawnkilldraw,1);
-    TextDrawColor(Spawnkilldraw,ORANGE);
-    TextDrawAlignment(Spawnkilldraw,0);
+    TextDrawFont(Spawnkilldraw,TEXT_DRAW_FONT_1);
+    TextDrawColour(Spawnkilldraw,ORANGE);
+    TextDrawAlignment(Spawnkilldraw,TEXT_DRAW_ALIGN:0);
 	TextDrawLetterSize(Spawnkilldraw,0.500000,0.999990);
-	TextDrawSetProportional(Spawnkilldraw,1);
+	TextDrawSetProportional(Spawnkilldraw,true);
 	TextDrawSetShadow(Spawnkilldraw,1);
 
 	BlackScreendraw = TextDrawCreate(1.000000,1.000000,"_");
- 	TextDrawUseBox(BlackScreendraw,1);
- 	TextDrawBoxColor(BlackScreendraw,0x000000FF);
+ 	TextDrawUseBox(BlackScreendraw,true);
+ 	TextDrawBoxColour(BlackScreendraw,0x000000FF);
  	TextDrawTextSize(BlackScreendraw,641.000000,10.000000);
- 	TextDrawAlignment(BlackScreendraw,0);
- 	TextDrawBackgroundColor(BlackScreendraw,0x00000000);
- 	TextDrawFont(BlackScreendraw,3);
+ 	TextDrawAlignment(BlackScreendraw,TEXT_DRAW_ALIGN:0);
+ 	TextDrawBackgroundColour(BlackScreendraw,0x00000000);
+ 	TextDrawFont(BlackScreendraw,TEXT_DRAW_FONT_3);
  	TextDrawLetterSize(BlackScreendraw,1.000000,51.000000);
-	TextDrawColor(BlackScreendraw,0x000000FF);
+	TextDrawColour(BlackScreendraw,0x000000FF);
 	TextDrawSetOutline(BlackScreendraw,1);
-	TextDrawSetProportional(BlackScreendraw,1);
+	TextDrawSetProportional(BlackScreendraw,true);
 	TextDrawSetShadow(BlackScreendraw,1);
  	//Maps
 	//-[Schönerungen nähe LSPD]-//
@@ -8280,16 +8279,16 @@ public OnGameModeInit()
 
 	for(new i=0;i<MAX_GATES;i++){ torstatus[i] = 0; }
 
-	//Balongs[0] = CreateDynamicObject(19333,265.87,-1863.86,1.77, 0.00,0.00,0.00),SetTimerEx("StartBalongMoving",2*57899,0,"i",0);
-	//Balongs[1] = CreateDynamicObject(19332,214.79,-1863.52,1.93, 0.00,0.00,0.00),SetTimerEx("StartBalongMoving",2*57899,0,"i",1);
-    //Balongs[2] = CreateDynamicObject(19335,176.96,-1863.89,2.07, 0.00,0.00,0.00),SetTimerEx("StartBalongMoving",2*57899,0,"i",2);
+	//Balongs[0] = CreateDynamicObject(19333,265.87,-1863.86,1.77, 0.00,0.00,0.00),SetTimerEx("StartBalongMoving",2*57899,false,"i",0);
+	//Balongs[1] = CreateDynamicObject(19332,214.79,-1863.52,1.93, 0.00,0.00,0.00),SetTimerEx("StartBalongMoving",2*57899,false,"i",1);
+    //Balongs[2] = CreateDynamicObject(19335,176.96,-1863.89,2.07, 0.00,0.00,0.00),SetTimerEx("StartBalongMoving",2*57899,false,"i",2);
 
 	/*FerrisWheelObjects[10] = CreateObject(18877,389.7734,-2028.4688,22,0,0,90,300);
  	FerrisWheelObjects[11] = CreateObject(18878,389.7734,-2028.4688,22,0,0,90,300);
   	for(new i=0;i<sizeof(FerrisWheelObjects) - 2;i++)
   	{
 	   	FerrisWheelObjects[i] = CreateObject(18879,389.7734,-2028.4688,22,0,0,90,300);
-	    AttachObjectToObject(FerrisWheelObjects[i],FerrisWheelObjects[10],gFerrisCageOffsets[i][0],gFerrisCageOffsets[i][1],gFerrisCageOffsets[i][2],0.0,0.0,90,0);
+	    AttachObjectToObject(FerrisWheelObjects[i],FerrisWheelObjects[10],gFerrisCageOffsets[i][0],gFerrisCageOffsets[i][1],gFerrisCageOffsets[i][2],0.0,0.0,90,false);
 	}*/
 	//Alkatraz
 	CreateObject(19340,-3529.73,1725.52,9.13, 0.00,0.00,0.00);
@@ -11098,24 +11097,24 @@ public OnGameModeInit()
     mysql_function_query(MySQL_R394,"SELECT * FROM server_firmfahrzeuge",true,"sql_array2","siii","SELECT * FROM server_firmfahrzeuge",_SQL_FIRMEN_LOAD,0,MySQL_R394);
     mysql_function_query(MySQL_R394,"SELECT * FROM server_patei",true,"sql_array2","siii","SELECT * FROM server_patei",_SQL_PARTEI_LOAD,0,MySQL_R394);
     
-    WeatherTimer = SetTimer("WeatherChange",60003*ChangeweatherinMin,1);
-    SetTimer("Other",30569,0);
-    SetTimer("Other2",966,1);
-	SetTimer("UpdateUhrundDatum",1003,1);
-    SetTimer("VehicleUpdate",2351,1);
-	SetTimer("OnFireUpdate",1136,1);
-	SetTimer("RespawnVehicles",60354*3,0);
-	SetTimer("PlayerLoseHeal",59688*2,0);
-	SetTimer("Server",1053,1);
-	SetTimer("AntiCheat",1126,1);
-	SetTimer("AntiCheat2",998,1);
-	SetTimer("RotateFerrisWheel",3020,0);
-	SetTimer("ServerTutorial",1012,1);
-	SetTimer("PayDay",1016,1);
-	SetTimer("bot",1000,0);
+    WeatherTimer = SetTimer("WeatherChange",60003*ChangeweatherinMin,true);
+    SetTimer("Other",30569,false);
+    SetTimer("Other2",966,true);
+	SetTimer("UpdateUhrundDatum",1003,true);
+    SetTimer("VehicleUpdate",2351,true);
+	SetTimer("OnFireUpdate",1136,true);
+	SetTimer("RespawnVehicles",60354*3,false);
+	SetTimer("PlayerLoseHeal",59688*2,false);
+	SetTimer("Server",1053,true);
+	SetTimer("AntiCheat",1126,true);
+	SetTimer("AntiCheat2",998,true);
+	SetTimer("RotateFerrisWheel",3020,false);
+	SetTimer("ServerTutorial",1012,true);
+	SetTimer("PayDay",1016,true);
+	SetTimer("bot",1000,false);
 	SetTimer("SaveAllAccounts",900000,-1);
-	SetTimer("DB_SAVE",900000,1);
-	SetTimer("ServerNamenChangerSystemNeu",3000,1);
+	SetTimer("DB_SAVE",900000,true);
+	SetTimer("ServerNamenChangerSystemNeu",3000,true);
 	
 	Friedhofszone = GangZoneCreate(805.9981,-1055.6499,952.6713,-1129.9589);
 	DriveinMenu[0] = CreateMenu("~r~Drivein",1,50.0,180.0,200.0,200.0);
@@ -11203,8 +11202,8 @@ public OnPlayerRequestClass(playerid,classid)
     SetPlayerVirtualWorld(playerid,0);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)
 	{
-		TogglePlayerControllable(playerid,0);
-		SetTimerEx("SpielerConnecten",500,0,"i",playerid);
+		TogglePlayerControllable(playerid,false);
+		SetTimerEx("SpielerConnecten",500,false,"i",playerid);
 	}
 	return 1;
 }
@@ -11219,11 +11218,11 @@ public SpielerConnecten(playerid)
 	if(IsPlayerNPC(playerid))return 1;
     gettime(stunde,minute);
 	SetPlayerTime(playerid,stunde,minute);
-	TogglePlayerSpectating(playerid,1);
+	TogglePlayerSpectating(playerid,true);
 	ShowPlayerDynCamView(playerid);
 	SpamChat(playerid,0);
     CheckBannedUser(playerid);
-	SetTimerEx("LoginRegisterLoginTD",3000,0,"i",playerid);
+	SetTimerEx("LoginRegisterLoginTD",3000,false,"i",playerid);
     return 1;
 }
 forward LoginRegisterLoginTD(playerid);
@@ -11245,7 +11244,7 @@ public OnPlayerConnect(playerid)
     // ist, bleibt der Fehlversuchszaehler auf dem Maximum stehen.
     if(LoginSperre_Aktiv(playerid) > 0) LoginFehlversuche[playerid] = MAX_LOGIN_VERSUCHE;
     SetPlayerColor(playerid,SAMP_WEISS);
-	TogglePlayerClock(playerid,0);
+	TogglePlayerClock(playerid,false);
 	DestroyBuildings(playerid);
 	gettime(stunde,minute);
 	SetPlayerTime(playerid,stunde,minute);
@@ -11254,23 +11253,23 @@ public OnPlayerConnect(playerid)
     //------[ Bankinformationen ]------//
 	Display_Bank_Geld[playerid] = TextDrawCreate(499.443511, 138.250076,"$00000000");
 	TextDrawLetterSize(Display_Bank_Geld[playerid], 0.579311, 2.317502);
-	TextDrawAlignment(Display_Bank_Geld[playerid], 1);
-	TextDrawColor(Display_Bank_Geld[playerid], -1);
+	TextDrawAlignment(Display_Bank_Geld[playerid], TEXT_DRAW_ALIGN_LEFT);
+	TextDrawColour(Display_Bank_Geld[playerid], -1);
 	TextDrawSetShadow(Display_Bank_Geld[playerid], 0);
 	TextDrawSetOutline(Display_Bank_Geld[playerid], 2);
-	TextDrawBackgroundColor(Display_Bank_Geld[playerid], 255);
-	TextDrawFont(Display_Bank_Geld[playerid], 3);
-	TextDrawSetProportional(Display_Bank_Geld[playerid], 1);
+	TextDrawBackgroundColour(Display_Bank_Geld[playerid], 255);
+	TextDrawFont(Display_Bank_Geld[playerid], TEXT_DRAW_FONT_3);
+	TextDrawSetProportional(Display_Bank_Geld[playerid], true);
 
 	Display_HP_Anzeige[playerid] = TextDrawCreate(570.000000, 58.000000,"100");
-	TextDrawBackgroundColor(Display_HP_Anzeige[playerid], 255);
-	TextDrawFont(Display_HP_Anzeige[playerid], 1);
+	TextDrawBackgroundColour(Display_HP_Anzeige[playerid], 255);
+	TextDrawFont(Display_HP_Anzeige[playerid], TEXT_DRAW_FONT_1);
 	TextDrawLetterSize(Display_HP_Anzeige[playerid], 0.200000, 0.899999);
-	TextDrawColor(Display_HP_Anzeige[playerid], -1);
+	TextDrawColour(Display_HP_Anzeige[playerid], -1);
 	TextDrawSetOutline(Display_HP_Anzeige[playerid], 0);
-	TextDrawSetProportional(Display_HP_Anzeige[playerid], 1);
+	TextDrawSetProportional(Display_HP_Anzeige[playerid], true);
 	TextDrawSetShadow(Display_HP_Anzeige[playerid], 1);
-	TextDrawSetSelectable(Display_HP_Anzeige[playerid], 0);
+	TextDrawSetSelectable(Display_HP_Anzeige[playerid], false);
 	SetTimerEx("Display_Textdraw",5000,true,"i",playerid);
 
 	//-[ Euro Anzeige ]-//
@@ -11278,368 +11277,368 @@ public OnPlayerConnect(playerid)
 	EURO_TD[playerid][0] = CreatePlayerTextDraw(playerid, 497.000000, 78.414810, "aussenbox");
 	PlayerTextDrawLetterSize(playerid, EURO_TD[playerid][0], 0.400332, 2.072889);
 	PlayerTextDrawTextSize(playerid, EURO_TD[playerid][0], 609.000000, 0.000000);
-	PlayerTextDrawAlignment(playerid, EURO_TD[playerid][0], 1);
-	PlayerTextDrawColor(playerid, EURO_TD[playerid][0], -256);
-	PlayerTextDrawUseBox(playerid, EURO_TD[playerid][0], 1);
-	PlayerTextDrawBoxColor(playerid, EURO_TD[playerid][0],0xF15433FF);
+	PlayerTextDrawAlignment(playerid, EURO_TD[playerid][0], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, EURO_TD[playerid][0], -256);
+	PlayerTextDrawUseBox(playerid, EURO_TD[playerid][0], true);
+	PlayerTextDrawBoxColour(playerid, EURO_TD[playerid][0],0xF15433FF);
 	PlayerTextDrawSetShadow(playerid, EURO_TD[playerid][0], 0);
 	PlayerTextDrawSetOutline(playerid, EURO_TD[playerid][0], 0);
-	PlayerTextDrawBackgroundColor(playerid, EURO_TD[playerid][0], 255);
-	PlayerTextDrawFont(playerid, EURO_TD[playerid][0], 1);
-	PlayerTextDrawSetProportional(playerid, EURO_TD[playerid][0], 1);
+	PlayerTextDrawBackgroundColour(playerid, EURO_TD[playerid][0], 255);
+	PlayerTextDrawFont(playerid, EURO_TD[playerid][0], TEXT_DRAW_FONT_1);
+	PlayerTextDrawSetProportional(playerid, EURO_TD[playerid][0], true);
 	PlayerTextDrawSetShadow(playerid, EURO_TD[playerid][0], 0);
 
 	EURO_TD[playerid][1] = CreatePlayerTextDraw(playerid, 498.333374, 79.659286, "boxinnen#");
 	PlayerTextDrawLetterSize(playerid, EURO_TD[playerid][1], 0.351332, 1.774222);
 	PlayerTextDrawTextSize(playerid, EURO_TD[playerid][1], 608.000000, 0.000000);
-	PlayerTextDrawAlignment(playerid, EURO_TD[playerid][1], 1);
-	PlayerTextDrawColor(playerid, EURO_TD[playerid][1], -256);
-	PlayerTextDrawUseBox(playerid, EURO_TD[playerid][1], 1);
-	PlayerTextDrawBoxColor(playerid, EURO_TD[playerid][1], 255);
+	PlayerTextDrawAlignment(playerid, EURO_TD[playerid][1], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, EURO_TD[playerid][1], -256);
+	PlayerTextDrawUseBox(playerid, EURO_TD[playerid][1], true);
+	PlayerTextDrawBoxColour(playerid, EURO_TD[playerid][1], 255);
 	PlayerTextDrawSetShadow(playerid, EURO_TD[playerid][1], 0);
 	PlayerTextDrawSetOutline(playerid, EURO_TD[playerid][1], 0);
-	PlayerTextDrawBackgroundColor(playerid, EURO_TD[playerid][1], 255);
-	PlayerTextDrawFont(playerid, EURO_TD[playerid][1], 3);
-	PlayerTextDrawSetProportional(playerid, EURO_TD[playerid][1], 1);
+	PlayerTextDrawBackgroundColour(playerid, EURO_TD[playerid][1], 255);
+	PlayerTextDrawFont(playerid, EURO_TD[playerid][1], TEXT_DRAW_FONT_3);
+	PlayerTextDrawSetProportional(playerid, EURO_TD[playerid][1], true);
 	PlayerTextDrawSetShadow(playerid, EURO_TD[playerid][1], 0);
 
 	EURO_TD[playerid][2] = CreatePlayerTextDraw(playerid, 529.667053, 81.318580, "Wird von Datenbank geladen....");
 	PlayerTextDrawLetterSize(playerid, EURO_TD[playerid][2], 0.169330, 1.127110);
-	PlayerTextDrawAlignment(playerid, EURO_TD[playerid][2], 1);
-	PlayerTextDrawColor(playerid, EURO_TD[playerid][2], -1);
+	PlayerTextDrawAlignment(playerid, EURO_TD[playerid][2], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, EURO_TD[playerid][2], -1);
 	PlayerTextDrawSetShadow(playerid, EURO_TD[playerid][2], 0);
 	PlayerTextDrawSetOutline(playerid, EURO_TD[playerid][2], 0);
-	PlayerTextDrawBackgroundColor(playerid, EURO_TD[playerid][2], 255);
-	PlayerTextDrawFont(playerid, EURO_TD[playerid][2], 2);
-	PlayerTextDrawSetProportional(playerid, EURO_TD[playerid][2], 1);
+	PlayerTextDrawBackgroundColour(playerid, EURO_TD[playerid][2], 255);
+	PlayerTextDrawFont(playerid, EURO_TD[playerid][2], TEXT_DRAW_FONT_2);
+	PlayerTextDrawSetProportional(playerid, EURO_TD[playerid][2], true);
 	PlayerTextDrawSetShadow(playerid, EURO_TD[playerid][2], 0);
 
 	EURO_TD[playerid][3] = CreatePlayerTextDraw(playerid, 546.667053, 90.444511, "- 100000");
 	PlayerTextDrawLetterSize(playerid, EURO_TD[playerid][3], 0.087999, 0.625186);
-	PlayerTextDrawAlignment(playerid, EURO_TD[playerid][3], 1);
-	PlayerTextDrawColor(playerid, EURO_TD[playerid][3], -16776961);
+	PlayerTextDrawAlignment(playerid, EURO_TD[playerid][3], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, EURO_TD[playerid][3], -16776961);
 	PlayerTextDrawSetShadow(playerid, EURO_TD[playerid][3], 0);
 	PlayerTextDrawSetOutline(playerid, EURO_TD[playerid][3], 0);
-	PlayerTextDrawBackgroundColor(playerid, EURO_TD[playerid][3], 255);
-	PlayerTextDrawFont(playerid, EURO_TD[playerid][3], 2);
-	PlayerTextDrawSetProportional(playerid, EURO_TD[playerid][3], 1);
+	PlayerTextDrawBackgroundColour(playerid, EURO_TD[playerid][3], 255);
+	PlayerTextDrawFont(playerid, EURO_TD[playerid][3], TEXT_DRAW_FONT_2);
+	PlayerTextDrawSetProportional(playerid, EURO_TD[playerid][3], true);
 	PlayerTextDrawSetShadow(playerid, EURO_TD[playerid][3], 0);
 
 	//-[Oldi]-//
 	Tutorialdraw[playerid][0] = CreatePlayerTextDraw(playerid,160,145,"~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~");
-	PlayerTextDrawUseBox(playerid,Tutorialdraw[playerid][0],1);
-	PlayerTextDrawBoxColor(playerid,Tutorialdraw[playerid][0],0x00000067);
-	PlayerTextDrawBackgroundColor(playerid,Tutorialdraw[playerid][0],0x000000ff);
+	PlayerTextDrawUseBox(playerid,Tutorialdraw[playerid][0],true);
+	PlayerTextDrawBoxColour(playerid,Tutorialdraw[playerid][0],0x00000067);
+	PlayerTextDrawBackgroundColour(playerid,Tutorialdraw[playerid][0],0x000000ff);
 	PlayerTextDrawTextSize(playerid,Tutorialdraw[playerid][0],480,290);
 	PlayerTextDrawLetterSize(playerid,Tutorialdraw[playerid][0],0.400000,0.599990);
 	PlayerTextDrawSetShadow(playerid,Tutorialdraw[playerid][0],1);
 
 	Tutorialdraw[playerid][1] = CreatePlayerTextDraw(playerid,160,145,"_");
-	PlayerTextDrawFont(playerid,Tutorialdraw[playerid][1],0);
-	PlayerTextDrawColor(playerid,Tutorialdraw[playerid][1],SERVERFARBEHEX);
-    PlayerTextDrawAlignment(playerid,Tutorialdraw[playerid][1],0);
+	PlayerTextDrawFont(playerid,Tutorialdraw[playerid][1],TEXT_DRAW_FONT_0);
+	PlayerTextDrawColour(playerid,Tutorialdraw[playerid][1],SERVERFARBEHEX);
+    PlayerTextDrawAlignment(playerid,Tutorialdraw[playerid][1],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(playerid,Tutorialdraw[playerid][1],0.499990,1.499990);
 	PlayerTextDrawSetOutline(playerid,Tutorialdraw[playerid][1],1);
-	PlayerTextDrawSetProportional(playerid,Tutorialdraw[playerid][1],1);
+	PlayerTextDrawSetProportional(playerid,Tutorialdraw[playerid][1],true);
 	PlayerTextDrawSetShadow(playerid,Tutorialdraw[playerid][1],1);
 
 	Tutorialdraw[playerid][2] = CreatePlayerTextDraw(playerid,160,165,"_");
-    PlayerTextDrawFont(playerid,Tutorialdraw[playerid][2],2);
-    PlayerTextDrawColor(playerid,Tutorialdraw[playerid][2],WEISS);
-    PlayerTextDrawAlignment(playerid,Tutorialdraw[playerid][2],0);
+    PlayerTextDrawFont(playerid,Tutorialdraw[playerid][2],TEXT_DRAW_FONT_2);
+    PlayerTextDrawColour(playerid,Tutorialdraw[playerid][2],WEISS);
+    PlayerTextDrawAlignment(playerid,Tutorialdraw[playerid][2],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(playerid,Tutorialdraw[playerid][2],0.200000,0.799990);
-	PlayerTextDrawSetProportional(playerid,Tutorialdraw[playerid][2],1);
+	PlayerTextDrawSetProportional(playerid,Tutorialdraw[playerid][2],true);
 	PlayerTextDrawSetShadow(playerid,Tutorialdraw[playerid][2],1);
 
 	Tutorialdraw[playerid][3] = CreatePlayerTextDraw(playerid,290,240,""#SERVERTAG"");
-	PlayerTextDrawFont(playerid,Tutorialdraw[playerid][3],2);
-	PlayerTextDrawColor(playerid,Tutorialdraw[playerid][3],ALPHASCHWARZ);
-    PlayerTextDrawAlignment(playerid,Tutorialdraw[playerid][3],0);
+	PlayerTextDrawFont(playerid,Tutorialdraw[playerid][3],TEXT_DRAW_FONT_2);
+	PlayerTextDrawColour(playerid,Tutorialdraw[playerid][3],ALPHASCHWARZ);
+    PlayerTextDrawAlignment(playerid,Tutorialdraw[playerid][3],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(playerid,Tutorialdraw[playerid][3],1.0,3.5);
 	PlayerTextDrawSetOutline(playerid,Tutorialdraw[playerid][3],1);
-	PlayerTextDrawSetProportional(playerid,Tutorialdraw[playerid][3],1);
+	PlayerTextDrawSetProportional(playerid,Tutorialdraw[playerid][3],true);
 	PlayerTextDrawSetShadow(playerid,Tutorialdraw[playerid][3],1);
 
 	VEHJOBTANKdraw[playerid] = CreatePlayerTextDraw(playerid,8,210,"_");
 	PlayerTextDrawSetShadow(playerid,VEHJOBTANKdraw[playerid],2);
 	PlayerTextDrawTextSize(playerid,VEHJOBTANKdraw[playerid],80,215);
-	PlayerTextDrawColor(playerid,VEHJOBTANKdraw[playerid],0xFEFEFEFF);
-	PlayerTextDrawFont(playerid,VEHJOBTANKdraw[playerid],1);
-	PlayerTextDrawUseBox(playerid,VEHJOBTANKdraw[playerid],1);
-	PlayerTextDrawBoxColor(playerid,VEHJOBTANKdraw[playerid],0x000000FF);
+	PlayerTextDrawColour(playerid,VEHJOBTANKdraw[playerid],0xFEFEFEFF);
+	PlayerTextDrawFont(playerid,VEHJOBTANKdraw[playerid],TEXT_DRAW_FONT_1);
+	PlayerTextDrawUseBox(playerid,VEHJOBTANKdraw[playerid],true);
+	PlayerTextDrawBoxColour(playerid,VEHJOBTANKdraw[playerid],0x000000FF);
 	PlayerTextDrawLetterSize(playerid,VEHJOBTANKdraw[playerid],0.500000,0.999990);
 
 	TAXOdraw[playerid][0] = CreatePlayerTextDraw(playerid,8,170,"_");//fahrpreis anzeige digital taxometer
-    PlayerTextDrawFont(playerid,TAXOdraw[playerid][0],2);
-    PlayerTextDrawAlignment(playerid,TAXOdraw[playerid][0],0);
-    PlayerTextDrawColor(playerid,TAXOdraw[playerid][0],0xF60A00E7);
+    PlayerTextDrawFont(playerid,TAXOdraw[playerid][0],TEXT_DRAW_FONT_2);
+    PlayerTextDrawAlignment(playerid,TAXOdraw[playerid][0],TEXT_DRAW_ALIGN:0);
+    PlayerTextDrawColour(playerid,TAXOdraw[playerid][0],0xF60A00E7);
     PlayerTextDrawSetShadow(playerid,TAXOdraw[playerid][0],0);
     PlayerTextDrawLetterSize(playerid,TAXOdraw[playerid][0],0.200000,0.999990);
 
     TAXOdraw[playerid][1] = CreatePlayerTextDraw(playerid,8,160,"Dienstpreis: 0$");//dienstpreis anzeige digital taxometer
-    PlayerTextDrawFont(playerid,TAXOdraw[playerid][1],2);
-    PlayerTextDrawAlignment(playerid,TAXOdraw[playerid][1],0);
-    PlayerTextDrawColor(playerid,TAXOdraw[playerid][1],0xF60A00E7);
+    PlayerTextDrawFont(playerid,TAXOdraw[playerid][1],TEXT_DRAW_FONT_2);
+    PlayerTextDrawAlignment(playerid,TAXOdraw[playerid][1],TEXT_DRAW_ALIGN:0);
+    PlayerTextDrawColour(playerid,TAXOdraw[playerid][1],0xF60A00E7);
     PlayerTextDrawSetShadow(playerid,TAXOdraw[playerid][1],0);
     PlayerTextDrawLetterSize(playerid,TAXOdraw[playerid][1],0.400000,0.999990);
 
     TAXOdraw[playerid][2] = CreatePlayerTextDraw(playerid,8,180,"_");//fahrpreis anzeige digital taxometer
-    PlayerTextDrawFont(playerid,TAXOdraw[playerid][2],2);
-    PlayerTextDrawAlignment(playerid,TAXOdraw[playerid][2],0);
-    PlayerTextDrawColor(playerid,TAXOdraw[playerid][2],0xF60A00E7);
+    PlayerTextDrawFont(playerid,TAXOdraw[playerid][2],TEXT_DRAW_FONT_2);
+    PlayerTextDrawAlignment(playerid,TAXOdraw[playerid][2],TEXT_DRAW_ALIGN:0);
+    PlayerTextDrawColour(playerid,TAXOdraw[playerid][2],0xF60A00E7);
     PlayerTextDrawSetShadow(playerid,TAXOdraw[playerid][2],0);
     PlayerTextDrawLetterSize(playerid,TAXOdraw[playerid][2],0.200000,0.999990);
 
     TAXOdraw[playerid][3] = CreatePlayerTextDraw(playerid,8,190,"_");//fahrpreis anzeige digital taxometer
-    PlayerTextDrawFont(playerid,TAXOdraw[playerid][3],2);
-    PlayerTextDrawAlignment(playerid,TAXOdraw[playerid][3],0);
-    PlayerTextDrawColor(playerid,TAXOdraw[playerid][3],0xF60A00E7);
+    PlayerTextDrawFont(playerid,TAXOdraw[playerid][3],TEXT_DRAW_FONT_2);
+    PlayerTextDrawAlignment(playerid,TAXOdraw[playerid][3],TEXT_DRAW_ALIGN:0);
+    PlayerTextDrawColour(playerid,TAXOdraw[playerid][3],0xF60A00E7);
     PlayerTextDrawSetShadow(playerid,TAXOdraw[playerid][3],0);
     PlayerTextDrawLetterSize(playerid,TAXOdraw[playerid][3],0.200000,0.999990);
 
 	PRISONdraw[playerid] = CreatePlayerTextDraw(playerid, 260.029083, 431.666687,"Checkpoints: 10 von 150");
 	PlayerTextDrawLetterSize(playerid, PRISONdraw[playerid], 0.225578, 1.150832);
-	PlayerTextDrawAlignment(playerid, PRISONdraw[playerid], 1);
-	PlayerTextDrawColor(playerid, PRISONdraw[playerid], -1);
+	PlayerTextDrawAlignment(playerid, PRISONdraw[playerid], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, PRISONdraw[playerid], -1);
 	PlayerTextDrawSetShadow(playerid, PRISONdraw[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, PRISONdraw[playerid], 1);
-	PlayerTextDrawBackgroundColor(playerid, PRISONdraw[playerid], 51);
-	PlayerTextDrawFont(playerid, PRISONdraw[playerid], 1);
-	PlayerTextDrawSetProportional(playerid, PRISONdraw[playerid], 1);
+	PlayerTextDrawBackgroundColour(playerid, PRISONdraw[playerid], 51);
+	PlayerTextDrawFont(playerid, PRISONdraw[playerid], TEXT_DRAW_FONT_1);
+	PlayerTextDrawSetProportional(playerid, PRISONdraw[playerid], true);
 	
 	//-[Alte PRP HUD Anzeige (NICHT MEHR EINFÜGEN IST KACKE)]-//
 	PAYDAYdraw[playerid] = CreatePlayerTextDraw(playerid,8,300,"_");
-    PlayerTextDrawFont(playerid,PAYDAYdraw[playerid],1);
-    PlayerTextDrawAlignment(playerid,PAYDAYdraw[playerid],0);
+    PlayerTextDrawFont(playerid,PAYDAYdraw[playerid],TEXT_DRAW_FONT_1);
+    PlayerTextDrawAlignment(playerid,PAYDAYdraw[playerid],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(playerid,PAYDAYdraw[playerid],0.500000,0.999990);
-	PlayerTextDrawSetProportional(playerid,PAYDAYdraw[playerid],1);
+	PlayerTextDrawSetProportional(playerid,PAYDAYdraw[playerid],true);
 	PlayerTextDrawSetShadow(playerid,PAYDAYdraw[playerid],1);
 
 	HPdraw[playerid] = CreatePlayerTextDraw(playerid,8,315,"_");
-    PlayerTextDrawFont(playerid,HPdraw[playerid],1);
-    PlayerTextDrawAlignment(playerid,HPdraw[playerid],0);
+    PlayerTextDrawFont(playerid,HPdraw[playerid],TEXT_DRAW_FONT_1);
+    PlayerTextDrawAlignment(playerid,HPdraw[playerid],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(playerid,HPdraw[playerid],0.500000,0.999990);
-	PlayerTextDrawSetProportional(playerid,HPdraw[playerid],1);
+	PlayerTextDrawSetProportional(playerid,HPdraw[playerid],true);
 	PlayerTextDrawSetShadow(playerid,HPdraw[playerid],1);
 
 	ARMOURdraw[playerid] = CreatePlayerTextDraw(playerid,110,315,"_");
-    PlayerTextDrawFont(playerid,ARMOURdraw[playerid],1);
-    PlayerTextDrawAlignment(playerid,ARMOURdraw[playerid],0);
+    PlayerTextDrawFont(playerid,ARMOURdraw[playerid],TEXT_DRAW_FONT_1);
+    PlayerTextDrawAlignment(playerid,ARMOURdraw[playerid],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(playerid,ARMOURdraw[playerid],0.500000,0.999990);
-	PlayerTextDrawSetProportional(playerid,ARMOURdraw[playerid],1);
+	PlayerTextDrawSetProportional(playerid,ARMOURdraw[playerid],true);
 	PlayerTextDrawSetShadow(playerid,ARMOURdraw[playerid],1);
 	
 	//-[Telefon]-//
 	Handy_Draw_Info[playerid] = CreatePlayerTextDraw(playerid, 42.333427, 323.985382, "Guthaben: ~y~Vertrag~w~ I Verbindung: ~g~IIIIII");
 	PlayerTextDrawLetterSize(playerid, Handy_Draw_Info[playerid], 0.143665, 0.645925);
 	PlayerTextDrawTextSize(playerid, Handy_Draw_Info[playerid], 136.000000, 0.000000);
-	PlayerTextDrawAlignment(playerid, Handy_Draw_Info[playerid], 1);
-	PlayerTextDrawColor(playerid, Handy_Draw_Info[playerid], -1);
-	PlayerTextDrawUseBox(playerid, Handy_Draw_Info[playerid], 1);
-	PlayerTextDrawBoxColor(playerid, Handy_Draw_Info[playerid], 114);
+	PlayerTextDrawAlignment(playerid, Handy_Draw_Info[playerid], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, Handy_Draw_Info[playerid], -1);
+	PlayerTextDrawUseBox(playerid, Handy_Draw_Info[playerid], true);
+	PlayerTextDrawBoxColour(playerid, Handy_Draw_Info[playerid], 114);
 	PlayerTextDrawSetShadow(playerid, Handy_Draw_Info[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, Handy_Draw_Info[playerid], 0);
-	PlayerTextDrawBackgroundColor(playerid, Handy_Draw_Info[playerid], 255);
-	PlayerTextDrawFont(playerid, Handy_Draw_Info[playerid], 1);
-	PlayerTextDrawSetProportional(playerid, Handy_Draw_Info[playerid], 1);
+	PlayerTextDrawBackgroundColour(playerid, Handy_Draw_Info[playerid], 255);
+	PlayerTextDrawFont(playerid, Handy_Draw_Info[playerid], TEXT_DRAW_FONT_1);
+	PlayerTextDrawSetProportional(playerid, Handy_Draw_Info[playerid], true);
 	PlayerTextDrawSetShadow(playerid, Handy_Draw_Info[playerid], 0);
 	
 	//-[Tacho Textdraws]-//
 	TachoBox[playerid] = CreatePlayerTextDraw(playerid, 378.000396, 370.851043,"usebox");
 	PlayerTextDrawLetterSize(playerid, TachoBox[playerid], 0.000000, 4.225064);
 	PlayerTextDrawTextSize(playerid, TachoBox[playerid], 252.000045, 0.000000);
-	PlayerTextDrawAlignment(playerid, TachoBox[playerid], 1);
-	PlayerTextDrawColor(playerid, TachoBox[playerid], 0);
+	PlayerTextDrawAlignment(playerid, TachoBox[playerid], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, TachoBox[playerid], 0);
 	PlayerTextDrawUseBox(playerid, TachoBox[playerid], true);
-	PlayerTextDrawBoxColor(playerid, TachoBox[playerid], 102);
+	PlayerTextDrawBoxColour(playerid, TachoBox[playerid], 102);
 	PlayerTextDrawSetShadow(playerid, TachoBox[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, TachoBox[playerid], 0);
-	PlayerTextDrawFont(playerid, TachoBox[playerid], 0);
+	PlayerTextDrawFont(playerid, TachoBox[playerid], TEXT_DRAW_FONT_0);
 
 	TachoStr1[playerid] = CreatePlayerTextDraw(playerid, 250.800155, 364.880035,"-");
 	PlayerTextDrawLetterSize(playerid, TachoStr1[playerid], 8.660393, 0.803554);
-	PlayerTextDrawAlignment(playerid, TachoStr1[playerid], 1);
-	PlayerTextDrawColor(playerid, TachoStr1[playerid], -1);
+	PlayerTextDrawAlignment(playerid, TachoStr1[playerid], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, TachoStr1[playerid], -1);
 	PlayerTextDrawSetShadow(playerid, TachoStr1[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, TachoStr1[playerid], 1);
-	PlayerTextDrawBackgroundColor(playerid, TachoStr1[playerid], 51);
-	PlayerTextDrawFont(playerid, TachoStr1[playerid], 1);
-	PlayerTextDrawSetProportional(playerid, TachoStr1[playerid], 1);
+	PlayerTextDrawBackgroundColour(playerid, TachoStr1[playerid], 51);
+	PlayerTextDrawFont(playerid, TachoStr1[playerid], TEXT_DRAW_FONT_1);
+	PlayerTextDrawSetProportional(playerid, TachoStr1[playerid], true);
 
 	TachoStr2[playerid] = CreatePlayerTextDraw(playerid, 252.600143, 405.195526,"-");
 	PlayerTextDrawLetterSize(playerid, TachoStr2[playerid], 8.660393, 0.803554);
-	PlayerTextDrawAlignment(playerid, TachoStr2[playerid], 1);
-	PlayerTextDrawColor(playerid, TachoStr2[playerid], -1);
+	PlayerTextDrawAlignment(playerid, TachoStr2[playerid], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, TachoStr2[playerid], -1);
 	PlayerTextDrawSetShadow(playerid, TachoStr2[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, TachoStr2[playerid], 1);
-	PlayerTextDrawBackgroundColor(playerid, TachoStr2[playerid], 51);
-	PlayerTextDrawFont(playerid, TachoStr2[playerid], 1);
-	PlayerTextDrawSetProportional(playerid, TachoStr2[playerid], 1);
+	PlayerTextDrawBackgroundColour(playerid, TachoStr2[playerid], 51);
+	PlayerTextDrawFont(playerid, TachoStr2[playerid], TEXT_DRAW_FONT_1);
+	PlayerTextDrawSetProportional(playerid, TachoStr2[playerid], true);
 
 	TachoTank[playerid] = CreatePlayerTextDraw(playerid, 263.600067, 374.329010,"Tank:");
 	PlayerTextDrawLetterSize(playerid, TachoTank[playerid], 0.254399, 1.171910);
-	PlayerTextDrawAlignment(playerid, TachoTank[playerid], 1);
-	PlayerTextDrawColor(playerid, TachoTank[playerid], -1);
+	PlayerTextDrawAlignment(playerid, TachoTank[playerid], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, TachoTank[playerid], -1);
 	PlayerTextDrawSetShadow(playerid, TachoTank[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, TachoTank[playerid], 1);
-	PlayerTextDrawBackgroundColor(playerid, TachoTank[playerid], 51);
-	PlayerTextDrawFont(playerid, TachoTank[playerid], 1);
-	PlayerTextDrawSetProportional(playerid, TachoTank[playerid], 1);
+	PlayerTextDrawBackgroundColour(playerid, TachoTank[playerid], 51);
+	PlayerTextDrawFont(playerid, TachoTank[playerid], TEXT_DRAW_FONT_1);
+	PlayerTextDrawSetProportional(playerid, TachoTank[playerid], true);
 
 	TachoKM[playerid] = CreatePlayerTextDraw(playerid, 291.400177, 394.742126,"Km: 50.123");
 	PlayerTextDrawLetterSize(playerid, TachoKM[playerid], 0.254399, 1.171910);
-	PlayerTextDrawAlignment(playerid, TachoKM[playerid], 1);
-	PlayerTextDrawColor(playerid, TachoKM[playerid], -1);
+	PlayerTextDrawAlignment(playerid, TachoKM[playerid], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, TachoKM[playerid], -1);
 	PlayerTextDrawSetShadow(playerid, TachoKM[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, TachoKM[playerid], 1);
-	PlayerTextDrawBackgroundColor(playerid, TachoKM[playerid], 51);
-	PlayerTextDrawFont(playerid, TachoKM[playerid], 1);
-	PlayerTextDrawSetProportional(playerid, TachoKM[playerid], 1);
+	PlayerTextDrawBackgroundColour(playerid, TachoKM[playerid], 51);
+	PlayerTextDrawFont(playerid, TachoKM[playerid], TEXT_DRAW_FONT_1);
+	PlayerTextDrawSetProportional(playerid, TachoKM[playerid], true);
 
 	TachoKMH[playerid] = CreatePlayerTextDraw(playerid, 327.199920, 373.342285,"kmh: 300");
 	PlayerTextDrawLetterSize(playerid, TachoKMH[playerid], 0.254399, 1.171910);
-	PlayerTextDrawAlignment(playerid, TachoKMH[playerid], 1);
-	PlayerTextDrawColor(playerid, TachoKMH[playerid], -1);
+	PlayerTextDrawAlignment(playerid, TachoKMH[playerid], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, TachoKMH[playerid], -1);
 	PlayerTextDrawSetShadow(playerid, TachoKMH[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, TachoKMH[playerid], 1);
-	PlayerTextDrawBackgroundColor(playerid, TachoKMH[playerid], 51);
-	PlayerTextDrawFont(playerid, TachoKMH[playerid], 1);
-	PlayerTextDrawSetProportional(playerid, TachoKMH[playerid], 1);
+	PlayerTextDrawBackgroundColour(playerid, TachoKMH[playerid], 51);
+	PlayerTextDrawFont(playerid, TachoKMH[playerid], TEXT_DRAW_FONT_1);
+	PlayerTextDrawSetProportional(playerid, TachoKMH[playerid], true);
 
 	TachoFahrzeugName[playerid] = CreatePlayerTextDraw(playerid, 276.000061, 351.431121,"Monster Truck");
 	PlayerTextDrawLetterSize(playerid, TachoFahrzeugName[playerid], 0.449999, 1.600000);
-	PlayerTextDrawAlignment(playerid, TachoFahrzeugName[playerid], 1);
-	PlayerTextDrawColor(playerid, TachoFahrzeugName[playerid], -1);
+	PlayerTextDrawAlignment(playerid, TachoFahrzeugName[playerid], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, TachoFahrzeugName[playerid], -1);
 	PlayerTextDrawSetShadow(playerid, TachoFahrzeugName[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, TachoFahrzeugName[playerid], 1);
-	PlayerTextDrawBackgroundColor(playerid, TachoFahrzeugName[playerid], 51);
-	PlayerTextDrawFont(playerid, TachoFahrzeugName[playerid], 0);
-	PlayerTextDrawSetProportional(playerid, TachoFahrzeugName[playerid], 1);
+	PlayerTextDrawBackgroundColour(playerid, TachoFahrzeugName[playerid], 51);
+	PlayerTextDrawFont(playerid, TachoFahrzeugName[playerid], TEXT_DRAW_FONT_0);
+	PlayerTextDrawSetProportional(playerid, TachoFahrzeugName[playerid], true);
 
 	//-[ NoDM Zone ]-//
 	Keine_DM_Zone[playerid][0] = CreatePlayerTextDraw(playerid, 212.000061, 0.844433,"Du befindest dich gerade in ~r~No-Dm-Pier~w~ und hier ist DM Verboten!");
 	PlayerTextDrawLetterSize(playerid, Keine_DM_Zone[playerid][0], 0.193999, 0.998519);
-	PlayerTextDrawAlignment(playerid, Keine_DM_Zone[playerid][0], 1);
-	PlayerTextDrawColor(playerid, Keine_DM_Zone[playerid][0], -1);
+	PlayerTextDrawAlignment(playerid, Keine_DM_Zone[playerid][0], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, Keine_DM_Zone[playerid][0], -1);
 	PlayerTextDrawSetShadow(playerid, Keine_DM_Zone[playerid][0], 0);
 	PlayerTextDrawSetOutline(playerid, Keine_DM_Zone[playerid][0], 0);
-	PlayerTextDrawBackgroundColor(playerid, Keine_DM_Zone[playerid][0], 255);
-	PlayerTextDrawFont(playerid, Keine_DM_Zone[playerid][0], 1);
-	PlayerTextDrawSetProportional(playerid, Keine_DM_Zone[playerid][0], 1);
+	PlayerTextDrawBackgroundColour(playerid, Keine_DM_Zone[playerid][0], 255);
+	PlayerTextDrawFont(playerid, Keine_DM_Zone[playerid][0], TEXT_DRAW_FONT_1);
+	PlayerTextDrawSetProportional(playerid, Keine_DM_Zone[playerid][0], true);
 	PlayerTextDrawSetShadow(playerid, Keine_DM_Zone[playerid][0], 0);
 
 	Keine_DM_Zone[playerid][1] = CreatePlayerTextDraw(playerid, 191.666763, -38.148155,"box");
 	PlayerTextDrawLetterSize(playerid, Keine_DM_Zone[playerid][1], 0.000000, 5.599998);
 	PlayerTextDrawTextSize(playerid, Keine_DM_Zone[playerid][1], 448.000000, 0.000000);
-	PlayerTextDrawAlignment(playerid, Keine_DM_Zone[playerid][1], 1);
-	PlayerTextDrawColor(playerid, Keine_DM_Zone[playerid][1], -1);
-	PlayerTextDrawUseBox(playerid, Keine_DM_Zone[playerid][1], 1);
-	PlayerTextDrawBoxColor(playerid, Keine_DM_Zone[playerid][1], 92);
+	PlayerTextDrawAlignment(playerid, Keine_DM_Zone[playerid][1], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, Keine_DM_Zone[playerid][1], -1);
+	PlayerTextDrawUseBox(playerid, Keine_DM_Zone[playerid][1], true);
+	PlayerTextDrawBoxColour(playerid, Keine_DM_Zone[playerid][1], 92);
 	PlayerTextDrawSetShadow(playerid, Keine_DM_Zone[playerid][1], 0);
 	PlayerTextDrawSetOutline(playerid, Keine_DM_Zone[playerid][1], 0);
-	PlayerTextDrawBackgroundColor(playerid, Keine_DM_Zone[playerid][1], 255);
-	PlayerTextDrawFont(playerid, Keine_DM_Zone[playerid][1], 1);
-	PlayerTextDrawSetProportional(playerid, Keine_DM_Zone[playerid][1], 1);
+	PlayerTextDrawBackgroundColour(playerid, Keine_DM_Zone[playerid][1], 255);
+	PlayerTextDrawFont(playerid, Keine_DM_Zone[playerid][1], TEXT_DRAW_FONT_1);
+	PlayerTextDrawSetProportional(playerid, Keine_DM_Zone[playerid][1], true);
 	PlayerTextDrawSetShadow(playerid, Keine_DM_Zone[playerid][1], 0);
 
 	//RennScheiß
     RACEdraw[playerid][0] = CreatePlayerTextDraw(playerid,490,232,"_");//renname
 	PlayerTextDrawSetShadow(playerid,RACEdraw[playerid][0],1);
-	PlayerTextDrawFont(playerid,RACEdraw[playerid][0],1);
+	PlayerTextDrawFont(playerid,RACEdraw[playerid][0],TEXT_DRAW_FONT_1);
 	PlayerTextDrawTextSize(playerid,RACEdraw[playerid][0],630,135);
-	PlayerTextDrawColor(playerid,RACEdraw[playerid][0],0xFEFEFEFF);
-	PlayerTextDrawBackgroundColor(playerid,RACEdraw[playerid][0],0x000000FF);
-	PlayerTextDrawUseBox(playerid,RACEdraw[playerid][0],1);
-	PlayerTextDrawBoxColor(playerid,RACEdraw[playerid][0],0x05000041);
+	PlayerTextDrawColour(playerid,RACEdraw[playerid][0],0xFEFEFEFF);
+	PlayerTextDrawBackgroundColour(playerid,RACEdraw[playerid][0],0x000000FF);
+	PlayerTextDrawUseBox(playerid,RACEdraw[playerid][0],true);
+	PlayerTextDrawBoxColour(playerid,RACEdraw[playerid][0],0x05000041);
 	PlayerTextDrawLetterSize(playerid,RACEdraw[playerid][0],0.500000,0.999990);
 
 	RACEdraw[playerid][1] = CreatePlayerTextDraw(playerid,490,245,"_");//infobox box
-	PlayerTextDrawUseBox(playerid,RACEdraw[playerid][1],1);
-	PlayerTextDrawBoxColor(playerid,RACEdraw[playerid][1],0x05000041);
+	PlayerTextDrawUseBox(playerid,RACEdraw[playerid][1],true);
+	PlayerTextDrawBoxColour(playerid,RACEdraw[playerid][1],0x05000041);
 	PlayerTextDrawTextSize(playerid,RACEdraw[playerid][1],630,135);
 	PlayerTextDrawLetterSize(playerid,RACEdraw[playerid][1],0.500000,9.000000);
 
 	RACEdraw[playerid][2] = CreatePlayerTextDraw(playerid,490,330,"_");//infobox box 2 cps
-	PlayerTextDrawUseBox(playerid,RACEdraw[playerid][2],1);
-	PlayerTextDrawBoxColor(playerid,RACEdraw[playerid][2],0x05000041);
+	PlayerTextDrawUseBox(playerid,RACEdraw[playerid][2],true);
+	PlayerTextDrawBoxColour(playerid,RACEdraw[playerid][2],0x05000041);
 	PlayerTextDrawTextSize(playerid,RACEdraw[playerid][2],630,135);
 	PlayerTextDrawLetterSize(playerid,RACEdraw[playerid][2],0.500000,0.999990);
 
 	RACEdraw[playerid][3] = CreatePlayerTextDraw(playerid,492,250,"_");//platz 1
 	PlayerTextDrawSetShadow(playerid,RACEdraw[playerid][3],1);
-	PlayerTextDrawFont(playerid,RACEdraw[playerid][3],1);
+	PlayerTextDrawFont(playerid,RACEdraw[playerid][3],TEXT_DRAW_FONT_1);
 	PlayerTextDrawTextSize(playerid,RACEdraw[playerid][3],630,135);
-	PlayerTextDrawColor(playerid,RACEdraw[playerid][3],0xFEFEFEFF);
-	PlayerTextDrawBackgroundColor(playerid,RACEdraw[playerid][3],0x000000FF);
+	PlayerTextDrawColour(playerid,RACEdraw[playerid][3],0xFEFEFEFF);
+	PlayerTextDrawBackgroundColour(playerid,RACEdraw[playerid][3],0x000000FF);
 	PlayerTextDrawLetterSize(playerid,RACEdraw[playerid][3],0.300000,0.999990);
 
 	RACEdraw[playerid][4] = CreatePlayerTextDraw(playerid,492,265,"_");//platz 2
 	PlayerTextDrawSetShadow(playerid,RACEdraw[playerid][4],1);
-	PlayerTextDrawFont(playerid,RACEdraw[playerid][4],1);
+	PlayerTextDrawFont(playerid,RACEdraw[playerid][4],TEXT_DRAW_FONT_1);
 	PlayerTextDrawTextSize(playerid,RACEdraw[playerid][4],630,135);
-	PlayerTextDrawColor(playerid,RACEdraw[playerid][4],0xFEFEFEFF);
-	PlayerTextDrawBackgroundColor(playerid,RACEdraw[playerid][4],0x000000FF);
+	PlayerTextDrawColour(playerid,RACEdraw[playerid][4],0xFEFEFEFF);
+	PlayerTextDrawBackgroundColour(playerid,RACEdraw[playerid][4],0x000000FF);
 	PlayerTextDrawLetterSize(playerid,RACEdraw[playerid][4],0.300000,0.999990);
 
 	RACEdraw[playerid][5] = CreatePlayerTextDraw(playerid,492,280,"_");//platz 3
 	PlayerTextDrawSetShadow(playerid,RACEdraw[playerid][5],1);
-	PlayerTextDrawFont(playerid,RACEdraw[playerid][5],1);
+	PlayerTextDrawFont(playerid,RACEdraw[playerid][5],TEXT_DRAW_FONT_1);
 	PlayerTextDrawTextSize(playerid,RACEdraw[playerid][5],630,135);
-	PlayerTextDrawColor(playerid,RACEdraw[playerid][5],0xFEFEFEFF);
-	PlayerTextDrawBackgroundColor(playerid,RACEdraw[playerid][5],0x000000FF);
+	PlayerTextDrawColour(playerid,RACEdraw[playerid][5],0xFEFEFEFF);
+	PlayerTextDrawBackgroundColour(playerid,RACEdraw[playerid][5],0x000000FF);
 	PlayerTextDrawLetterSize(playerid,RACEdraw[playerid][5],0.300000,0.999990);
 
 	BUYSMARKTWEAPONdraw[playerid][0] = CreatePlayerTextDraw(playerid,500,300,"~r~Kaufen");
 	PlayerTextDrawSetShadow(playerid,BUYSMARKTWEAPONdraw[playerid][0],1);
-	PlayerTextDrawFont(playerid,BUYSMARKTWEAPONdraw[playerid][0],1);
+	PlayerTextDrawFont(playerid,BUYSMARKTWEAPONdraw[playerid][0],TEXT_DRAW_FONT_1);
 	PlayerTextDrawTextSize(playerid,BUYSMARKTWEAPONdraw[playerid][0],630,135);
 	PlayerTextDrawLetterSize(playerid,BUYSMARKTWEAPONdraw[playerid][0],0.400000,0.699990);
-	PlayerTextDrawSetSelectable(playerid,BUYSMARKTWEAPONdraw[playerid][0],1);
+	PlayerTextDrawSetSelectable(playerid,BUYSMARKTWEAPONdraw[playerid][0],true);
 
 	BUYSMARKTWEAPONdraw[playerid][1] = CreatePlayerTextDraw(playerid,500,310,"~w~Abbrechen");
 	PlayerTextDrawSetShadow(playerid,BUYSMARKTWEAPONdraw[playerid][1],1);
-	PlayerTextDrawFont(playerid,BUYSMARKTWEAPONdraw[playerid][1],1);
+	PlayerTextDrawFont(playerid,BUYSMARKTWEAPONdraw[playerid][1],TEXT_DRAW_FONT_1);
 	PlayerTextDrawTextSize(playerid,BUYSMARKTWEAPONdraw[playerid][1],630,135);
 	PlayerTextDrawLetterSize(playerid,BUYSMARKTWEAPONdraw[playerid][1],0.400000,0.699990);
-	PlayerTextDrawSetSelectable(playerid,BUYSMARKTWEAPONdraw[playerid][1],1);
+	PlayerTextDrawSetSelectable(playerid,BUYSMARKTWEAPONdraw[playerid][1],true);
 
 	INFOdraw[playerid][0] = CreatePlayerTextDraw(playerid,500,260,"_");
-	PlayerTextDrawUseBox(playerid,INFOdraw[playerid][0],1);
-	PlayerTextDrawBoxColor(playerid,INFOdraw[playerid][0],0x00000067);
+	PlayerTextDrawUseBox(playerid,INFOdraw[playerid][0],true);
+	PlayerTextDrawBoxColour(playerid,INFOdraw[playerid][0],0x00000067);
 	PlayerTextDrawTextSize(playerid,INFOdraw[playerid][0],640,450);
 	PlayerTextDrawLetterSize(playerid,INFOdraw[playerid][0],0.400000,0.599990);
 	PlayerTextDrawSetShadow(playerid,INFOdraw[playerid][0],0);
-	PlayerTextDrawAlignment(playerid,INFOdraw[playerid][0],1);
+	PlayerTextDrawAlignment(playerid,INFOdraw[playerid][0],TEXT_DRAW_ALIGN_LEFT);
 
 	INFOdraw[playerid][1] = CreatePlayerTextDraw(playerid,500,260,"_");
-	PlayerTextDrawUseBox(playerid,INFOdraw[playerid][1],1);
-	PlayerTextDrawBoxColor(playerid,INFOdraw[playerid][1],0x00000067);
+	PlayerTextDrawUseBox(playerid,INFOdraw[playerid][1],true);
+	PlayerTextDrawBoxColour(playerid,INFOdraw[playerid][1],0x00000067);
 	PlayerTextDrawTextSize(playerid,INFOdraw[playerid][1],640,450);
 	PlayerTextDrawLetterSize(playerid,INFOdraw[playerid][1],0.400000,0.599990);
 	PlayerTextDrawSetShadow(playerid,INFOdraw[playerid][1],0);
-	PlayerTextDrawAlignment(playerid,INFOdraw[playerid][1],1);
+	PlayerTextDrawAlignment(playerid,INFOdraw[playerid][1],TEXT_DRAW_ALIGN_LEFT);
 
  	INFOdraw[playerid][2] = CreatePlayerTextDraw(playerid,1,210,"_");
-	PlayerTextDrawUseBox(playerid,INFOdraw[playerid][2],1);
-	PlayerTextDrawBoxColor(playerid,INFOdraw[playerid][2],0x00000067);
+	PlayerTextDrawUseBox(playerid,INFOdraw[playerid][2],true);
+	PlayerTextDrawBoxColour(playerid,INFOdraw[playerid][2],0x00000067);
 	PlayerTextDrawTextSize(playerid,INFOdraw[playerid][2],190,450);
 	PlayerTextDrawLetterSize(playerid,INFOdraw[playerid][2],0.500000,0.799990);
 	PlayerTextDrawSetShadow(playerid,INFOdraw[playerid][2],0);
-	PlayerTextDrawAlignment(playerid,INFOdraw[playerid][2],1);
+	PlayerTextDrawAlignment(playerid,INFOdraw[playerid][2],TEXT_DRAW_ALIGN_LEFT);
 	
 	//-[ Binco - System 01]-//
 	BINCOplayerdraw[playerid] = CreatePlayerTextDraw(playerid, 525.000244, 418.977722, "Skin wird: 20x benutzt");
 	PlayerTextDrawLetterSize(playerid, BINCOplayerdraw[playerid], 0.137000, 0.737185);
 	PlayerTextDrawTextSize(playerid, BINCOplayerdraw[playerid], 578.000000, 0.000000);
-	PlayerTextDrawAlignment(playerid, BINCOplayerdraw[playerid], 1);
-	PlayerTextDrawColor(playerid, BINCOplayerdraw[playerid], -1);
-	PlayerTextDrawUseBox(playerid, BINCOplayerdraw[playerid], 1);
-	PlayerTextDrawBoxColor(playerid, BINCOplayerdraw[playerid], 96);
+	PlayerTextDrawAlignment(playerid, BINCOplayerdraw[playerid], TEXT_DRAW_ALIGN_LEFT);
+	PlayerTextDrawColour(playerid, BINCOplayerdraw[playerid], -1);
+	PlayerTextDrawUseBox(playerid, BINCOplayerdraw[playerid], true);
+	PlayerTextDrawBoxColour(playerid, BINCOplayerdraw[playerid], 96);
 	PlayerTextDrawSetShadow(playerid, BINCOplayerdraw[playerid], 0);
 	PlayerTextDrawSetOutline(playerid, BINCOplayerdraw[playerid], 0);
-	PlayerTextDrawBackgroundColor(playerid, BINCOplayerdraw[playerid], 173);
-	PlayerTextDrawFont(playerid, BINCOplayerdraw[playerid], 1);
-	PlayerTextDrawSetProportional(playerid, BINCOplayerdraw[playerid], 1);
+	PlayerTextDrawBackgroundColour(playerid, BINCOplayerdraw[playerid], 173);
+	PlayerTextDrawFont(playerid, BINCOplayerdraw[playerid], TEXT_DRAW_FONT_1);
+	PlayerTextDrawSetProportional(playerid, BINCOplayerdraw[playerid], true);
 	PlayerTextDrawSetShadow(playerid, BINCOplayerdraw[playerid], 0);
 	//Destroyen
 	DestroyVars(playerid);
@@ -12030,7 +12029,7 @@ public OnPlayerDisconnect(playerid,reason)
 				    GetPlayerPos(playerid,x,y,z);
 				    for(new i_slot=0,gun,ammo;i_slot<13;i_slot++)
 				    {
-					    GetPlayerWeaponData(playerid,i_slot,gun,ammo);
+					    GetPlayerWeaponData(playerid,WEAPON_SLOT:i_slot,gun,ammo);
 					    if(gun != 0 && ammo != 0)
 						{
 							dropcount++;
@@ -12082,32 +12081,32 @@ public OnPlayerDisconnect(playerid,reason)
 	DestroyVars(playerid);
 	return 1;
 }
-public OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY, Float:fZ)//ExplodeMunition
+public OnPlayerWeaponShot(playerid, WEAPON:weaponid, BULLET_HIT_TYPE:hittype, hitid, Float:fX, Float:fY, Float:fZ)//ExplodeMunition
 {
 	if(explosiwaffenabf == 1)
 	{
 		new Float:fxX,Float:fyY,Float:fzZ;
-		if(hittype == 0)
+		if(hittype == BULLET_HIT_TYPE_NONE)
 		{
 			if(fX == 0 && fY == 0 && fZ == 0)return 1;
 			CreateExplosion(fX, fY, fZ, 12, 10.0);
 		}
-		else if(hittype == 1)
+		else if(hittype == BULLET_HIT_TYPE_PLAYER)
 		{
 			GetPlayerPos(hitid,fxX,fyY,fzZ);
 			CreateExplosion(fxX, fyY, fzZ, 12, 10.0);
 		}
-		else if(hittype == 2)
+		else if(hittype == BULLET_HIT_TYPE_VEHICLE)
 		{
 			GetVehiclePos(hitid,fxX,fyY,fzZ);
 			CreateExplosion(fxX, fyY, fzZ, 12, 10.0);
 		}
-		else if(hittype == 3)
+		else if(hittype == BULLET_HIT_TYPE_OBJECT)
 		{
 			GetObjectPos(hitid,fxX,fyY,fzZ);
 			CreateExplosion(fxX, fyY, fzZ, 12, 10.0);
 		}
-		else if(hittype == 4)
+		else if(hittype == BULLET_HIT_TYPE_PLAYER_OBJECT)
 		{
 			GetPlayerObjectPos(playerid,hitid,fxX,fyY,fzZ);
 			CreateExplosion(fxX, fyY, fzZ, 12, 10.0);
@@ -12118,7 +12117,7 @@ public OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY
 public OnPlayerSpawn(playerid)
 {
 	SetPlayerSkillLevel(playerid,WEAPONSKILL_PISTOL,0);
-    TogglePlayerSpectating(playerid,0);
+    TogglePlayerSpectating(playerid,false);
 	HideLoginScreen(playerid);
 	StopAudioStreamForPlayer(playerid);
     new string[256];
@@ -12356,7 +12355,7 @@ public OnPlayerSpawn(playerid)
 					HideBinco(playerid);
 				  	PlayerTextDrawHide(playerid,BINCOplayerdraw[playerid]);
 					SetCameraBehindPlayer(playerid);
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					Spieler[playerid][Skin] = 0;
 					Spieler[playerid][pSkin] = GetPlayerSkin(playerid);
 					ImTutorial[playerid] = 0;
@@ -12613,7 +12612,7 @@ public OnPlayerSpawn(playerid)
 		Spieler[playerid][pDiceTries][2] = 0;
 		//TextDrawHideForPlayer(playerid,BlackScreendraw);
 		SetPlayerVirtualWorld(playerid,0);
-		TogglePlayerControllable(playerid,1);
+		TogglePlayerControllable(playerid,true);
 	    RemovePlayerAttachedObject(playerid,2);
 		RemovePlayerAttachedObject(playerid,3);
 		RemovePlayerAttachedObject(playerid,4);
@@ -12807,7 +12806,7 @@ public OnPlayerSpawn(playerid)
 			//SCM(playerid,WANTEDDEATHERROT,""IINFO" du bist verletzt.");
 			//SCM(playerid,WEISS,"Gib /totenzeit ein,um zu sehen wie lange du noch verletzt bist.");
 			//SCM(playerid,WEISS,"");
-		    ApplyAnimation(playerid,"CRACK","crckdeth2",4.0,1,1,1,0,0,1);
+		    ApplyAnimation(playerid,"CRACK","crckdeth2",4.0,true,true,true,false,0,SYNC_ALL);
 		    SetPlayerPosEx(playerid,Spieler[playerid][tot_x],Spieler[playerid][tot_y],Spieler[playerid][tot_z]);
 		    SetPlayerInterior(playerid,Spieler[playerid][tot_int]);
 		    SetPlayerVirtualWorld(playerid,Spieler[playerid][tot_world]);
@@ -13406,7 +13405,7 @@ public OnPlayerSpawn(playerid)
 	}
  	return 1;
 }
-public OnPlayerDeath(playerid,killerid,reason)
+public OnPlayerDeath(playerid,killerid,WEAPON:reason)
 {
     if(IsPlayerNPC(killerid))return 1;
     new Float:x,Float:y,Float:z,string[256];
@@ -13419,7 +13418,7 @@ public OnPlayerDeath(playerid,killerid,reason)
 	{
 	 	if(GetPlayerState(i) == PLAYER_STATE_SPECTATING && Spieler[i][pSpectate] == playerid)
 	 	{
-	 	    TogglePlayerSpectating(i,0);
+	 	    TogglePlayerSpectating(i,false);
 			Spieler[i][pSpectate] = -1;
   		}
 	}
@@ -13552,7 +13551,7 @@ public OnPlayerDeath(playerid,killerid,reason)
 			GameTextForPlayer(playerid,"~r~Paintballdeath",1000,4);
 			PaintBallPickupRefresh(playerid);
 			KillTimer(Spieler[playerid][PaintballRefreshPickupTimer]);
-			Spieler[playerid][PaintballRefreshPickupTimer] = SetTimerEx("PaintBallPickupRefresh",15000,0,"i",playerid);
+			Spieler[playerid][PaintballRefreshPickupTimer] = SetTimerEx("PaintBallPickupRefresh",15000,false,"i",playerid);
 			pbdeathpickup[playerid] = CreateDynamicPickup(1254,1,x,y,z,1);
 			format(string,sizeof(string),"%s",Spieler[playerid][pName]);
 			PBdeathtext[playerid] = CreateDynamic3DTextLabel(string,PAINTBALL,x,y,z,10.0,INVALID_PLAYER_ID,INVALID_VEHICLE_ID,1,1);
@@ -13560,89 +13559,89 @@ public OnPlayerDeath(playerid,killerid,reason)
 			{
 				Spieler[killerid][pPBRang] = 1;
 				PlayerPlaySound(killerid,1183,0.0,0.0,0.0);
-			    SetTimerEx("StopPlayerPlaySound",5000,0,"i",killerid);
+			    SetTimerEx("StopPlayerPlaySound",5000,false,"i",killerid);
 			    SCM(killerid,0x4BB400FF,"Paintball: Du bist nun eine Rang höher gestiegen |<Anfänger>|");
 			    TextDrawShowForPlayer(killerid,InfoSign);
 			    PlayerTextDrawSetString(killerid,INFOdraw[killerid][2],"~g~Rank-~w~Up ~r~Anfaenger");
 				PlayerTextDrawShow(killerid,INFOdraw[killerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",killerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",killerid);
 			}
 			if(Spieler[killerid][pPBKills] == 50)
 			{
 				Spieler[killerid][pPBRang] = 2;
 				PlayerPlaySound(killerid,1183,0.0,0.0,0.0);
-			    SetTimerEx("StopPlayerPlaySound",5000,0,"i",killerid);
+			    SetTimerEx("StopPlayerPlaySound",5000,false,"i",killerid);
 			    SCM(killerid,0x4BB400FF,"Paintball: Du bist nun eine Rang höher gestiegen |<Fortgeschrittener>|");
 			    TextDrawShowForPlayer(killerid,InfoSign);
 			    PlayerTextDrawSetString(killerid,INFOdraw[killerid][2],"~g~Rank-~w~Up ~r~Fortgeschrittener");
 				PlayerTextDrawShow(killerid,INFOdraw[killerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",killerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",killerid);
 			}
 			if(Spieler[killerid][pPBKills] == 100)
 			{
 				Spieler[killerid][pPBRang] = 3;
 				PlayerPlaySound(killerid,1183,0.0,0.0,0.0);
-			    SetTimerEx("StopPlayerPlaySound",5000,0,"i",killerid);
+			    SetTimerEx("StopPlayerPlaySound",5000,false,"i",killerid);
 			    SCM(killerid,0x4BB400FF,"Paintball: Du bist nun eine Rang höher gestiegen |<Skiller>|");
 			    TextDrawShowForPlayer(killerid,InfoSign);
 			    PlayerTextDrawSetString(killerid,INFOdraw[killerid][2],"~g~Rank-~w~Up ~r~Skiller");
 				PlayerTextDrawShow(killerid,INFOdraw[killerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",killerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",killerid);
 			}
 			if(Spieler[killerid][pPBKills] == 150)
 			{
 				Spieler[killerid][pPBRang] = 4;
 				PlayerPlaySound(killerid,1183,0.0,0.0,0.0);
-			    SetTimerEx("StopPlayerPlaySound",5000,0,"i",killerid);
+			    SetTimerEx("StopPlayerPlaySound",5000,false,"i",killerid);
 			    SCM(killerid,0x4BB400FF,"Paintball: Du bist nun eine Rang höher gestiegen |<Profi>|");
 			    TextDrawShowForPlayer(killerid,InfoSign);
 			    PlayerTextDrawSetString(killerid,INFOdraw[killerid][2],"~g~Rank-~w~Up ~r~Profi");
 				PlayerTextDrawShow(killerid,INFOdraw[killerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",killerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",killerid);
 			}
 			if(Spieler[killerid][pPBKills] == 200)
 			{
 				Spieler[killerid][pPBRang] = 5;
 				PlayerPlaySound(killerid,1183,0.0,0.0,0.0);
-			    SetTimerEx("StopPlayerPlaySound",5000,0,"i",killerid);
+			    SetTimerEx("StopPlayerPlaySound",5000,false,"i",killerid);
 			    SCM(killerid,0x4BB400FF,"Paintball: Du bist nun eine Rang höher gestiegen |<High Skiller>|");
 			    TextDrawShowForPlayer(killerid,InfoSign);
 			    PlayerTextDrawSetString(killerid,INFOdraw[killerid][2],"~g~Rank-~w~Up ~r~High Skiller");
 				PlayerTextDrawShow(killerid,INFOdraw[killerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",killerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",killerid);
 			}
 			if(Spieler[killerid][pPBKills] == 250)
 			{
 				Spieler[killerid][pPBRang] = 6;
 				PlayerPlaySound(killerid,1183,0.0,0.0,0.0);
-			    SetTimerEx("StopPlayerPlaySound",5000,0,"i",killerid);
+			    SetTimerEx("StopPlayerPlaySound",5000,false,"i",killerid);
 			    SCM(killerid,0x4BB400FF,"Paintball: Du bist nun eine Rang höher gestiegen |<Elite>|");
 			    TextDrawShowForPlayer(killerid,InfoSign);
 			    PlayerTextDrawSetString(killerid,INFOdraw[killerid][2],"~g~Rank-~w~Up ~r~Elite");
 				PlayerTextDrawShow(killerid,INFOdraw[killerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",killerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",killerid);
 			}
 			if(Spieler[killerid][pPBKills] == 500)
 			{
 				Spieler[killerid][pPBRang] = 7;
 				PlayerPlaySound(killerid,1183,0.0,0.0,0.0);
-			    SetTimerEx("StopPlayerPlaySound",5000,0,"i",killerid);
+			    SetTimerEx("StopPlayerPlaySound",5000,false,"i",killerid);
 			    SCM(killerid,0x4BB400FF,"Paintball: Du bist nun eine Rang höher gestiegen |<ProHighSkiller>|");
 			    TextDrawShowForPlayer(killerid,InfoSign);
 			    PlayerTextDrawSetString(killerid,INFOdraw[killerid][2],"~g~Rank-~w~Up ~r~ProHighSkiller");
 				PlayerTextDrawShow(killerid,INFOdraw[killerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",killerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",killerid);
 			}
 			if(Spieler[killerid][pPBKills] == 1000)
 			{
 			    Spieler[killerid][pPBRang] = 8;
 				PlayerPlaySound(killerid,1183,0.0,0.0,0.0);
-			    SetTimerEx("StopPlayerPlaySound",5000,0,"i",killerid);
+			    SetTimerEx("StopPlayerPlaySound",5000,false,"i",killerid);
 			    SCM(killerid,0x4BB400FF,"Paintball: Du bist nun eine Rang höher gestiegen |<["#SERVERTAG"] Elite>|");
 			    TextDrawShowForPlayer(killerid,InfoSign);
 			    PlayerTextDrawSetString(killerid,INFOdraw[killerid][2],"~g~Rank-~w~Up ~r~["#SERVERTAG"] Elite");
 				PlayerTextDrawShow(killerid,INFOdraw[killerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",killerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",killerid);
 			}
 			ForEachPlayer(i)
 			{
@@ -13688,7 +13687,7 @@ public OnPlayerDeath(playerid,killerid,reason)
 				GetPlayerPos(playerid,x,y,z);
 				PaintBallPickupRefresh(playerid);
 				KillTimer(Spieler[playerid][PaintballRefreshPickupTimer]);
-				Spieler[playerid][PaintballRefreshPickupTimer] = SetTimerEx("PaintBallPickupRefresh",15000,0,"i",playerid);
+				Spieler[playerid][PaintballRefreshPickupTimer] = SetTimerEx("PaintBallPickupRefresh",15000,false,"i",playerid);
 				pbdeathpickup[playerid]=CreateDynamicPickup(1254,1,x,y,z,1);
 				format(string,sizeof(string),"%s",Spieler[playerid][pName]);
 			    ForEachPlayer(i)
@@ -13864,7 +13863,7 @@ public OnPlayerDeath(playerid,killerid,reason)
 	}
 	if(IsPlayerConnected(killerid) && killerid != INVALID_PLAYER_ID)
  	{
-	 	if(reason == 50)//rotorkill
+	 	if(reason == WEAPON:REASON_HELICOPTER_BLADES)//rotorkill
 		{
 			SCM(killerid,SAMP_WEISS,""IINFO" du hast soeben einen Spieler mit einem Helikopterrotor getötet.");
 			format(string,sizeof(string),"Anti-Rotor-Kill: %s ist durch %s durch einen Helikopterrotor gestorben.",Spieler[playerid][pName],Spieler[killerid][pName]);
@@ -13977,7 +13976,7 @@ public OnPlayerDeath(playerid,killerid,reason)
 							GetPlayerPos(playerid,x,y,z);
 							for(new i_slot=0,gun,ammo;i_slot<13;i_slot++)
 						    {
-							    GetPlayerWeaponData(playerid,i_slot,gun,ammo);
+							    GetPlayerWeaponData(playerid,WEAPON_SLOT:i_slot,gun,ammo);
 							    if(gun != 0 && ammo != 0)
 								{
 									dropcount++;
@@ -14126,7 +14125,7 @@ public OnPlayerDeath(playerid,killerid,reason)
 		Spieler[playerid][pDeath] = 1;
 	    for(new i_slot=0,gun,ammo;i_slot<13;i_slot++)
 	    {
-		    GetPlayerWeaponData(playerid,i_slot,gun,ammo);
+		    GetPlayerWeaponData(playerid,WEAPON_SLOT:i_slot,gun,ammo);
 		    if(gun != 0 && ammo != 0)
 			{
 				dropcount++;
@@ -14151,7 +14150,7 @@ public OnPlayerDeath(playerid,killerid,reason)
 	Spieler[playerid][tot_world] = GetPlayerVirtualWorld(playerid);
 	return 1;
 }
-public OnPlayerGiveDamage(playerid,damagedid,Float:amount,weaponid)
+public OnPlayerGiveDamage(playerid,damagedid,Float:amount,WEAPON:weaponid,bodypart)
 {
 	if(playerid != INVALID_PLAYER_ID && Spieler[playerid][cSound] == 1){
 		PlayerPlaySound(playerid,17802,0.0,0.0,0.0);
@@ -14162,7 +14161,7 @@ public OnPlayerGiveDamage(playerid,damagedid,Float:amount,weaponid)
 	}
     return 1;
 }
-public OnPlayerTakeDamage(playerid,issuerid,Float:amount,weaponid,bodypart)
+public OnPlayerTakeDamage(playerid,issuerid,Float:amount,WEAPON:weaponid,bodypart)
 {
 	new string[128];
 	if(server_headshoot == 1)
@@ -14209,11 +14208,11 @@ public OnPlayerTakeDamage(playerid,issuerid,Float:amount,weaponid,bodypart)
 			{
 			    if(!IsPlayerInAnyVehicle(issuerid))
 			    {
-				    TogglePlayerControllable(issuerid,0);
+				    TogglePlayerControllable(issuerid,false);
 				    Spieler[issuerid][pFreezedInNoDmZone] = 1;
-					SetTimerEx("UnTazer",5000,0,"i",issuerid);
+					SetTimerEx("UnTazer",5000,false,"i",issuerid);
 					SetPlayerArmedWeapon(issuerid,0);
-				   	ApplyAnimation(issuerid,"PED","FALL_FALL",1.0,0,0,0,0,0,1);
+				   	ApplyAnimation(issuerid,"PED","FALL_FALL",1.0,false,false,false,false,0,SYNC_ALL);
 				   	SCM(issuerid,SAMP_WEISS,""IINFO" Unterlasse das Schlagen in einer Ruhe Zone!");
 			 	}
 		 	}
@@ -14693,7 +14692,7 @@ public OnPlayerText(playerid,text[])
 			    format(string,sizeof(string),"{FF6666}Bankangestellte:{FFFFFF} Ihr Pin lautet %i.",Spieler[playerid][pBankPin]);
 			    SCM(playerid,SAMP_WEISS,string);
 			    SCM(playerid,SAMP_WEISS,"{FF6666}Bankangestellte:{FFFFFF} Ihren Bankpin können Sie über den Befehl '/bankpin' aufrufen.");
-			   	ApplyAnimation(GetPlayerID("[BOT]Bank"),"PED","IDLE_CHAT",4.0,0,0,0,0,0,1);
+			   	ApplyAnimation(GetPlayerID("[BOT]Bank"),"PED","IDLE_CHAT",4.0,false,false,false,false,0,SYNC_ALL);
 				ACMoney(playerid,-25);
 				return 0;
 			}
@@ -14704,7 +14703,7 @@ public OnPlayerText(playerid,text[])
 			    Spieler[playerid][pWrongBankPinEntry] = 0;
 			    format(string,sizeof(string),"{FF6666}Bankangestellte:{FFFFFF} Ihr neuer Pin lautet %i.",Spieler[playerid][pBankPin]);
 			    SCM(playerid,SAMP_WEISS,string);
-			    ApplyAnimation(GetPlayerID("[BOT]Bank"),"PED","IDLE_CHAT",4.0,0,0,0,0,0,1);
+			    ApplyAnimation(GetPlayerID("[BOT]Bank"),"PED","IDLE_CHAT",4.0,false,false,false,false,0,SYNC_ALL);
 			   	Spieler[playerid][pBank] -= 25;
 			   	return 0;
 			}
@@ -14735,14 +14734,14 @@ public OnPlayerText(playerid,text[])
 			}
 			SCM(playerid,SAMP_WEISS,"{FF6666}Bankangestellte:{FFFFFF} Sie haben sich erfolgreich ein Schließfach zugelegt.");
 		    Spieler[playerid][pBankSafeSafe] = 1;
-		    ApplyAnimation(GetPlayerID("[BOT]Bank"),"PED","IDLE_CHAT",4.0,0,0,0,0,0,1);
+		    ApplyAnimation(GetPlayerID("[BOT]Bank"),"PED","IDLE_CHAT",4.0,false,false,false,false,0,SYNC_ALL);
 			ACMoney(playerid,-125);
 			return 0;
 		}
 		if(strcmp(text,"Tschüss",true) == 0)
 		{
 			SetCameraBehindPlayer(playerid);
-			TogglePlayerControllable(playerid,1);
+			TogglePlayerControllable(playerid,true);
 			Spieler[playerid][pTalkwithBankbitch] = 0;
 			PlayerPlaySound(playerid,5453,0.0,0.0,0.0);
 			format(string,sizeof(string),"{FF6666}Bankangestellte:{FFFFFF} Auf Wiedersehen %s,ich wünsche Ihnen noch einen schönen Tag.",SpielerName(playerid));
@@ -15220,7 +15219,7 @@ COMMAND:bstart(playerid,params[])
 		if(BallongBesetzt == 0){
 			if(Spieler[playerid][sp_ballong] == 1){
 		        MoveDynamicObject(map_noobi[89],1130.45422, -1488.94507, 312.42508,1.0);
-		        SetTimer("Ballong1",480000,0);
+		        SetTimer("Ballong1",480000,false);
 				BallongBesetzt = 1;
 				Spieler[playerid][sp_ballong] = 0;
 				format(SP_INFO,sizeof(SP_INFO),"[ "IINFO2"Ballong Fahrt"#HTML_WEISS" ]\nVerwendung\n"IINFO2"/bstart\n"#HTML_WEISS"Status: "#HTML_ROT"Besetzt\n"#HTML_WEISS"von: "HTML_GRUEN"%s",SpielerName(playerid));
@@ -16154,12 +16153,12 @@ COMMAND:gangwar(playerid,params[])
 			SetPlayerVirtualWorld(playerid,1);
 			Spieler[playerid][pTutTime4All] = 0;
 			GetPlayerPos(playerid,Pos[0],Pos[1],Pos[2]);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			TextDrawShowForPlayer(playerid,Introdraw[0]);
 		    TextDrawShowForPlayer(playerid,Introdraw[1]);
 			InterpolateCameraPos(playerid,Pos[0],Pos[1],Pos[2],GangwarZones[gwzone][War_FlagX1],GangwarZones[gwzone][War_FlagY1],GangwarZones[gwzone][War_FlagZ1],2000,CAMERA_MOVE);
 			InterpolateCameraLookAt(playerid,Pos[0],Pos[1],Pos[2],GangwarZones[gwzone][War_FlagX1],GangwarZones[gwzone][War_FlagY1],GangwarZones[gwzone][War_FlagZ1],2000,CAMERA_MOVE);
-			Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",1000,1,"ii",playerid,1);
+			Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",1000,true,"ii",playerid,1);
 			TextDrawShowForPlayer(playerid,InfoSign);
 		    PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~g~Gangwar:~w~ Du hast ein Gangwar gestartet.");
 			PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
@@ -16185,18 +16184,18 @@ COMMAND:gangwar(playerid,params[])
 			{
 				format(string,sizeof(string),"%s",FraktionsName(Spieler[playerid][pFraktion]));//Flagge 1
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][3],string);
-			    TextDrawBackgroundColor(GangwarZones[gwzone][WARdraw][4],GRUEN);
-				TextDrawColor(GangwarZones[gwzone][WARdraw][4],GRUEN);
+			    TextDrawBackgroundColour(GangwarZones[gwzone][WARdraw][4],GRUEN);
+				TextDrawColour(GangwarZones[gwzone][WARdraw][4],GRUEN);
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][4],"..............");
 			    format(string,sizeof(string),"%s",FraktionsName(GangwarZones[gwzone][War_Owner]));//Flagge 2
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][5],string);
-			    TextDrawBackgroundColor(GangwarZones[gwzone][WARdraw][6],GRUEN);
-				TextDrawColor(GangwarZones[gwzone][WARdraw][6],GRUEN);
+			    TextDrawBackgroundColour(GangwarZones[gwzone][WARdraw][6],GRUEN);
+				TextDrawColour(GangwarZones[gwzone][WARdraw][6],GRUEN);
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][6],"..............");
 			    format(string,sizeof(string),"%s",FraktionsName(GangwarZones[gwzone][War_Owner]));//Flagge 3
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][7],string);
-			    TextDrawBackgroundColor(GangwarZones[gwzone][WARdraw][8],GRUEN);
-				TextDrawColor(GangwarZones[gwzone][WARdraw][8],GRUEN);
+			    TextDrawBackgroundColour(GangwarZones[gwzone][WARdraw][8],GRUEN);
+				TextDrawColour(GangwarZones[gwzone][WARdraw][8],GRUEN);
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][8],"..............");
 				format(string,sizeof(string),"%s\n\nFlagge der Fraktion '%s'",GangwarZones[gwzone][War_Zone_Name],FraktionsName(Spieler[playerid][pFraktion]));
 			    UpdateDynamic3DTextLabelText(WarLabel[gwzone][0],0xCDFF00CC,string);
@@ -16212,18 +16211,18 @@ COMMAND:gangwar(playerid,params[])
 			{
 				format(string,sizeof(string),"%s",FraktionsName(GangwarZones[gwzone][War_Owner]));//Flagge 1
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][3],string);
-			    TextDrawBackgroundColor(GangwarZones[gwzone][WARdraw][4],GRUEN);
-				TextDrawColor(GangwarZones[gwzone][WARdraw][4],GRUEN);
+			    TextDrawBackgroundColour(GangwarZones[gwzone][WARdraw][4],GRUEN);
+				TextDrawColour(GangwarZones[gwzone][WARdraw][4],GRUEN);
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][4],"..............");
 			    format(string,sizeof(string),"%s",FraktionsName(Spieler[playerid][pFraktion]));//Flagge 2
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][5],string);
-			    TextDrawBackgroundColor(GangwarZones[gwzone][WARdraw][6],GRUEN);
-				TextDrawColor(GangwarZones[gwzone][WARdraw][6],GRUEN);
+			    TextDrawBackgroundColour(GangwarZones[gwzone][WARdraw][6],GRUEN);
+				TextDrawColour(GangwarZones[gwzone][WARdraw][6],GRUEN);
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][6],"..............");
 			    format(string,sizeof(string),"%s",FraktionsName(GangwarZones[gwzone][War_Owner]));//Flagge 3
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][7],string);
-			    TextDrawBackgroundColor(GangwarZones[gwzone][WARdraw][8],GRUEN);
-				TextDrawColor(GangwarZones[gwzone][WARdraw][8],GRUEN);
+			    TextDrawBackgroundColour(GangwarZones[gwzone][WARdraw][8],GRUEN);
+				TextDrawColour(GangwarZones[gwzone][WARdraw][8],GRUEN);
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][8],"..............");
 				format(string,sizeof(string),"%s\n\nFlagge der Fraktion '%s'",GangwarZones[gwzone][War_Zone_Name],FraktionsName(Spieler[playerid][pFraktion]));
 			    UpdateDynamic3DTextLabelText(WarLabel[gwzone][1],0xCDFF00CC,string);
@@ -16239,18 +16238,18 @@ COMMAND:gangwar(playerid,params[])
 			{
 				format(string,sizeof(string),"%s",FraktionsName(GangwarZones[gwzone][War_Owner]));//Flagge 1
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][3],string);
-			    TextDrawBackgroundColor(GangwarZones[gwzone][WARdraw][4],GRUEN);
-				TextDrawColor(GangwarZones[gwzone][WARdraw][4],GRUEN);
+			    TextDrawBackgroundColour(GangwarZones[gwzone][WARdraw][4],GRUEN);
+				TextDrawColour(GangwarZones[gwzone][WARdraw][4],GRUEN);
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][4],"..............");
 			    format(string,sizeof(string),"%s",FraktionsName(GangwarZones[gwzone][War_Owner]));//Flagge 2
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][5],string);
-			    TextDrawBackgroundColor(GangwarZones[gwzone][WARdraw][6],GRUEN);
-				TextDrawColor(GangwarZones[gwzone][WARdraw][6],GRUEN);
+			    TextDrawBackgroundColour(GangwarZones[gwzone][WARdraw][6],GRUEN);
+				TextDrawColour(GangwarZones[gwzone][WARdraw][6],GRUEN);
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][6],"..............");
 			    format(string,sizeof(string),"%s",FraktionsName(Spieler[playerid][pFraktion]));//Flagge 3
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][7],string);
-			    TextDrawBackgroundColor(GangwarZones[gwzone][WARdraw][8],GRUEN);
-				TextDrawColor(GangwarZones[gwzone][WARdraw][8],GRUEN);
+			    TextDrawBackgroundColour(GangwarZones[gwzone][WARdraw][8],GRUEN);
+				TextDrawColour(GangwarZones[gwzone][WARdraw][8],GRUEN);
 			    TextDrawSetString(GangwarZones[gwzone][WARdraw][8],"..............");
 				format(string,sizeof(string),"%s\n\nFlagge der Fraktion '%s'",GangwarZones[gwzone][War_Zone_Name],FraktionsName(Spieler[playerid][pFraktion]));
 			    UpdateDynamic3DTextLabelText(WarLabel[gwzone][2],0xCDFF00CC,string);
@@ -16442,7 +16441,7 @@ COMMAND:acheckgun(playerid,params[])
     SCM(playerid,SAMP_WEISS,string);
 	for(new i=0;i<13;i++)
 	{
-		GetPlayerWeaponData(pID,i,waffe,muni);
+		GetPlayerWeaponData(pID,WEAPON_SLOT:i,waffe,muni);
 		if(waffe != 0)
 		{
 			format(string,sizeof(string)," %i: %s %i Munition",i,SpielerWaffenName(waffe),muni);
@@ -16514,7 +16513,7 @@ COMMAND:aimbottest(playerid,params[])
 	Spieler[playerid][pAimbotTest] = gettime() + 10;
 	GetPlayerPos(playerid,Pos[0],Pos[1],Pos[2]);
 	GetPlayerFacingAngle(playerid,Pos[3]);
-	SetTimerEx("AimbotTest",500,0,"iffff",playerid,Pos[0],Pos[1],Pos[2],Pos[3]);
+	SetTimerEx("AimbotTest",500,false,"iffff",playerid,Pos[0],Pos[1],Pos[2],Pos[3]);
 	GetXYInFrontOfPlayer(pID,Pos[0],Pos[1],Pos[2],Pos[3],-2.5);
 	SetPlayerPos(playerid,Pos[0],Pos[1],Pos[2]);
 	SetPlayerFacingAngle(playerid,Pos[3]);
@@ -16823,16 +16822,16 @@ COMMAND:hausgun(playerid,params[])
 	if(gunammo <= 0)return SCM(playerid,SAMP_WEISS,""IINFO" du musst schon einen Munitionsbetrag angeben!");
 	if(strcmp(cmd,"get",true) == 0)
    	{
-		if(HausInfo[haus][haus_gun][GetWeaponSlot(gunid)] == gunid)
+		if(HausInfo[haus][haus_gun][Script_GetWeaponSlot(gunid)] == gunid)
 		{
-			if((HausInfo[haus][haus_gunammo][GetWeaponSlot(gunid)] - gunammo) < 0)return SCM(playerid,SAMP_WEISS,"So viel Munition liegt nicht im Waffenschrank!");
+			if((HausInfo[haus][haus_gunammo][Script_GetWeaponSlot(gunid)] - gunammo) < 0)return SCM(playerid,SAMP_WEISS,"So viel Munition liegt nicht im Waffenschrank!");
 			format(string,sizeof(string),""IINFO" du hast dir ein/e %s mit %i Munition aus dem Waffenschrank genommen!",SpielerWaffenName(gunid),gunammo);
 			SCM(playerid,SAMP_WEISS,string);
 			GiveWeapon(playerid,gunid,gunammo,true);
-			HausInfo[haus][haus_gunammo][GetWeaponSlot(gunid)] -= gunammo;
-			if(HausInfo[haus][haus_gunammo][GetWeaponSlot(gunid)] <= 0)
+			HausInfo[haus][haus_gunammo][Script_GetWeaponSlot(gunid)] -= gunammo;
+			if(HausInfo[haus][haus_gunammo][Script_GetWeaponSlot(gunid)] <= 0)
 			{
-				HausInfo[haus][haus_gun][GetWeaponSlot(gunid)] = 0;
+				HausInfo[haus][haus_gun][Script_GetWeaponSlot(gunid)] = 0;
 			}
 			SaveOnlyOneHaus(haus);
 			format(string,sizeof(string),"** %s holt eine Waffe aus dem Waffenschrank **",SpielerName(playerid));
@@ -16847,8 +16846,8 @@ COMMAND:hausgun(playerid,params[])
 		if((GetPlayerAmmo(playerid) - gunammo) < 0)return SCM(playerid,SAMP_WEISS,"Angegebene Munitionsrate nicht vorhanden!");
 		format(string,sizeof(string),""IINFO" du hast ein/e %s mit %i Munition in den Waffenschrank gelegt!",SpielerWaffenName(gunid),gunammo);
 		SCM(playerid,SAMP_WEISS,string);
-		HausInfo[haus][haus_gun][GetWeaponSlot(GetPlayerWeapon(playerid))] = gunid;
-		HausInfo[haus][haus_gunammo][GetWeaponSlot(GetPlayerWeapon(playerid))] += gunammo;
+		HausInfo[haus][haus_gun][Script_GetWeaponSlot(GetPlayerWeapon(playerid))] = gunid;
+		HausInfo[haus][haus_gunammo][Script_GetWeaponSlot(GetPlayerWeapon(playerid))] += gunammo;
 		SetPlayerAmmo(playerid,gunid,GetPlayerAmmo(playerid) - gunammo);
 		SaveOnlyOneHaus(haus);
 		format(string,sizeof(string),"** %s legt seine Waffe in den Waffenschrank **",SpielerName(playerid));
@@ -17752,7 +17751,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Normal",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[0] = 0;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in Los Santos auf normal.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17762,7 +17761,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Regen",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[0] = 8;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in Los Santos auf regnerisch.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17772,7 +17771,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Sturm",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[0] = 16;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in Los Santos auf stürmisch.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17782,7 +17781,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Nebel",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[0] = 9;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in Los Santos auf nebelig.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17793,7 +17792,7 @@ COMMAND:setweather(playerid,params[])
 		{
 			if(monat < 10 && monat > 1)return SCM(playerid,SAMP_WEISS,"Es ist noch Sommerzeit.");
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[0] = 8;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in Los Santos auf Schnee.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17803,7 +17802,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Zufall",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[0] = BadWeather[random(sizeof(BadWeather))];
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in Los Santos auf zufällige weise.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17817,7 +17816,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Normal",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[1] = 0;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in San Fierro auf normal.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17827,7 +17826,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Regen",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[1] = 8;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in San Fierro auf regnerisch.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17837,7 +17836,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Sturm",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[1] = 16;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in San Fierro auf stürmisch.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17847,7 +17846,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Nebel",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[1] = 9;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in San Fierro auf nebelig.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17858,7 +17857,7 @@ COMMAND:setweather(playerid,params[])
 		{
 			if(monat < 10 && monat > 1)return SCM(playerid,SAMP_WEISS,"Es ist noch Sommerzeit.");
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[1] = 8;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in San Fierro auf Schnee.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17868,7 +17867,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Zufall",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[1] = BadWeather[random(sizeof(BadWeather))];
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in San Fierro auf zufällige weise.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17882,7 +17881,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Normal",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[2] = 0;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in Las Venturas auf normal.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17892,7 +17891,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Regen",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[2] = 8;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in Las Venturas auf regnerisch.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17902,7 +17901,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Sturm",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[2] = 16;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in Las Venturas auf stürmisch.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17912,7 +17911,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Nebel",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[2] = 9;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in Las Venturas auf nebelig.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17923,7 +17922,7 @@ COMMAND:setweather(playerid,params[])
 		{
 			if(monat < 10 && monat > 1)return SCM(playerid,SAMP_WEISS,"Es ist noch Sommerzeit.");
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[2] = 8;
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in Las Venturas auf Schnee.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -17933,7 +17932,7 @@ COMMAND:setweather(playerid,params[])
 		if(strcmp(cmd,"Zufall",true) == 0)
 		{
 			KillTimer(WeatherTimer);
-			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,1);
+			WeatherTimer = SetTimer("WeatherChange",60000*ChangeweatherinMin,true);
 			UseBadWeather[2] = BadWeather[random(sizeof(BadWeather))];
 			format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) ändert die Wetterverhältnisse in Las Venturas auf zufällige weise.",Spieler[playerid][pName],playerid);
 			SendAdminMessage(GRUEN,string);
@@ -21250,7 +21249,7 @@ COMMAND:wtext(playerid,params[])
     TextDrawSetString(WERBEdraw,string);
 	TextDrawShowForAll(WERBEdraw);
 	TextDrawHideForAll(CHANGEDraw);
-	SetTimer("ShowWerbeTextDraw",10000,0);
+	SetTimer("ShowWerbeTextDraw",10000,false);
 	NextAdvertise = gettime() + 10;
 	return 1;
 	}
@@ -21320,7 +21319,7 @@ COMMAND:use(playerid,params[])
 		SetDrunkLevel(playerid,GetPlayerDrunkLevel(playerid)+4000);
 		format(string,sizeof(string),"** %s nimmt ein Bier und trinkt es **",SpielerName(playerid));
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
-		ApplyAnimation(playerid,"PED","WALK_DRUNK",4.0,0,1,1,1,5000,1);
+		ApplyAnimation(playerid,"PED","WALK_DRUNK",4.0,false,true,true,true,5000,SYNC_ALL);
 		Spieler[playerid][pAlc]--;
 		if((GetPlayerACHealth(playerid) + 20) > 100)return SetPlayerACHealth(playerid,100);
 		SetPlayerACHealth(playerid,GetPlayerACHealth(playerid)+20);
@@ -21336,14 +21335,14 @@ COMMAND:use(playerid,params[])
 		}
 		format(string,sizeof(string),"** %s nimmt 2g Ganja und raucht sie **",SpielerName(playerid));
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
-		ApplyAnimation(playerid,"SMOKING","M_smklean_loop",4.0,0,1,1,1,5000,1);
+		ApplyAnimation(playerid,"SMOKING","M_smklean_loop",4.0,false,true,true,true,5000,SYNC_ALL);
 		Spieler[playerid][pGanja] -= 2;
 		Spieler[playerid][pStonedCount]++;
 		if(Spieler[playerid][pStonedCount] == 3)
 		{
 			PlayerTextDrawSetString(playerid,PAYDAYdraw[playerid],"~g~Du bist Stoned");
 			KillTimer(Spieler[playerid][pStonedTimer][0]);
-			Spieler[playerid][pStonedTimer][0] = SetTimerEx("Stoned",30000,0,"ii",playerid,1);//drugart = 1 = Ganja,2 = kokain,3 = opium,4 = Spice
+			Spieler[playerid][pStonedTimer][0] = SetTimerEx("Stoned",30000,false,"ii",playerid,1);//drugart = 1 = Ganja,2 = kokain,3 = opium,4 = Spice
 		}
 		if((GetPlayerACHealth(playerid) + 30) > 100)return SetPlayerACHealth(playerid,100);
 		SetPlayerACHealth(playerid,GetPlayerACHealth(playerid)+30);
@@ -21360,11 +21359,11 @@ COMMAND:use(playerid,params[])
 		}
 		format(string,sizeof(string),"** %s zieht sich 2g Kokain **",SpielerName(playerid));
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
-		ApplyAnimation(playerid,"SMOKING","M_smklean_loop",4.0,0,1,1,1,5000,1);
+		ApplyAnimation(playerid,"SMOKING","M_smklean_loop",4.0,false,true,true,true,5000,SYNC_ALL);
 		Spieler[playerid][pKokain] -= 2;
 		PlayerTextDrawSetString(playerid,PAYDAYdraw[playerid],"~y~Du bist Stoned");
 		KillTimer(Spieler[playerid][pStonedTimer][1]);
-		Spieler[playerid][pStonedTimer][1] = SetTimerEx("Stoned",30000,0,"ii",playerid,2);//drugart = 1 = Ganja,2 = kokain,3 = opium,4 = Spice
+		Spieler[playerid][pStonedTimer][1] = SetTimerEx("Stoned",30000,false,"ii",playerid,2);//drugart = 1 = Ganja,2 = kokain,3 = opium,4 = Spice
 		if((GetPlayerACHealth(playerid) + 50) > 100)return SetPlayerACHealth(playerid,100);
 		SetPlayerACHealth(playerid,GetPlayerACHealth(playerid)+50);
 		return 1;
@@ -21382,14 +21381,14 @@ COMMAND:use(playerid,params[])
 		format(string,sizeof(string),"** %s schluckt eine Pille Opium **",SpielerName(playerid));
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 		SCM(playerid,SAMP_WEISS,""IINFO" du hast eine Pille Opium geschluckt und nun einen 2 Minütigen Rausch.");
-		ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+		ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 		Spieler[playerid][pOpium]--;
 		Spieler[playerid][StonedHP] = GetPlayerACHealth(playerid);
 	    SetPlayerACHealth(playerid,150);
 	    Spieler[playerid][pStonedAntiSpam] = 1;
 	    SetDrunkLevel(playerid,GetPlayerDrunkLevel(playerid)+15000);
 	    PlayerTextDrawSetString(playerid,PAYDAYdraw[playerid],"~p~Du bist Stoned");
-	    Spieler[playerid][pStonedTimer][2] = SetTimerEx("Stoned",60000*2,0,"ii",playerid,3);//drugart = 1 = Ganja,2 = kokain,3 = opium,4 = Spice
+	    Spieler[playerid][pStonedTimer][2] = SetTimerEx("Stoned",60000*2,false,"ii",playerid,3);//drugart = 1 = Ganja,2 = kokain,3 = opium,4 = Spice
 		return 1;
 	}
 	if(strcmp(cmd,"Spice",true) == 0)
@@ -21405,7 +21404,7 @@ COMMAND:use(playerid,params[])
 		format(string,sizeof(string),"** %s nimmt Spice zu sich **",SpielerName(playerid));
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 		SCM(playerid,SAMP_WEISS,""IINFO" du hast Spice genommen und nun einen 2 Minütigen Rausch.");
-		ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+		ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 		Spieler[playerid][pSpice]--;
 		Spieler[playerid][StonedHP] = GetPlayerACHealth(playerid);
 		Spieler[playerid][StonedArmour] = GetPlayerACArmour(playerid);
@@ -21414,7 +21413,7 @@ COMMAND:use(playerid,params[])
 	    Spieler[playerid][pStonedAntiSpam] = 1;
 	    SetDrunkLevel(playerid,GetPlayerDrunkLevel(playerid)+15000);
 	    PlayerTextDrawSetString(playerid,PAYDAYdraw[playerid],"~p~Du bist Stoned");
-	    Spieler[playerid][pStonedTimer][2] = SetTimerEx("Stoned",65000*2,0,"ii",playerid,3);//drugart = 1 = Ganja,2 = kokain,3 = opium,4 = Spice
+	    Spieler[playerid][pStonedTimer][2] = SetTimerEx("Stoned",65000*2,false,"ii",playerid,3);//drugart = 1 = Ganja,2 = kokain,3 = opium,4 = Spice
 		return 1;
 	}
 	if(strcmp(cmd,"Lunchpaket",true) == 0)
@@ -21428,7 +21427,7 @@ COMMAND:use(playerid,params[])
 		}
 		format(string,sizeof(string),"** %s nimmt ein Lunchpaket und isst es **",SpielerName(playerid));
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
-		ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+		ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 		Spieler[playerid][pLunchpaket]--;
 		StopAudioStreamForPlayer(playerid);
 		PlayAudioStreamForPlayer(playerid,ServerSounds[4],0.0,0.0,0.0);
@@ -21447,7 +21446,7 @@ COMMAND:use(playerid,params[])
 		}
 		format(string,sizeof(string),"** %s nimmt eine Zigarette und raucht sie **",SpielerName(playerid));
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
-		ApplyAnimation(playerid,"SMOKING","M_smklean_loop",4.0,0,1,1,1,5000,1);
+		ApplyAnimation(playerid,"SMOKING","M_smklean_loop",4.0,false,true,true,true,5000,SYNC_ALL);
 		Spieler[playerid][pZigarets]--;
 		if((GetPlayerACHealth(playerid) + 5) > 100)return SetPlayerACHealth(playerid,100);
 		SetPlayerACHealth(playerid,GetPlayerACHealth(playerid)+5);
@@ -21486,7 +21485,7 @@ COMMAND:sfight(playerid,params[])
 					if(gettime() < SmarkInfo[sm][swarsleep])
 					{
 					new time = SmarkInfo[sm][swartime]-gettime();
-					format(string,sizeof(string),"Ihr diesen Schwarzmarkt (ID:%i) erst in "IINFO2"%i:%02d"#HTML_WEISS" Angreifen.",time/60,time%60);
+					format(string,sizeof(string),"Ihr koennt diesen Schwarzmarkt erst in "IINFO2"%i:%02d"#HTML_WEISS" angreifen.",time/60,time%60);
 					return SCM(playerid,SAMP_WEISS,string);
 					}
 					ForEachPlayer(i)
@@ -21502,12 +21501,12 @@ COMMAND:sfight(playerid,params[])
 					if(members < 2)return SCM(playerid,SAMP_WEISS,"Nicht genug Fraktionsmitglieder der Besitzerfraktion Online.(2)");
 				    Spieler[playerid][pTutTime4All] = 0;
 					GetPlayerPos(playerid,Pos[0],Pos[1],Pos[2]);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					TextDrawShowForPlayer(playerid,Introdraw[0]);
 				    TextDrawShowForPlayer(playerid,Introdraw[1]);
 					InterpolateCameraPos(playerid,Pos[0],Pos[1],Pos[2],SmarkInfo[sm][sx],SmarkInfo[sm][sy],SmarkInfo[sm][sz],2000,CAMERA_MOVE);
 					InterpolateCameraLookAt(playerid,Pos[0],Pos[1],Pos[2],SmarkInfo[sm][sx],SmarkInfo[sm][sy],SmarkInfo[sm][sz],2000,CAMERA_MOVE);
-					Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",1000,1,"ii",playerid,2);
+					Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",1000,true,"ii",playerid,2);
 					TextDrawShowForPlayer(playerid,InfoSign);
 				    PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~g~Schwarzmarkt-Fight:~w~ Du hast einen Schwarzmarkt-Fight gestartet.");
 					PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
@@ -21834,7 +21833,7 @@ COMMAND:seject(playerid,params[])
 						SetPlayerPosEx(pID,SmarkInfo[sm][sx],SmarkInfo[sm][sy],SmarkInfo[sm][sz]);
 						SetPlayerVirtualWorld(pID,0);
 						SetPlayerInterior(pID,0);
-						TogglePlayerControllable(pID,1);
+						TogglePlayerControllable(pID,true);
 						PlayerTextDrawHide(pID,INFOdraw[pID][0]);
 						PlayerTextDrawHide(pID,BUYSMARKTWEAPONdraw[pID][0]);
 						PlayerTextDrawHide(pID,BUYSMARKTWEAPONdraw[pID][1]);
@@ -22761,7 +22760,7 @@ COMMAND:weisung(playerid,params[])
     SaveAccount(playerid);
 	SaveAccount(pID);
 	SCM(playerid,SAMP_WEISS,"{FF6666}Bankangestellte:{FFFFFF} Für weiter Transaktionen stehen wir Ihnen zu verfügung,ihre Bank of San Andreas.");
-	ApplyAnimation(GetPlayerID("[BOT]Bank"),"PED","IDLE_CHAT",4.0,0,0,0,0,0,1);
+	ApplyAnimation(GetPlayerID("[BOT]Bank"),"PED","IDLE_CHAT",4.0,false,false,false,false,0,SYNC_ALL);
 	return 1;
 }
 COMMAND:fraktueberweisung(playerid,params[])
@@ -22810,7 +22809,7 @@ COMMAND:fraktueberweisung(playerid,params[])
 		Log("Fkassensqllog",string);
 		format(string,sizeof(string),"%s hat euch %i$ überwiesen! Fraktionkassenstand(Geld): %i$",SpielerName(playerid),menge,fverwaltungen[fID][Geld]);
 	    SendFraktionsMessage(fID,FMELDUNG,string);
-	    ApplyAnimation(GetPlayerID("[BOT]Bank"),"PED","IDLE_CHAT",4.0,0,0,0,0,0,1);
+	    ApplyAnimation(GetPlayerID("[BOT]Bank"),"PED","IDLE_CHAT",4.0,false,false,false,false,0,SYNC_ALL);
 		SCM(playerid,SAMP_WEISS,"{FF6666}Bankangestellte:{FFFFFF} Für weiter Transaktionen stehen wir Ihnen zu verfügung,ihre Bank of San Andreas.");
 		return 1;
 	}
@@ -23103,7 +23102,7 @@ COMMAND:allthinginfo_2(playerid,params[])
 	    if(GetPlayerVehicleSeat(playerid) != 0)return SCM(playerid,SAMP_WEISS,""IINFO" nicht der Fahrer des Fahrzeugs.");
 	    for(new i=0;i<MAX_ZIGAUTOMATEN;i++)
 	  	{
-			format(string,sizeof(string),"%s\nZTM: %i | %i/180 Schachteln\n%s",string,i,ZigAutomatInfo[i][Zigarrets]);
+			format(string,sizeof(string),"%s\nZTM: %i | %i/180 Schachteln",string,i,ZigAutomatInfo[i][Zigarrets]);
 			ShowPlayerDialog(playerid,DIALOG_SEARCH_ATMORZTM,DIALOG_STYLE_LIST,"Zigarettenautomaten",string,"Markieren","Abbrechen");
 		}
 		return 1;
@@ -23417,7 +23416,7 @@ COMMAND:bentladen(playerid,params[])
 	if(BauarbeiterLoad[playerid] == 0)return SCM(playerid,SAMP_WEISS,""IINFO" du hast keine Ladung auf deinem Fahrzeug!");
 	if(IsPlayerInRangeOfPoint(playerid, 7.5, BauarbeiterABP[BauarbeiterEntladenPunkt[playerid]][0],BauarbeiterABP[BauarbeiterEntladenPunkt[playerid]][1],BauarbeiterABP[BauarbeiterEntladenPunkt[playerid]][2]) && BauarbeiterCheckpoint[playerid] == 4)
 	{
-    	SetTimerEx("BauarbeiterLadung",60000,0,"ii",playerid,2);
+    	SetTimerEx("BauarbeiterLadung",60000,false,"ii",playerid,2);
 	    SCM(playerid,SAMP_WEISS,"Warte 1 Minute bis die Ladung abgeladen wurde!");
 	    TogglePlayerControllable(playerid,false);
 	    BauarbeiterLoad[playerid] = 0;
@@ -23450,7 +23449,7 @@ COMMAND:baufladen(playerid,params[])
 	if(BauarbeiterLoad[playerid] != 0)return SCM(playerid,SAMP_WEISS,""IINFO" du hast bereits eine Ladung auf deinem Fahrzeug!");
     if(IsPlayerInRangeOfPoint(playerid,7.5,1633.4183,982.5751,10.5474) && BauarbeiterCheckpoint[playerid] == 2)
 	{
-	    SetTimerEx("BauarbeiterLadung",60000,0,"ii",playerid,1);
+	    SetTimerEx("BauarbeiterLadung",60000,false,"ii",playerid,1);
 	    SCM(playerid,SAMP_WEISS,"Warte 1 Minute bis sich die Ladung auf dem Fahrzeug befindet.");
 	    TogglePlayerControllable(playerid,false);
 	    BauarbeiterLoad[playerid] = 1;
@@ -23596,7 +23595,7 @@ COMMAND:werkstatt(playerid,params[])
     if(!IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du sitzt in keinem Fahrzeug.");
     if(GetPlayerVehicleSeat(playerid) != 0)return SCM(playerid,SAMP_WEISS,""IINFO" nicht der Fahrer des Fahrzeugs.");
     ShowMenuForPlayer(VehicleComponentrelay[0],playerid);
-	TogglePlayerControllable(playerid,0);
+	TogglePlayerControllable(playerid,false);
 	return 1;
 }
 
@@ -23638,7 +23637,7 @@ COMMAND:drivein(playerid,params[])
 	DisablePlayerCheckpoint(playerid);
     if(DriveInPos[did][ItsABSN] == true) ShowMenuForPlayer(DriveinMenu[0],playerid);
     else ShowMenuForPlayer(DriveinMenu[1],playerid);
-    TogglePlayerControllable(playerid,0);
+    TogglePlayerControllable(playerid,false);
     SetPlayerCheckpoint(playerid,DriveInPos[did][Deatx],DriveInPos[did][Deaty],DriveInPos[did][Deatz],2.0);
     return 1;
 }
@@ -23834,7 +23833,7 @@ COMMAND:togphone_2(playerid,params[])
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 		ShowHandyDraw(playerid);
 		UpdateHandyTextdraw(playerid);
-		AkkuTimer[playerid] = SetTimerEx("HandyAkku",120000,1,"i",playerid);
+		AkkuTimer[playerid] = SetTimerEx("HandyAkku",120000,true,"i",playerid);
 	}
 	else if(Spieler[playerid][pHandystate] == 1)
 	{
@@ -24019,7 +24018,7 @@ COMMAND:tog__3(playerid,params[])
 			PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
    			ShowHandyDraw(playerid);
 		    UpdateHandyTextdraw(playerid);
-			AkkuTimer[playerid] = SetTimerEx("HandyAkku",120000,1,"i",playerid);
+			AkkuTimer[playerid] = SetTimerEx("HandyAkku",120000,true,"i",playerid);
 		}
 		else if(Spieler[playerid][pHandystate] == 1)
 		{
@@ -24772,7 +24771,7 @@ COMMAND:showfirmen(playerid,params[])
 		            case 11:{ftyp="Müllentsorgung";}
 		            default:{ftyp="ERROR";}
 				}
-				format(string,sizeof(string),"[Firmen ID: %i], Name: %s, Typ: %s, Firmentyp: %s, Gründer: %s, Status: %s\n%s",f,Firma[f][FirmaName],fgtyp,ftyp,Firma[f][FirmaOwner],string);
+				format(string,sizeof(string),"[Firmen ID: %i], Name: %s, Typ: %s, Firmentyp: %s, Gründer: %s\n%s",f,Firma[f][FirmaName],fgtyp,ftyp,Firma[f][FirmaOwner],string);
 		    	ShowPlayerDialog(playerid,DIALOG_4ALL_SONSTIGES,DIALOG_STYLE_MSGBOX,""ClanTagDialoge" Firmenanträge",string,"Verlassen","");
 				count++;
 			}
@@ -25704,7 +25703,7 @@ COMMAND:firmleave(playerid,params[])
 	new string[128],org = Spieler[playerid][pOrgMember];
     if(org == 0)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keiner Firma.");
     if(strcmp(Spieler[playerid][pName],OrgInfo[org][OrgOwner],false) == 0)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst deine Organisation nicht eigenhändig verlassen.");
-	format(string,sizeof(string),"%s hat die Firma "IINFO2"%s"#HTML_WEISS" verlassen.",SpielerName(playerid));
+	format(string,sizeof(string),"%s hat die Firma "IINFO2"%s"#HTML_WEISS" verlassen.",SpielerName(playerid),OrgInfo[org][OrgName]);
 	SendOrganisationsMessage(org,SAMP_WEISS,string);
 	Spieler[playerid][pOrgLeader] = 0;
 	Spieler[playerid][pOrgMember] = 0;
@@ -25957,7 +25956,7 @@ COMMAND:parteileave(playerid,params[])
 	new string[128],p = Spieler[playerid][pParteiMember];
     if(p == 0)return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keiner Partei.");
     if(strcmp(Spieler[playerid][pName],PartInfo[p][ParteiOwner],false) == 0)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst deine Partei nicht eigenhändig verlassen.");
-	format(string,sizeof(string),"%s hat die Partei "IINFO2"%s"#HTML_WEISS" verlassen.",SpielerName(playerid));
+	format(string,sizeof(string),"%s hat die Partei "IINFO2"%s"#HTML_WEISS" verlassen.",SpielerName(playerid),PartInfo[p][ParteiName]);
 	SendParteiMessage(p,SAMP_WEISS,string);
 	Spieler[playerid][pParteiLeader] = 0;
 	Spieler[playerid][pParteiMember] = 0;
@@ -26323,7 +26322,7 @@ COMMAND:give(playerid,params[])
 	{
 		if((Spieler[playerid][pAlc] - menge) < 0)return SCM(playerid,SAMP_WEISS,""IINFO" du trägst nicht so viel Bier bei dir!");
 	    if((Spieler[pID][pAlc] + menge) > 20)return SCM(playerid,SAMP_WEISS,"So viel kannst der Spieler nicht tragen.");
-		format(string,sizeof(string),""IINFO" du hast %s (ID:%i) % Flasche/n Bier gegeben.",SpielerName(pID),pID,menge);
+		format(string,sizeof(string),""IINFO" du hast %s (ID:%i) %i Flasche/n Bier gegeben.",SpielerName(pID),pID,menge);
 		SCM(playerid,SAMP_WEISS,string);
 		format(string,sizeof(string),"%s (ID:%i) hat dir soeben %d Flasche/n Bier gegeben.",SpielerName(playerid),playerid,menge);
 		SCM(pID,SAMP_WEISS,string);
@@ -26337,7 +26336,7 @@ COMMAND:give(playerid,params[])
 	{
 		if((Spieler[playerid][pCondoms] - menge) < 0)return SCM(playerid,SAMP_WEISS,""IINFO" du trägst nicht so viele Kondome bei dir!");
 	    if((Spieler[pID][pCondoms] + menge) > 100)return SCM(playerid,SAMP_WEISS,"So viel kannst der Spieler nicht tragen.");
-		format(string,sizeof(string),""IINFO" du hast %s (ID:%i) % Kondome gegeben.",SpielerName(pID),pID,menge);
+		format(string,sizeof(string),""IINFO" du hast %s (ID:%i) %i Kondome gegeben.",SpielerName(pID),pID,menge);
 		SCM(playerid,SAMP_WEISS,string);
 		format(string,sizeof(string),"%s (ID:%i) hat dir soeben %d Kondome gegeben.",SpielerName(playerid),playerid,menge);
 		SCM(pID,SAMP_WEISS,string);
@@ -26351,7 +26350,7 @@ COMMAND:give(playerid,params[])
 	{
 		if((Spieler[playerid][pCoins] - menge) < 0)return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht so viele Coins!");
 	    if((Spieler[pID][pCoins] + menge) > 100000000)return SCM(playerid,SAMP_WEISS,"So viel kannst der Spieler nicht tragen.");
-		format(string,sizeof(string),""IINFO" du hast %s (ID:%i) % Coins gegeben.",SpielerName(pID),pID,menge);
+		format(string,sizeof(string),""IINFO" du hast %s (ID:%i) %i Coins gegeben.",SpielerName(pID),pID,menge);
 		SCM(playerid,SAMP_WEISS,string);
 		format(string,sizeof(string),"%s (ID:%i) hat dir soeben %d Coins gegeben.",SpielerName(playerid),playerid,menge);
 		SCM(pID,SAMP_WEISS,string);
@@ -27250,7 +27249,7 @@ COMMAND:unfreeze(playerid,params[])
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 	if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
 	Spieler[pID][pFreezed] = false;
-	TogglePlayerControllable(pID,1);
+	TogglePlayerControllable(pID,true);
 	Spieler[pID][pCuffed] = 0;
 	Spieler[pID][pTazerd] = 0;
 	format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) hat dich unfreezt. Grund: %s",Spieler[playerid][pName],playerid,reason);
@@ -27282,7 +27281,7 @@ COMMAND:freeze(playerid,params[])
 		if(GetPlayerLevel(pID) > 3)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst nur Level 1´er 2´er oder 3´er freezen!");
 	}
 	Spieler[pID][pFreezed] = true;
-	TogglePlayerControllable(pID,0);
+	TogglePlayerControllable(pID,false);
 	format(string,sizeof(string),""ACINFO" der Admin %s (ID:%i) hat dich gefreezt. Grund: %s",Spieler[playerid][pName],playerid,reason);
 	SCM(pID,SAMP_WEISS,string);
 	format(string,sizeof(string),""IINFO" du hast %s (ID:%i) gefreezt. Grund: %s",Spieler[pID][pName],pID,reason);
@@ -27495,7 +27494,7 @@ COMMAND:waffenschein(playerid,params[])
 	  	fverwaltungen[16][Geld] += (fsteuern[WeapPrice]*wlevel)/2;
 	}
 	PlayerPlaySound(playerid,1183,0.0,0.0,0.0);
-  	SetTimerEx("StopPlayerPlaySound",5000,0,"i",playerid);
+  	SetTimerEx("StopPlayerPlaySound",5000,false,"i",playerid);
   	Spieler[playerid][pWaffenLic] = wlevel;
     SetPlayerWaffenSkill(playerid);
   	return 1;
@@ -28064,9 +28063,9 @@ COMMAND:samenkaufen(playerid,params[])
 		    SetPlayerFacingAngle(playerid,310.5711);
 		    InterpolateCameraPos(playerid,1298.9716,-854.7413,43.5083,1300.6304,-856.3292,44.1327,2000,CAMERA_MOVE);
 			InterpolateCameraLookAt(playerid,1298.9716,-854.7413,43.5083,1297.5085,-853.1715,43.4663,2000,CAMERA_MOVE);
-			ApplyAnimation(playerid,"DEALER","DEALER_DEAL",4.0,0,1,1,1,5000,1);
-			TogglePlayerControllable(playerid,0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
+			ApplyAnimation(playerid,"DEALER","DEALER_DEAL",4.0,false,true,true,true,5000,SYNC_ALL);
+			TogglePlayerControllable(playerid,false);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
 		    format(string,sizeof(string),""IINFO" du hast soeben %i Ganjasamen für %i$ gekauft",menge,preiberechnung);
 		    SCM(playerid,SAMP_WEISS,string);
 		    ACMoney(playerid,-preiberechnung);
@@ -28084,9 +28083,9 @@ COMMAND:samenkaufen(playerid,params[])
 		    SetPlayerFacingAngle(playerid,310.5711);
 		    InterpolateCameraPos(playerid,1298.9716,-854.7413,43.5083,1300.6304,-856.3292,44.1327,2000,CAMERA_MOVE);
 			InterpolateCameraLookAt(playerid,1298.9716,-854.7413,43.5083,1297.5085,-853.1715,43.4663,2000,CAMERA_MOVE);
-			ApplyAnimation(playerid,"DEALER","DEALER_DEAL",4.0,0,1,1,1,5000,1);
-			TogglePlayerControllable(playerid,0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
+			ApplyAnimation(playerid,"DEALER","DEALER_DEAL",4.0,false,true,true,true,5000,SYNC_ALL);
+			TogglePlayerControllable(playerid,false);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
 		    format(string,sizeof(string),""IINFO" du hast soeben %i Kokainsamen für %i$ gekauft",menge,preiberechnung);
 		    SCM(playerid,SAMP_WEISS,string);
 		    ACMoney(playerid,-preiberechnung);
@@ -28105,9 +28104,9 @@ COMMAND:samenkaufen(playerid,params[])
 			    SetPlayerFacingAngle(playerid,90.2736);
 			    InterpolateCameraPos(playerid,-1889.9170,-202.2443,14.3792,-1889.4138,-196.1063,18.3959,2000,CAMERA_MOVE);
 				InterpolateCameraLookAt(playerid,-1889.9170,-202.2443,14.3792,-1889.3230,-203.4034,14.5326,2000,CAMERA_MOVE);
-				ApplyAnimation(playerid,"DEALER","DEALER_DEAL",4.0,0,1,1,1,5000,1);
-				TogglePlayerControllable(playerid,0);
-				SetTimerEx("UnTazer",3000,0,"i",playerid);
+				ApplyAnimation(playerid,"DEALER","DEALER_DEAL",4.0,false,true,true,true,5000,SYNC_ALL);
+				TogglePlayerControllable(playerid,false);
+				SetTimerEx("UnTazer",3000,false,"i",playerid);
 			    format(string,sizeof(string),""IINFO" du hast soeben %i Opiumsamen für %i$ gekauft",menge,preiberechnung);
 			    SCM(playerid,SAMP_WEISS,string);
 			    ACMoney(playerid,-preiberechnung);
@@ -28128,9 +28127,9 @@ COMMAND:samenkaufen(playerid,params[])
 			    SetPlayerFacingAngle(playerid,90.2736);
 			    InterpolateCameraPos(playerid,-1889.9170,-202.2443,14.3792,-1889.4138,-196.1063,18.3959,2000,CAMERA_MOVE);
 				InterpolateCameraLookAt(playerid,-1889.9170,-202.2443,14.3792,-1889.3230,-203.4034,14.5326,2000,CAMERA_MOVE);
-				ApplyAnimation(playerid,"DEALER","DEALER_DEAL",4.0,0,1,1,1,5000,1);
-				TogglePlayerControllable(playerid,0);
-				SetTimerEx("UnTazer",3000,0,"i",playerid);
+				ApplyAnimation(playerid,"DEALER","DEALER_DEAL",4.0,false,true,true,true,5000,SYNC_ALL);
+				TogglePlayerControllable(playerid,false);
+				SetTimerEx("UnTazer",3000,false,"i",playerid);
 			    format(string,sizeof(string),""IINFO" du hast soeben %i Spicesamen für %i$ gekauft",menge,preiberechnung);
 			    SCM(playerid,SAMP_WEISS,string);
 			    ACMoney(playerid,-preiberechnung);
@@ -28897,12 +28896,12 @@ COMMAND:startrace(playerid,params[])
 					SCM(i,SAMP_WEISS,string);
 					GameTextForPlayer(i,"~g~10",1000,3);
 				    PlayerPlaySound(i,1056,0.0,0.0,0.0);
-				    TogglePlayerControllable(i,0);
+				    TogglePlayerControllable(i,false);
 				}
 			}
 		}
 		RCountdownSec = 10;
-		RCountDownTimer = SetTimerEx("CountDown",1000,1,"i",1);
+		RCountDownTimer = SetTimerEx("CountDown",1000,true,"i",1);
 	   	return 1;
    	}
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
@@ -30295,7 +30294,7 @@ COMMAND:invite(playerid,params[])
     SCM(pID,SAMP_WEISS,string);
 	format(string,sizeof(string),""IINFO" du hast %s in deine Fraktion eingeladen.",Spieler[pID][pName]);
     SCM(playerid,SAMP_WEISS,string);
-    format(string,sizeof(string),"Dir wurde eine Invite Anfrage vom Leader %s in die Fraktion %s gestellt.\nKlicke *Annehmen* um der Fraktion %s beizutreten\nUnd *Ablehnen* um nicht beizutreten.",Spieler[playerid][pName],FraktionsName(Spieler[playerid][pFraktion]));
+    format(string,sizeof(string),"Dir wurde eine Invite Anfrage vom Leader %s in die Fraktion %s gestellt.\nKlicke *Annehmen* um der Fraktion beizutreten\nUnd *Ablehnen* um nicht beizutreten.",Spieler[playerid][pName],FraktionsName(Spieler[playerid][pFraktion]));
     ShowPlayerDialog(pID,INVITE_DIALOG,DIALOG_STYLE_MSGBOX,FraktionsName(Spieler[playerid][pFraktion]),string,"Annehmen","Abbrechen");
 	SetPVarInt(pID,"getfrak",Spieler[playerid][pFraktion]);
 	SetPVarInt(pID,"getleader",playerid);
@@ -30399,7 +30398,7 @@ COMMAND:spec(playerid,params[])
 	SCM(playerid,SAMP_WEISS,"Nutze '/unspec' um das spionieren abzubrechen.");
 	SetPlayerInterior(playerid,GetPlayerInterior(pID));
  	SetPlayerVirtualWorld(playerid,GetPlayerVirtualWorld(pID));
-   	TogglePlayerSpectating(playerid,1);
+   	TogglePlayerSpectating(playerid,true);
    	if(!IsPlayerInAnyVehicle(pID)) PlayerSpectatePlayer(playerid,pID);
 	else  PlayerSpectateVehicle(playerid,GetPlayerVehicleID(pID));
    	Spieler[playerid][pSpectate] = pID;
@@ -30420,7 +30419,7 @@ COMMAND:unspec(playerid,params[])
 	if(Spieler[playerid][pCuffed] == 1)return CUFF_MSG(playerid);
 	if(!isPlayerAnAdmin(playerid,1))return ADMIN_MSG(playerid);
 	if(Spieler[playerid][pSpectate] == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du spectatetest niemanden.");
-	TogglePlayerSpectating(playerid,0);
+	TogglePlayerSpectating(playerid,false);
 	new string[128];
 	SCM(playerid,SAMP_WEISS,""IINFO" du spectatest nun nicht mehr.");
 	format(string,sizeof(string),"[SPEC]: %s %s hat aufgehört zu spectaten.",Adminrang(playerid),SpielerName(playerid));
@@ -31043,7 +31042,7 @@ COMMAND:applyforhousekey(playerid,params[])
 	format(string,sizeof(string),""IINFO" du hast einen Hausschlüssel für die Hausnummer %i bekommen",ImmobilienKeyID[playerid]);
 	SCM(playerid,SAMP_WEISS,string);
 	SCM(playerid,SAMP_WEISS,""IINFO" du kannst diesen Schlüssel nur 20 Minuten benutzen,nach der Zeit ist dieser deaktiviert!");
-	ImmobilienTimer[playerid] = SetTimerEx("HauslockbyMakler",20*60000,0,"ii",playerid,haus);
+	ImmobilienTimer[playerid] = SetTimerEx("HauslockbyMakler",20*60000,false,"ii",playerid,haus);
 	return 1;
 }
 
@@ -31253,8 +31252,8 @@ COMMAND:ladung(playerid,params[])
 	{
 		if(truckerjobgo[playerid] != 2)return SCM(playerid,SAMP_WEISS,""IINFO" du musst erst den Anhänger holen.");
 		SCM(playerid,SAMP_WEISS,"Warte eine Minute! Die Ware wird aufgeladen!");
-		TogglePlayerControllable(playerid,0);
-		SetTimerEx("TruckerTimer",60000,0,"ii",playerid,1);
+		TogglePlayerControllable(playerid,false);
+		SetTimerEx("TruckerTimer",60000,false,"ii",playerid,1);
 		truckLoad[playerid] = 1;
 		return 1;
 	}
@@ -31262,8 +31261,8 @@ COMMAND:ladung(playerid,params[])
 	{
 		if(truckerjobgo2[playerid] != 2)return SCM(playerid,SAMP_WEISS,""IINFO" du musst erst den Anhänger holen.");
 	    SCM(playerid,SAMP_WEISS,"Warte eine Minute. Die Autoteile werden aufgeladen!");
-		TogglePlayerControllable(playerid,0);
-		SetTimerEx("TruckerTimer",60000,0,"ii",playerid,2);
+		TogglePlayerControllable(playerid,false);
+		SetTimerEx("TruckerTimer",60000,false,"ii",playerid,2);
 		truckLoad[playerid] = 1;
 		return 1;
 	}
@@ -31271,8 +31270,8 @@ COMMAND:ladung(playerid,params[])
 	{
 		if(truckerjobgo3[playerid] != 2)return SCM(playerid,SAMP_WEISS,""IINFO" du musst erst den Anhänger holen.");
 	    SCM(playerid,SAMP_WEISS,"Warte eine Minute. Der Bauschutt wird aufgeladen!");
-		TogglePlayerControllable(playerid,0);
-		SetTimerEx("TruckerTimer",60000,0,"ii",playerid,3);
+		TogglePlayerControllable(playerid,false);
+		SetTimerEx("TruckerTimer",60000,false,"ii",playerid,3);
 		truckLoad[playerid] = 1;
 		return 1;
 	}
@@ -31280,8 +31279,8 @@ COMMAND:ladung(playerid,params[])
 	{
 		if(truckerjobgo4[playerid] != 2)return SCM(playerid,SAMP_WEISS,""IINFO" du musst erst den Anhänger holen.");
 	    SCM(playerid,SAMP_WEISS,"Warte eine Minute. Bis der Treibstoff in den Tank des Anhängers gefüllt wird!");
-		TogglePlayerControllable(playerid,0);
-		SetTimerEx("TruckerTimer",60000,0,"ii",playerid,4);
+		TogglePlayerControllable(playerid,false);
+		SetTimerEx("TruckerTimer",60000,false,"ii",playerid,4);
 		truckLoad[playerid] = 1;
 		return 1;
 	}
@@ -31290,8 +31289,8 @@ COMMAND:ladung(playerid,params[])
 		if(truckerjobgo5[playerid] != 2)return SCM(playerid,SAMP_WEISS,""IINFO" du musst erst den Anhänger holen.");
 		//if((VehicleLoadTank[GetPlayerVehicleID(playerid)]+fsteuern[EisenLagger1]) > 60000)return SCM(playerid,SAMP_WEISS,""IINFO" der Anhänger ist bereits randgefüllt.");
 		SCM(playerid,SAMP_WEISS,"Warte eine Minute. Bis das Eisen aufgeladen wird!");
-		TogglePlayerControllable(playerid,0);
-		SetTimerEx("TruckerTimer",60000,0,"ii",playerid,5);
+		TogglePlayerControllable(playerid,false);
+		SetTimerEx("TruckerTimer",60000,false,"ii",playerid,5);
 		truckLoad[playerid] = 1;
 		return 1;
 	}
@@ -31425,7 +31424,7 @@ COMMAND:cv_3(playerid,params[])
 		    {
 			Motor[vehicleid] = true;
 			KillTimer(vFahrzeug[vehicleid][VehicleEngineTimer]);
-			vFahrzeug[vehicleid][VehicleEngineTimer] = SetTimerEx("VehicleEngine",VehicleInfo[GetVehicleModel(vehicleid)-400][vEngineStartInSek]*1000,0,"ii",playerid,vehicleid);
+			vFahrzeug[vehicleid][VehicleEngineTimer] = SetTimerEx("VehicleEngine",VehicleInfo[GetVehicleModel(vehicleid)-400][vEngineStartInSek]*1000,false,"ii",playerid,vehicleid);
 			GameTextForPlayer(playerid,"~w~Motor~g~ wird gestartet",VehicleInfo[GetVehicleModel(vehicleid)-400][vEngineStartInSek]*1000,6);
 			}
 			else
@@ -31754,7 +31753,7 @@ COMMAND:cancel(playerid,params[])
 		pID = Spieler[playerid][pSeller];
 		if(!IsPlayerConnected(pID))return SCM(playerid,SAMP_WEISS,"Spieler nicht eingeloggt.");
 		if(!ProxDetectorS(5.0,playerid,pID))return SCM(playerid,SAMP_WEISS,""IINFO" der angegebene Spieler ist nicht in deiner Nähe!");
-	    format(string,sizeof(string),""IINFO" du hast das Wantedhacking von %s %s (ID:%i) abgelehnt.",SpielerFraktionsRangName(playerid),SpielerName(pID),pID);
+	    format(string,sizeof(string),""IINFO" du hast das Wantedhacking von %s (ID:%i) abgelehnt.",SpielerFraktionsRangName(playerid),SpielerName(pID),pID);
 		SCM(playerid,SAMP_WEISS,string);
 		format(string,sizeof(string),"%s (ID:%i) hat dein Angebot zum Wantedhacking abgelehnt!",SpielerName(playerid),playerid);
 		SCM(pID,SAMP_WEISS,string);
@@ -32452,7 +32451,7 @@ COMMAND:accept(playerid,params[])
 		pID = Spieler[playerid][pSeller];
 		if(!IsPlayerConnected(pID))return SCM(playerid,SAMP_WEISS,"Spieler nicht eingeloggt.");
 		if(!ProxDetectorS(7.5,playerid,pID))return SCM(playerid,SAMP_WEISS,""IINFO" der angegebene Spieler ist nicht in deiner Nähe!");
-		format(string,sizeof(string),""IINFO" du hast das Wantedhacking von %s %s (ID:%i) für %i$ pro 15 Sekunde angenommen.",SpielerName(pID),pID,Spieler[playerid][pKaufPreis]);
+		format(string,sizeof(string),""IINFO" du hast das Wantedhacking von %s (ID:%i) für %i$ pro 15 Sekunde angenommen.",SpielerName(pID),pID,Spieler[playerid][pKaufPreis]);
 		SCM(playerid,SAMP_WEISS,string);
 		SCM(playerid,SAMP_WEISS,""IINFO" du darfst dich nun nicht ausloggen, ansonsten wird der Handel abgebrochen! Du musst nun in dem Fahrzeug sitzen bleiben!");
 		format(string,sizeof(string),"%s (ID:%i) hat das Wantedhacking für %i$ pro 15 Sekunden angenommen.",SpielerName(playerid),playerid,Spieler[playerid][pKaufPreis]);
@@ -32833,11 +32832,11 @@ COMMAND:accept(playerid,params[])
     	vFahrzeug[GetPlayerVehicleID(playerid)][FailGas] = 0;
 		if(RaceMode[r] == 0 || RaceMode[r] == 2 || RaceMode[r] == 3)
 		{
-			SetPlayerRaceCheckpoint(playerid,0,RaceInfo[r][0][0],RaceInfo[r][0][1],RaceInfo[r][0][2],RaceInfo[r][1][0],RaceInfo[r][1][1],RaceInfo[r][1][2],RACE_CP_SIZE[r][0]);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_GROUND_NORMAL,RaceInfo[r][0][0],RaceInfo[r][0][1],RaceInfo[r][0][2],RaceInfo[r][1][0],RaceInfo[r][1][1],RaceInfo[r][1][2],RACE_CP_SIZE[r][0]);
 		}
 		else if(RaceMode[r] == 1)
 		{
-			SetPlayerRaceCheckpoint(playerid,3,RaceInfo[r][0][0],RaceInfo[r][0][1],RaceInfo[r][0][2],RaceInfo[r][1][0],RaceInfo[r][1][1],RaceInfo[r][1][2],RACE_CP_SIZE[r][0]);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,RaceInfo[r][0][0],RaceInfo[r][0][1],RaceInfo[r][0][2],RaceInfo[r][1][0],RaceInfo[r][1][1],RaceInfo[r][1][2],RACE_CP_SIZE[r][0]);
 		}
 		InviteInRace[playerid] = 1;
 		RaceCps[playerid] = 0;
@@ -33336,7 +33335,7 @@ COMMAND:accept(playerid,params[])
 			    SendFraktionsMessage(Spieler[playerid][pFraktion],FCHATCOLOR,string);
 				Spieler[playerid][pOrtenVehORPlayer] = 3;//1 playerid 2 veh 3 service accept
 			    Spieler[playerid][pOrtenVehIDplayerid] = i;
-			    SpielerOrtenTimer[playerid] = SetTimerEx("SpielerOderFahrzeugOrten",1000,1,"iii",playerid,i,1);
+			    SpielerOrtenTimer[playerid] = SetTimerEx("SpielerOderFahrzeugOrten",1000,true,"iii",playerid,i,1);
 			    Spieler[i][pCallServiceWheelman] = false;
 				return 1;
 		    }
@@ -33914,11 +33913,11 @@ COMMAND:knockout(playerid,params[])
 	    if(Spieler[playerid][pTazerd] == 1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist K.O.");
 		if(Spieler[pID][pTazerd] == 1)return SCM(playerid,SAMP_WEISS,"Spieler bereits K.O.");
 		if(Spieler[pID][pDeath] == 1)return SCM(playerid,SAMP_WEISS,"Spieler ist bereits Tot.");
-		TogglePlayerControllable(pID,0);
+		TogglePlayerControllable(pID,false);
 		Spieler[pID][pTazerd] = 1;
 		//TextDrawShowForPlayer(pID,BlackScreendraw);
-		ApplyAnimation(pID,"CRACK","crckdeth2",4.0,1,1,1,0,0,1);
-	    TazerTimer[pID] = SetTimerEx("UnTazer",10000,0,"i",pID);
+		ApplyAnimation(pID,"CRACK","crckdeth2",4.0,true,true,true,false,0,SYNC_ALL);
+	    TazerTimer[pID] = SetTimerEx("UnTazer",10000,false,"i",pID);
 		format(string,sizeof(string),"%s hat dich K.O geschlagen.",SpielerName(playerid));
 		SCM(pID,SAMP_WEISS,string);
 		GameTextForPlayer(pID,"~r~K.O",7500,3);
@@ -33953,7 +33952,7 @@ COMMAND:reinzerren(playerid,params[])
 	    if(Spieler[pID][pTazerd] == 0)return SCM(playerid,SAMP_WEISS,"Spieler ist nicht K.O.");
 	    if(!ProxDetectorS(5.0,playerid,pID))return SCM(playerid,SAMP_WEISS,""IINFO" der angegebene Spieler ist nicht in deiner Nähe!");
 	    if(IsPlayerInAnyVehicle(pID))return SCM(playerid,SAMP_WEISS,"Spieler ist bereits in einem Fahrzeug!");
-		TogglePlayerControllable(pID,0);
+		TogglePlayerControllable(pID,false);
 	    KillTimer(TazerTimer[pID]);
 	    Spieler[pID][pTazerd] = 0;
 	    Spieler[pID][pCuffed] = 1;
@@ -33993,7 +33992,7 @@ COMMAND:fesseln(playerid,params[])
 		if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
 	    if(!IsPlayerInVehicle(pID,GetPlayerVehicleID(playerid)))return SCM(playerid,SAMP_WEISS,"Spieler befindet sich nicht in deinem Fahrzeug.");
 	    if(Spieler[pID][pCuffed] == 1)return SCM(playerid,SAMP_WEISS,"Spieler ist bereits gefesselt.");
-		TogglePlayerControllable(pID,0);
+		TogglePlayerControllable(pID,false);
 		KillTimer(TazerTimer[pID]);
 	    Spieler[pID][pCuffed] = 1;
 	    GameTextForPlayer(pID,"~r~Gefesselt",3000,3);
@@ -34032,7 +34031,7 @@ COMMAND:entfesseln(playerid,params[])
 	    if(Spieler[pID][pCuffed] == 0)return SCM(playerid,SAMP_WEISS,"Spieler ist nicht gefesselt.");
 	    new seatid = GetPlayerVehicleSeat(pID);
 		ClearAnimations(pID);
-	    TogglePlayerControllable(pID,1);
+	    TogglePlayerControllable(pID,true);
 	    KillTimer(TazerTimer[pID]);
 	    PutPlayerInVehicleEx(pID,GetPlayerVehicleID(playerid),seatid);
 	    Spieler[pID][pCuffed] = 0;
@@ -34312,7 +34311,7 @@ COMMAND:stadium(playerid,params[])
 	if(IsPlayerInRangeOfPoint(playerid,5.0,2695.7078,-1704.6866,11.8438) || IsPlayerInRangeOfPoint(playerid,5.0,-2109.6663,-444.1563,38.7344))
 	{
 		ShowMenuForPlayer(EVENTSTADIUMmenu,playerid);
-		TogglePlayerControllable(playerid,0);
+		TogglePlayerControllable(playerid,false);
 		return 1;
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht am Los Santos Stadium!");
@@ -34378,7 +34377,7 @@ COMMAND:equipment(playerid,params[])
 			if(IsPlayerInRangeOfPoint(playerid,2.0,x,y,z))
 			{
 				ShowMenuForPlayer(FIREequip,playerid);
-				TogglePlayerControllable(playerid,0);
+				TogglePlayerControllable(playerid,false);
 				return 1;
 		    }
 	    }
@@ -34478,7 +34477,7 @@ COMMAND:generatekey(playerid,params[])
 	}
 	if(KeyWillbeGenerate > 0)return SCM(playerid,SAMP_WEISS,""IINFO" der Computer generiert bereits einen Zugangsschlüssel.");
     Spieler[playerid][pGenerateState] = true;
-    Spieler[playerid][pGenerateTimer] = SetTimerEx("GenerateKeyForPlayer",1000,1,"i",playerid);
+    Spieler[playerid][pGenerateTimer] = SetTimerEx("GenerateKeyForPlayer",1000,true,"i",playerid);
     SCM(playerid,0xD30023FF,""IINFO" der Computer generiert nun einen Zugangsschlüssel für die Tore.");
     SCM(playerid,0xD30023FF,"Dies dauert zwei Minuten.");
 	SCM(playerid,0xD30023FF,"Halte es solange durch und verlasse den Vorraum nicht.");
@@ -34527,7 +34526,7 @@ COMMAND:openalljails(playerid,params[])
 		format(string,sizeof(string),"** %s öffnet die Zellen über den Computer **",SpielerName(playerid));
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 	 	PlayerHearMusicInRange(x,y,z,1035,5,1,500);//x,y,z,soundid,radius,timer an = 1 wenn aus = 0,zeit wann timer music/sound beendet
-		SetTimerEx("MoveGate",15000,0,"i",1);
+		SetTimerEx("MoveGate",15000,false,"i",1);
 		return 1;
 	}
 	return SCM(playerid,SAMP_WEISS,"Die Zellen wurden bereits geöffnet.");
@@ -35908,7 +35907,7 @@ COMMAND:repairinfo_2(playerid,params[])
 	{
 		for(new i=0;i<MAX_TELEFONZELLEN;i++)
 		{
-			format(string,sizeof(string),"%s\nNummer: "IINFO2"%i"#HTML_WEISS" Zustand: "IINFO2"%i %"#HTML_WEISS"\n%s",string,i,TeleZelleInfo[i][EGmBhHp]);
+			format(string,sizeof(string),"%s\nNummer: "IINFO2"%i"#HTML_WEISS" Zustand: "IINFO2"%i %%"#HTML_WEISS"",string,i,TeleZelleInfo[i][EGmBhHp]);
 			ShowPlayerDialog(playerid,DIALOG_SEARCH_TZELLEN,DIALOG_STYLE_LIST,""ClanTagDialoge" Telefonzellen",string,"Markieren","Verlassen");
 		}
 		return 1;
@@ -35920,7 +35919,7 @@ COMMAND:repairinfo_2(playerid,params[])
 		{
 		 	if(Blitzer[i][Erstellt] == 1)
 			{
-				format(string,sizeof(string),"%s\nNummer: "IINFO2"%i"#HTML_WEISS" Zustand: "IINFO2"%i %"#HTML_WEISS"\n%s",string,i,Blitzer[i][EGmBhHp]);
+				format(string,sizeof(string),"%s\nNummer: "IINFO2"%i"#HTML_WEISS" Zustand: "IINFO2"%i %%"#HTML_WEISS"",string,i,Blitzer[i][EGmBhHp]);
 				ShowPlayerDialog(playerid,DIALOG_SEARCH_BLITZER,DIALOG_STYLE_LIST,""ClanTagDialoge" Blitzer",string,"Markieren","Verlassen");
 				count++;
 			}
@@ -35935,7 +35934,7 @@ COMMAND:repairinfo_2(playerid,params[])
 		{
 			if(FMastenInfo[msten][Erstellt] == 1)
 			{
-				format(string,sizeof(string),"%s\nNummer: "IINFO2"%i"#HTML_WEISS" Zustand: "IINFO2"%i %"#HTML_WEISS"\n%s",string,msten,FMastenInfo[msten][EGmBhHp]);
+				format(string,sizeof(string),"%s\nNummer: "IINFO2"%i"#HTML_WEISS" Zustand: "IINFO2"%i %%"#HTML_WEISS"",string,msten,FMastenInfo[msten][EGmBhHp]);
 				ShowPlayerDialog(playerid,DIALOG_SEARCH_TMAST,DIALOG_STYLE_LIST,""ClanTagDialoge" Funkmasten",string,"Markieren","Verlassen");
 				count++;
 			}
@@ -35947,7 +35946,7 @@ COMMAND:repairinfo_2(playerid,params[])
 	{
 		for(new i=0;i<MAX_SPRUNKS;i++)
 		{
-			format(string,sizeof(string),"%s\nNummer: "IINFO2"%i"#HTML_WEISS" Zustand: "IINFO2"%i %"#HTML_WEISS"\n%s",string,i,SprunkInfo[i][EGmBhHp]);
+			format(string,sizeof(string),"%s\nNummer: "IINFO2"%i"#HTML_WEISS" Zustand: "IINFO2"%i %%"#HTML_WEISS"",string,i,SprunkInfo[i][EGmBhHp]);
 			ShowPlayerDialog(playerid,DIALOG_SEARCH_SPRUNK,DIALOG_STYLE_LIST,""ClanTagDialoge" Sprunkautomaten",string,"Markieren","Verlassen");
 			count++;
 		}
@@ -37314,7 +37313,7 @@ COMMAND:take(playerid,params[])
 				if(Spieler[pID][pGanja] + Spieler[pID][pKokain] + Spieler[pID][pOpium] + Spieler[pID][pGanjaSammen] + Spieler[pID][pOpiumSammen] + Spieler[pID][pKokainSammen] == 0)return SCM(playerid,SAMP_WEISS,"Spieler hat keine Drogen.");
 				format(string,sizeof(string),"%s hat dir deine%i Opium Pillen,%ig Ganja,%ig Kokain,%ig Spice abgenommen.",SpielerName(playerid),Spieler[pID][pOpium],Spieler[pID][pGanja],Spieler[pID][pKokain],Spieler[pID][pSpice]);
 				SCM(pID,SAMP_WEISS,string);
-				format(string,sizeof(string),""IINFO" du hast %s %i Opium Pillen,%ig Ganja,%ig Kokain,%ig Spice abgenommen.",Spieler[pID][pOpium],Spieler[pID][pGanja],Spieler[pID][pKokain],Spieler[pID][pSpice]);
+				format(string,sizeof(string),""IINFO" du hast %s %i Opium Pillen,%ig Ganja,%ig Kokain,%ig Spice abgenommen.",SpielerName(pID),Spieler[pID][pOpium],Spieler[pID][pGanja],Spieler[pID][pKokain],Spieler[pID][pSpice]);
 			    SCM(playerid,SAMP_WEISS,string);
 				Spieler[pID][pOpium] = 0;
 			    Spieler[pID][pGanja] = 0;
@@ -37383,7 +37382,7 @@ COMMAND:take(playerid,params[])
 				format(string,sizeof(string),"%s hat dir deine Scheinsperre abgenommen.",SpielerName(playerid));
 				SCM(pID,SAMP_WEISS,string);
 			    Spieler[pID][pScheinSperre] = 0;
-				format(string,sizeof(string),"%s hat %s den Scheinsperre abgenommen.",SpielerName(playerid));
+				format(string,sizeof(string),"%s hat %s den Scheinsperre abgenommen.",SpielerName(playerid),SpielerName(pID));
 				PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 				ForEachPlayer(i)
 				{
@@ -37786,7 +37785,7 @@ COMMAND:tazer_3(playerid,params[])
 			format(string,sizeof(string),"** %s holt seinen Tazer aus dem Holster raus **",SpielerName(playerid));
 			PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 			SCM(playerid,SAMP_WEISS,"Mit der Taste "IINFO2"N"#HTML_WEISS" kannst du den Tazer verwenden!");
-			Spieler[playerid][pTazerTimer] = SetTimerEx("TazerAkku",30000,1,"i",playerid);
+			Spieler[playerid][pTazerTimer] = SetTimerEx("TazerAkku",30000,true,"i",playerid);
 			SetPlayerAttachedObject(playerid,4,18642,5,0.088999,0.039999,-0.028000);
 			Spieler[playerid][pTazerInorOutbag] = 1;
 			return 1;
@@ -37870,7 +37869,7 @@ COMMAND:checkgun(playerid,params[])
 	    SCM(playerid,SAMP_WEISS,string);
 		for(new i=0;i<13;i++)
 		{
-			GetPlayerWeaponData(pID,i,waffe,muni);
+			GetPlayerWeaponData(pID,WEAPON_SLOT:i,waffe,muni);
 			if(waffe != 0)
 			{
 				format(string,sizeof(string)," %i: %s %i Munition",i,SpielerWaffenName(waffe),muni);
@@ -38296,7 +38295,7 @@ COMMAND:uncuff(playerid,params[])
 	    ClearAnimations(pID);
 	    SetPlayerSpecialAction(pID,SPECIAL_ACTION_NONE);
 	    RemovePlayerAttachedObject(pID,0);
-	    TogglePlayerControllable(pID,1);
+	    TogglePlayerControllable(pID,true);
 	    PutPlayerInVehicleEx(pID,GetPlayerVehicleID(playerid),seatid);
 	    Spieler[pID][pCuffed] = 0;
 	    Spieler[pID][pTazerd] = 0;
@@ -38681,7 +38680,7 @@ COMMAND:orten(playerid,params[])
 		SetPlayerCheckpoint(playerid,x,y,z,3);
 		Spieler[playerid][pOrtenVehORPlayer] = 1;//1 playerid 2 veh 3 service accept
 	    Spieler[playerid][pOrtenVehIDplayerid] = pID;
-		SpielerOrtenTimer[playerid] = SetTimerEx("SpielerOderFahrzeugOrten",1000,1,"iii",playerid,pID,1);
+		SpielerOrtenTimer[playerid] = SetTimerEx("SpielerOderFahrzeugOrten",1000,true,"iii",playerid,pID,1);
 		Spieler[playerid][pIsearch] = 1;
 		return 1;
 	}
@@ -38712,7 +38711,7 @@ COMMAND:ortenveh(playerid,params[])
 		SetPlayerCheckpoint(playerid,x,y,z,3);
 		Spieler[playerid][pOrtenVehORPlayer] = 2;//1 playerid 2 veh 3 service accept
 	    Spieler[playerid][pOrtenVehIDplayerid] = vehicleid;
-		SpielerOrtenTimer[playerid] = SetTimerEx("SpielerOderFahrzeugOrten",1000,1,"iii",playerid,vehicleid,2);
+		SpielerOrtenTimer[playerid] = SetTimerEx("SpielerOderFahrzeugOrten",1000,true,"iii",playerid,vehicleid,2);
 		Spieler[playerid][pIsearch] = 1;
 		return 1;
 	}
@@ -38779,7 +38778,7 @@ COMMAND:grab(playerid,params[])
 	    if(IsPlayerInAnyVehicle(pID))return SCM(playerid,SAMP_WEISS,"Spieler ist bereits in einem Fahrzeug!");
 	    SetPlayerSpecialAction(pID,SPECIAL_ACTION_CUFFED);
 	    SetPlayerAttachedObject(pID,0,19418,6,-0.011000,0.028000,-0.022000,-15.600012,-33.699977,-81.700035,0.891999,1.000000,1.168000);
-	    TogglePlayerControllable(pID,0);
+	    TogglePlayerControllable(pID,false);
 	    KillTimer(TazerTimer[pID]);
 	    Spieler[pID][pTazerd] = 0;
 	    Spieler[pID][pCuffed] = 1;
@@ -39065,7 +39064,7 @@ COMMAND:bildschirm(playerid,params[])
 			SetPlayerPosEx(playerid,219.8703,1867.5889,-1.1288);
 			SetPlayerCameraPos(playerid,201.8838,1858.2830,13.1406);
 			SetPlayerCameraLookAt(playerid,225.3775,1864.4536,13.1406);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerInterior(playerid,0);
 			SetPlayerVirtualWorld(playerid,0);
 			UseCam[playerid] = 1;
@@ -39076,7 +39075,7 @@ COMMAND:bildschirm(playerid,params[])
 		    SetPlayerPosEx(playerid,296.9854,1815.7217,1.7980);
 			SetPlayerCameraPos(playerid,256.2640,1813.6497,7.7109);
 			SetPlayerCameraLookAt(playerid,286.2763,1820.4073,4.7109);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerInterior(playerid,0);
 			SetPlayerVirtualWorld(playerid,0);
 			UseCam[playerid] = 1;
@@ -39087,7 +39086,7 @@ COMMAND:bildschirm(playerid,params[])
 		    SetPlayerPosEx(playerid,306.8860,1861.4445,5.2338);
 			SetPlayerCameraPos(playerid,295.6446,1852.6193,9.7672);
 			SetPlayerCameraLookAt(playerid,299.8271,1857.7485,7.8281);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerInterior(playerid,0);
 			SetPlayerVirtualWorld(playerid,0);
 			UseCam[playerid] = 1;
@@ -39098,7 +39097,7 @@ COMMAND:bildschirm(playerid,params[])
 		    SetPlayerPosEx(playerid,271.9131,1863.9319,11.4607);
 			SetPlayerCameraPos(playerid,267.7379,1875.0355,9.6094);
 			SetPlayerCameraLookAt(playerid,269.6065,1863.7909,8.7578);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerInterior(playerid,0);
 			SetPlayerVirtualWorld(playerid,0);
 			UseCam[playerid] = 1;
@@ -39109,7 +39108,7 @@ COMMAND:bildschirm(playerid,params[])
 		    SetPlayerPosEx(playerid,226.4640,1882.5750,12.6406);
 			SetPlayerCameraPos(playerid,247.3170,1841.5400,23.5086);
 			SetPlayerCameraLookAt(playerid,226.4640,1882.5750,12.6406);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerInterior(playerid,0);
 			SetPlayerVirtualWorld(playerid,0);
 			UseCam[playerid] = 1;
@@ -39120,7 +39119,7 @@ COMMAND:bildschirm(playerid,params[])
 		    SetPlayerPosEx(playerid,133.4530,1835.4613,12.6406);
 			SetPlayerCameraPos(playerid,97.4474,1809.6836,25.2711);
 			SetPlayerCameraLookAt(playerid,137.6531,1848.5460,17.6577);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerInterior(playerid,0);
 			SetPlayerVirtualWorld(playerid,0);
 			UseCam[playerid] = 1;
@@ -39131,7 +39130,7 @@ COMMAND:bildschirm(playerid,params[])
 		    SetPlayerPosEx(playerid,314.0238,1972.3566,12.8765);
 			SetPlayerCameraPos(playerid,286.2668,2038.3162,24.1182);
 			SetPlayerCameraLookAt(playerid,320.3222,1961.2155,17.8765);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerInterior(playerid,0);
 			SetPlayerVirtualWorld(playerid,0);
 			UseCam[playerid] = 1;
@@ -39142,7 +39141,7 @@ COMMAND:bildschirm(playerid,params[])
 		    SetPlayerPosEx(playerid,290.0488,1934.8677,12.8949);
 			SetPlayerCameraPos(playerid,350.7001,1812.1399,33.6815);
 			SetPlayerCameraLookAt(playerid,307.4418,1963.7765,17.8765);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerInterior(playerid,0);
 			SetPlayerVirtualWorld(playerid,0);
 			UseCam[playerid] = 1;
@@ -39153,7 +39152,7 @@ COMMAND:bildschirm(playerid,params[])
 		    SetPlayerPosEx(playerid,2580.1462,-1290.3422,1056.2710);
 			SetPlayerCameraPos(playerid,2581.6907,-1287.5789,1045.0234);
 			SetPlayerCameraLookAt(playerid,2578.4521,-1292.3622,1044.1250);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerInterior(playerid,2);
 			SetPlayerVirtualWorld(playerid,0);
 			UseCam[playerid] = 1;
@@ -39164,7 +39163,7 @@ COMMAND:bildschirm(playerid,params[])
 		    SetPlayerPosEx(playerid,2574.3333,-1294.8170,1054.6406);
 			SetPlayerCameraPos(playerid,2577.2009,-1287.4562,1044.1250);
 			SetPlayerCameraLookAt(playerid,2573.1411,-1301.0428,1044.1250);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerInterior(playerid,2);
 			SetPlayerVirtualWorld(playerid,0);
 			UseCam[playerid] = 1;
@@ -39175,7 +39174,7 @@ COMMAND:bildschirm(playerid,params[])
 		    SetPlayerPosEx(playerid,2562.5952,-1298.8199,1071.4879);
 			SetPlayerCameraPos(playerid,2531.5913,-1285.6827,1047.9233);
 			SetPlayerCameraLookAt(playerid,2562.2681,-1298.7257,1044.1250);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerInterior(playerid,2);
 			SetPlayerVirtualWorld(playerid,0);
 			UseCam[playerid] = 1;
@@ -39186,7 +39185,7 @@ COMMAND:bildschirm(playerid,params[])
 			if(UseCam[playerid] == 0)return SCM(playerid,SAMP_WEISS,""IINFO" du schaust auf keinen Bildschirm.");
 			UseCam[playerid] = 0;
 			SetCameraBehindPlayer(playerid);
-			TogglePlayerControllable(playerid,1);
+			TogglePlayerControllable(playerid,true);
 			SetPlayerPosEx(playerid,Spieler[playerid][LastInGamePos_x],Spieler[playerid][LastInGamePos_y],Spieler[playerid][LastInGamePos_z]);
 		    SetPlayerVirtualWorld(playerid,0);
 			SetPlayerInterior(playerid,0);
@@ -39221,10 +39220,10 @@ COMMAND:wiederbeleben(playerid,params[])
 	    if(!ProxDetectorS(3.0,playerid,pID))return SCM(playerid,SAMP_WEISS,""IINFO" der angegebene Spieler ist nicht in deiner Nähe!");
 	    if(Spieler[pID][pDeath] == 0)return SCM(playerid,SAMP_WEISS,"Spieler muss nicht Reanimiert werden.");
 		if(Spieler[pID][pRevived] == 1)return SCM(playerid,SAMP_WEISS,"Spieler muss nicht Reanimiert werden.");
-		ApplyAnimation(playerid,"MEDIC","CPS",4.0,0,1,1,1,5000,1);
+		ApplyAnimation(playerid,"MEDIC","CPS",4.0,false,true,true,true,5000,SYNC_ALL);
 		format(string,sizeof(string),"** %s %s beginnt mit der Reanimation **",SpielerFraktionsRangName(playerid),SpielerName(playerid));
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
-		SetTimerEx("SpielerWiederbeleben",5000,0,"ii",playerid,pID);
+		SetTimerEx("SpielerWiederbeleben",5000,false,"ii",playerid,pID);
 		format(string,sizeof(string),""IINFO" du beginnst mit der Reanimation von %s.",SpielerName(pID));
 		SCM(playerid,SAMP_WEISS,string);
 		SCM(playerid,SAMP_WEISS,""IINFO" du musst 5 Sekunden an dieser Position bleiben!");
@@ -39258,7 +39257,7 @@ COMMAND:retten(playerid,params[])
  			OnePlayAnim(playerid,"DEALER","DEALER_DEAL",4.0,0,0,0,0,0);
   			animak[playerid] = true,StopAudioStreamForPlayer(playerid);
 		}
-        SetTimerEx("PersonRetten",30000,0,"ii",playerid,pID);
+        SetTimerEx("PersonRetten",30000,false,"ii",playerid,pID);
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
@@ -39292,7 +39291,7 @@ COMMAND:rescue(playerid,params[])
 		if((seat+1) > 4)return SCM(playerid,SAMP_WEISS,"Es sind bereits alle Krankenliegen belegt.");
 		Spieler[pID][pRevived] = 0;
 		StopLoopingAnim(pID);
-		TogglePlayerControllable(pID,0);
+		TogglePlayerControllable(pID,false);
 		PutPlayerInVehicleEx(pID,GetPlayerVehicleID(playerid),seat+1);
 		SetPlayerCheckpoint(playerid,1155.8502,-1352.2446,14.1776,1.0);
 		Spieler[playerid][pIsearch] = 1;
@@ -39337,7 +39336,7 @@ COMMAND:hospital(playerid,params[])
 		SetPlayerVirtualWorld(pID,1);
 		SetPlayerInterior(pID,0);
 		Spieler[pID][pInHospital] = 10;
-		TogglePlayerControllable(pID,0);
+		TogglePlayerControllable(pID,false);
 		ACMoney(pID,-100);
 	 	fverwaltungen[16][Geld] += 100;
 		format(string,sizeof(string),""IINFO" du hast %s (ID:%i) ins Krankenhaus eingewiesen.",SpielerName(pID),pID);
@@ -39915,7 +39914,7 @@ COMMAND:find(playerid,params[])
 	SetPlayerCheckpoint(playerid,x,y,z,3);
 	Spieler[playerid][pOrtenVehORPlayer] = 1;//1 playerid 2 veh 3 service accept
     Spieler[playerid][pOrtenVehIDplayerid] = pID;
-	SpielerOrtenTimer[playerid]=SetTimerEx("SpielerOderFahrzeugOrten",1000,1,"iii",playerid,pID,1);
+	SpielerOrtenTimer[playerid]=SetTimerEx("SpielerOderFahrzeugOrten",1000,true,"iii",playerid,pID,1);
 	Spieler[playerid][pIsearch] = 1;
 	return 1;
 }
@@ -39942,7 +39941,7 @@ COMMAND:findveh(playerid,params[])
 	SetPlayerCheckpoint(playerid,x,y,z,3);
 	Spieler[playerid][pOrtenVehORPlayer] = 2;//1 playerid 2 veh 3 service accept
     Spieler[playerid][pOrtenVehIDplayerid] = vehicleid;
-	SpielerOrtenTimer[playerid]=SetTimerEx("SpielerOderFahrzeugOrten",1000,1,"iii",playerid,vehicleid,2);
+	SpielerOrtenTimer[playerid]=SetTimerEx("SpielerOderFahrzeugOrten",1000,true,"iii",playerid,vehicleid,2);
 	Spieler[playerid][pIsearch] = 1;
 	return 1;
 }
@@ -40028,7 +40027,7 @@ COMMAND:eatbrot(playerid,params[])
         if(GetPlayerACHealth(playerid) >= 95)return SCM(playerid,SAMP_WEISS,""IINFO" du hast keinen Hunger.");
 		format(string,sizeof(string),"** %s isst ein knuspriges Brot **",SpielerName(playerid));
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
-		ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+		ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 		if((GetPlayerACHealth(playerid) + 100) > 100)return SetPlayerACHealth(playerid,100);
 		SetPlayerACHealth(playerid,GetPlayerACHealth(playerid)+100);
 		return 1;
@@ -40110,7 +40109,7 @@ COMMAND:whack(playerid,params[])
 		format(string,sizeof(string),"** %s beginnt das Hacking des Polizeicomputers. **",SpielerName(playerid));
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 		SendClientMessageToAll(ORANGE,"News: Ein Unbekannter versucht sich in die Polizei Datenbank zu hacken.");
-		Spieler[playerid][pWhackTimer] = SetTimerEx("WantedhackT",1000,1,"i",playerid);
+		Spieler[playerid][pWhackTimer] = SetTimerEx("WantedhackT",1000,true,"i",playerid);
 		GameTextForPlayer(playerid,"~r~Du versuchst die Polizei Datenbank zu hacken",3000,3);
 		WantedHackingStatus = gettime() + (60*240);
 		Spieler[playerid][pWHackState] = true;
@@ -40871,7 +40870,7 @@ COMMAND:gethdd(playerid,params[])
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 	if(Spieler[playerid][pAWAYFROMKEYBOARD] == 1)return AFK_MSG(playerid);
-	new pID,string[128],serial[45+4];
+	new pID,string[128],serial[50];
     if(sscanf(params,"u",pID))return SCM(playerid,SAMP_WEISS,""IINFO" /gethdd [playerid/Name]");
  	if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -41298,7 +41297,7 @@ COMMAND:idrop_3(playerid,params[])
 		new f = MAX_WAFFENDROP+1,GunID = GetPlayerWeapon(playerid),GunAmmo = GetPlayerAmmo(playerid);
 		if(IsWeaponEnable(GunID) == 1 && GunID != 0 || GunID == 9)
 		{
-			RemovePlayerWeapon(playerid,GunID);
+			Script_RemovePlayerWeapon(playerid,GunID);
 		 	return SCM(playerid,SAMP_WEISS,"ACHTUNG: Waffe wird vom System als unangemessen empfunden!");
 	 	}
 	   	if(GunID > 0 && GunAmmo != 0)
@@ -41311,7 +41310,7 @@ COMMAND:idrop_3(playerid,params[])
 				    break;
 			    }
 		    }
-		   	RemovePlayerWeapon(playerid,GunID);
+		   	Script_RemovePlayerWeapon(playerid,GunID);
 			dGunData[f][ObjData][0] = GunID;
 			dGunData[f][ObjData][1] = GunAmmo;
 			GetPlayerPos(playerid,dGunData[f][ObjPos][0],dGunData[f][ObjPos][1],dGunData[f][ObjPos][2]);
@@ -42710,7 +42709,7 @@ COMMAND:ramzoll(playerid,params[])
 		SCM(playerid,ZOLLGRUEN,string);
 		Zoll[zollid][zollopenorclose] = 1;
 		MoveDynamicObject(ZollSchranke[zollid],Zoll[zollid][zollx],Zoll[zollid][zolly],Zoll[zollid][zollz] -2,2.0,Zoll[zollid][zollax],Zoll[zollid][zollay],Zoll[zollid][zollaz]);
-		SetTimerEx("MoveZoll",5000,0,"i",zollid);
+		SetTimerEx("MoveZoll",5000,false,"i",zollid);
 		return 1;
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
@@ -42824,7 +42823,7 @@ COMMAND:zoll(playerid,params[])
 		SCM(playerid,ZOLLGRUEN,string);
 		Zoll[zollid][zollopenorclose] = 1;
 		MoveDynamicObject(ZollSchranke[zollid],Zoll[zollid][zollx],Zoll[zollid][zolly],Zoll[zollid][zollz] -2,2.0,Zoll[zollid][zollax],Zoll[zollid][zollay],Zoll[zollid][zollaz]);
-		SetTimerEx("MoveZoll",5000,0,"i",zollid);
+		SetTimerEx("MoveZoll",5000,false,"i",zollid);
 		if(Spieler[playerid][pWantedPoints] >= 30)
 		{
 			format(string,sizeof(string),"HQ: An alle Einheiten, %s wurde am Zoll %i in Richtung %s mit %i Wantedpunkte gesichtet.",SpielerName(playerid),zollid,Zoll[zollid][zollbeschriftung],Spieler[playerid][pWantedPoints]);
@@ -42846,7 +42845,7 @@ COMMAND:zoll(playerid,params[])
         format(string,sizeof(string),"HQ: An alle Einheiten, %s wurde am Zoll %i in Richtung %s bei einem Illegalen Straßenrennen gesichtet.",SpielerName(playerid),zollid,Zoll[zollid][zollbeschriftung]);
         Zoll[zollid][zollopenorclose] = 1;
 		MoveDynamicObject(ZollSchranke[zollid],Zoll[zollid][zollx],Zoll[zollid][zolly],Zoll[zollid][zollz] -2,2.0,Zoll[zollid][zollax],Zoll[zollid][zollay],Zoll[zollid][zollaz]);
-		SetTimerEx("MoveZoll",5000,0,"i",zollid);
+		SetTimerEx("MoveZoll",5000,false,"i",zollid);
 		SCM(playerid,SAMP_WEISS,"{FF6666}Zollbeamter:{FFFFFF} Stehen Bleiben! Ich informiere die Polizei!");
 		SCM(playerid,ZOLLGRUEN,""IINFO" du bist ohne zu bezahlen durch den Zoll gefahren!");
 		ForEachPlayer(i)
@@ -42909,7 +42908,7 @@ COMMAND:tor(playerid,params[])
         {
  			MoveObject(LS_SAPDTOR,1539.69995, -1627.59998,8.20000,4.0);
 			SCM(playerid,SAMP_WEISS,"Willkommen Officer");
-			SetTimer("CloseTor",6000,0);
+			SetTimer("CloseTor",6000,false);
 			return 1;
 		}
 		return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der Fraktion des 'S.A.P.D'/CSI");
@@ -44891,10 +44890,10 @@ COMMAND:fish(playerid,params[])
 	PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 	if(Spieler[playerid][pFishingLic] == 1)
 	{
-		SetTimerEx("Angeln",2500,0,"i",playerid);
+		SetTimerEx("Angeln",2500,false,"i",playerid);
 	}
-	else SetTimerEx("Angeln",5000,0,"i",playerid);
-	TogglePlayerControllable(playerid,0);
+	else SetTimerEx("Angeln",5000,false,"i",playerid);
+	TogglePlayerControllable(playerid,false);
 	SetCameraBehindPlayer(playerid);
 	SetPlayerAttachedObject(playerid,6,18632,5,0.085999,0.024000,-0.028000,-23.600000,0.000000,102.399971,1.000000,1.000000,1.000000);//fischanimations angel für rp aktion :D
 	return 1;
@@ -44938,8 +44937,8 @@ COMMAND:kartbahn(playerid,params[])
 	   	Spieler[playerid][pKartCountdown] = 0;
 		GameTextForPlayer(playerid,"~g~5",1000,3);
 	    PlayerPlaySound(playerid,1056,0.0,0.0,0.0);
-	    TogglePlayerControllable(playerid,0);
-		Spieler[playerid][pKartTimer] = SetTimerEx("StartKartRace",1000,1,"ii",playerid,1);
+	    TogglePlayerControllable(playerid,false);
+		Spieler[playerid][pKartTimer] = SetTimerEx("StartKartRace",1000,true,"ii",playerid,1);
 		return 1;
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keiner Kart-Bahn.");
@@ -47218,7 +47217,7 @@ COMMAND:acolor(playerid,params[])
 	if(!IsValidVehicle(vehicleid))return SCM(playerid,SAMP_WEISS,"Fahrzeug existiert nicht!");
     vFahrzeug[vehicleid][Colour1] = color1;
     vFahrzeug[vehicleid][Colour2] = color2;
-    ChangeVehicleColor(vehicleid, color1, color2);
+    ChangeVehicleColours(vehicleid, color1, color2);
     format(string,sizeof(string),""IINFO" du hast eine/n %s (ID:%i) umgefärbt.",VehicleDefinations[GetVehicleModel(vehicleid)-400],vehicleid);
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
@@ -47592,7 +47591,7 @@ COMMAND:restart(playerid,params[])
 	}
 	OnGameModeSave();
 	Sekunden = 60;
-	Serverrestarter = SetTimer("Restart",1000,1);
+	Serverrestarter = SetTimer("Restart",1000,true);
 	getdate(tag,monat,jahr);
 	gettime(stunde,minute,sekunde);
 	format(string,sizeof(string),"[%02d/%02d/%02d] [%02d:%02d:%02d] %s (Adminlevel: %i) hat den Restart vorgang aktiviert!",tag,monat,jahr,stunde,minute,sekunde,SpielerName(playerid),Spieler[playerid][pAdmin]);
@@ -47684,7 +47683,7 @@ COMMAND:countdown(playerid,params[])
 		    PlayerPlaySound(i,1056,0.0,0.0,0.0);
 	    }
 	}
-    CountDownTimer = SetTimerEx("CountDown",1000,1,"i",0);
+    CountDownTimer = SetTimerEx("CountDown",1000,true,"i",0);
     return 1;
 }
 
@@ -47708,7 +47707,7 @@ COMMAND:flycam(playerid,params[])
 		GetPlayerPos(playerid,x,y,z);
 		Spieler[playerid][pUseFlyCam] = true;
 		noclipdata[playerid][flyobject] = CreatePlayerObject(playerid,19300,x,y,z,0.0,0.0,0.0);
-		TogglePlayerSpectating(playerid,1);
+		TogglePlayerSpectating(playerid,true);
 		AttachCameraToPlayerObject(playerid,noclipdata[playerid][flyobject]);
 		SCM(playerid,SAMP_WEISS,""IINFO" du bist im Flycam Modus! Um ihn wieder zu beenden /flycam");
 		noclipdata[playerid][cameramode] = CAMERA_MODE_FLY;
@@ -47716,7 +47715,7 @@ COMMAND:flycam(playerid,params[])
 	else
 	{
 		CancelEdit(playerid);
-		TogglePlayerSpectating(playerid,0);
+		TogglePlayerSpectating(playerid,false);
 		Spieler[playerid][pUseFlyCam] = false;
 		DestroyPlayerObject(playerid,noclipdata[playerid][flyobject]);
 		SCM(playerid,SAMP_WEISS,""IINFO" du hast den Flycam Modus beendet!");
@@ -47747,7 +47746,7 @@ COMMAND:afk(playerid,params[])
     Spieler[playerid][pAFKKeyStates] = 0;
 	Spieler[playerid][pAFKAwayTime] = 0;
 	Spieler[playerid][pAWAYFROMKEYBOARD] = 1;
-	TogglePlayerControllable(playerid,0);
+	TogglePlayerControllable(playerid,false);
 	format(string,sizeof(string),""IINFO2"AFK seit"#HTML_WEISS"\n%02d:%02d Uhr",stunde,minute);
 	AFKLabel[playerid] = Create3DTextLabel(string,SAMP_WEISS,30.0,40.0,50.0,MAX_STREAM_NAME_DISTANCE,0,1);
 	Attach3DTextLabelToPlayer(AFKLabel[playerid],playerid,0.0,0.0,-0.2);
@@ -47792,8 +47791,8 @@ COMMAND:back(playerid,params[])
 	//PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 	SCM(playerid,SAMP_WEISS,""IINFO" du bist nun nicht mehr im AFK Modus.");
 	if(Spieler[playerid][pAFKPDAYDOWN] == true) Spieler[playerid][pAFKPDAYDOWN] = false;
-	if(Spieler[playerid][pCuffed] == 1 || Spieler[playerid][pTazerd] == 1)return TogglePlayerControllable(playerid,0);
-	if(Spieler[playerid][pFreezed] == false) TogglePlayerControllable(playerid,1);
+	if(Spieler[playerid][pCuffed] == 1 || Spieler[playerid][pTazerd] == 1)return TogglePlayerControllable(playerid,false);
+	if(Spieler[playerid][pFreezed] == false) TogglePlayerControllable(playerid,true);
 	return 1;
 }
 
@@ -47868,7 +47867,7 @@ COMMAND:waffenlagerraub(playerid,params[])
 			format(string,sizeof(string),"%s schreit: Hände hoch das ist ein Überfall !!!",SpielerName(playerid));
 			PlayerTalkPublic(playerid,WEISS,string,50);
 			SendClientMessageToAll(ORANGE,"News: Ein Krimineller ist in das Waffenlager der Bundeswehr eingebrochen.");
-			Spieler[playerid][pWaffenlagerRobTimer] = SetTimerEx("Waffenlagerraub",1000,1,"i",playerid);
+			Spieler[playerid][pWaffenlagerRobTimer] = SetTimerEx("Waffenlagerraub",1000,true,"i",playerid);
 			GameTextForPlayer(playerid,"~r~Du versuchst das Waffenlager der Bundeswehr auszurauben",3000,3);
 			MoveDynamicObject(tor[96],973.15155, 2067.90112, 11.47930+6,1);
 			MoveDynamicObject(tor[97],977.71112, 2072.88623, 11.47930+6,1);
@@ -47950,7 +47949,7 @@ COMMAND:bankraub(playerid,params[])
 			format(string,sizeof(string),"%s schreit: Hände hoch das ist ein Überfall !!!",SpielerName(playerid));
 			PlayerTalkPublic(playerid,WEISS,string,50);
 			SendClientMessageToAll(ORANGE,"News: Ein Krimineller ist in die Bank von San Andreas eingebrochen.");
-			Spieler[playerid][pBankRobTimer] = SetTimerEx("Bankraub",1000,1,"i",playerid);
+			Spieler[playerid][pBankRobTimer] = SetTimerEx("Bankraub",1000,true,"i",playerid);
 			GameTextForPlayer(playerid,"~r~Du versuchst die Bank of San Andreas auszurauben",3000,3);
 			MoveDynamicObject(tor[17],1472.04,-998.54,44.58+6,1);
 			PlayerHearMusicInRange(1472.04,-998.54,44.58,1035,5,1,2000);//x,y,z,soundid,radius,timer an = 1 wenn aus = 0,zeit wann timer music/sound beendet
@@ -48011,14 +48010,14 @@ COMMAND:repcar(playerid,params[])
 			if(Motor[vehicleid] == true)return SCM(playerid,SAMP_WEISS,""IINFO" der Motor muss aus sein,bevor das Fahrzeug repariert wird.");
 			SCM(playerid,0x4BB400FF,"Fahrzeug wird repariert und geprüft! Warte einen Moment.");
 			SetCameraBehindPlayer(playerid);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			RepairAVehicle[vehicleid] = 1;
 			if(IsPlayerInRangeOfPoint(playerid,6.0,1777.8367,-1120.9999,24.0859))
 			{
 			    vFahrzeug[vehicleid][FailGas] = 0;
     			vFahrzeug[vehicleid][Tank] = VehicleInfo[GetVehicleModel(vehicleid)-400][vtankvolumen];
 			}
-			reptimer[playerid] = SetTimerEx("Repaired",10000,0,"i",playerid);
+			reptimer[playerid] = SetTimerEx("Repaired",10000,false,"i",playerid);
 		    return 1;
 		}
 		return SCM(playerid,SAMP_WEISS,"An keiner staatlichen Werkstatt.");
@@ -48058,7 +48057,7 @@ COMMAND:klaukleidung(playerid,params[])
 	    case 4: SetPlayerSkin(pID,62);
 	    case 5: SetPlayerSkin(pID,96);
    	}
-	ApplyAnimation(playerid,"BOMBER","BOM_Plant",4.0,0,1,1,1,5000,1);
+	ApplyAnimation(playerid,"BOMBER","BOM_Plant",4.0,false,true,true,true,5000,SYNC_ALL);
 	SCM(pID,SAMP_WEISS,"Ein Unbekannter hat deine Kleidung geklaut.");
 	format(string,sizeof string,""IINFO" du hast %s die Kleidung geklaut.",SpielerName(pID));
 	SCM(playerid,SAMP_WEISS,string);
@@ -48448,7 +48447,7 @@ COMMAND:robc4(playerid,params[])
 	SCM(pID2,0xD30023FF,"Die Staatsmächte wurden kontaktiert,haltet 3 Minuten durch um den Transporter leer zu räumen.");
     SCM(pID2,0xD30023FF,"Bleib die 5 Minuten so nah wie möglich am Transporter ohne zu sterben,da der Raub sonst abbricht.");
 	PutPlayerInVehicleEx(pID2,BOTarmytransport,1);
-	C4robTimer = SetTimerEx("RobC4Transporter",1000,1,"iii",playerid,pID,pID2);
+	C4robTimer = SetTimerEx("RobC4Transporter",1000,true,"iii",playerid,pID,pID2);
 	PlayerHearMusicInRange(Pos[0],Pos[1],Pos[2],1035,5,1,2000);//x,y,z,soundid,radius,timer an = 1 wenn aus = 0,zeit wann timer music/sound beendet
 	ForEachPlayer(i)
 	{
@@ -48493,7 +48492,7 @@ COMMAND:legbombe(playerid,params[])
 	if(gettime() > bombenstatus)
 	{
 	    bombenstatus = gettime() + (60*60*4);
-		ApplyAnimation(playerid,"BOMBER","BOM_Plant",4.0,0,1,1,1,5000,1);
+		ApplyAnimation(playerid,"BOMBER","BOM_Plant",4.0,false,true,true,true,5000,SYNC_ALL);
 		ShowPlayerDialog(playerid,DIALOG_BOMBELEGEN_DRAHT,DIALOG_STYLE_LIST,"Wähle nun den jeweiligen Draht aus...","{FF0000}Rot\n{00FF04}Grün\n{2B00FF}Blau\n{FFCC00}Gelb","Auswählen","Abbrechen");
 	}
 	else
@@ -48524,7 +48523,7 @@ COMMAND:defuse(playerid,params[])
 		if(IsPlayerInRangeOfPoint(playerid,1.5,BombeX,BombeY,BombeZ) && BombState == true)
 		{
 			if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,"Im Fahrzeug nicht möglich.");
-			ApplyAnimation(playerid,"BOMBER","BOM_Plant",4.0,0,1,1,1,5000,1);
+			ApplyAnimation(playerid,"BOMBER","BOM_Plant",4.0,false,true,true,true,5000,SYNC_ALL);
 			ShowPlayerDialog(playerid,DIALOG_BOMBELEGEN_ENTSCHAERFEN,DIALOG_STYLE_LIST,""IINFO" du versuchst die Bombe zu entschärfen...","{FF0000}Draht Rot...\n{00FF04}Draht Grün...\n{2B00FF}Draht Blau...\n{FFCC00}Draht Gelb...","Entschärfen","Abbrechen");
 		 	format(string,sizeof(string),"** %s schaut sich den Sprengsatz an **",SpielerName(playerid));
 			PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
@@ -49000,10 +48999,10 @@ public OnPlayerEnterVehicle(playerid,vehicleid,ispassenger)
 	if(Spieler[playerid][pDeath] == 1)
 	{
 		ClearAnimations(playerid);
-		TogglePlayerControllable(playerid,1);
+		TogglePlayerControllable(playerid,true);
 		return 1;
 	}
-	new driver = GetVehicleDriver(vehicleid);
+	new driver = Script_GetVehicleDriver(vehicleid);
 	if(ispassenger == 0)
 	{
 		if(driver != INVALID_PLAYER_ID)
@@ -49011,7 +49010,7 @@ public OnPlayerEnterVehicle(playerid,vehicleid,ispassenger)
 			if(IsVehicleABus(vehicleid) || IsVehicleAPostCar(vehicleid) || IsVehicleACleanCar(vehicleid) || IsVehicleAMuellCar(vehicleid) || IsVehicleATransportplane(vehicleid) || IsVehicleATransportplane2(vehicleid) || IsVehicleATransportplane3(vehicleid) || IsVehicleATruck(vehicleid) || IsVehicleAFarmCar(vehicleid) || IsVehicleAFarmCar2(vehicleid) || IsVehicleATaxi(vehicleid))
 			{
 				ClearAnimations(playerid);
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				return 1;
 			}
 			for(new a=0;a<MAX_ADMINVEHS;a++)
@@ -49019,7 +49018,7 @@ public OnPlayerEnterVehicle(playerid,vehicleid,ispassenger)
 			   	if(vehicleid == adminmobile[a])
 			   	{
 				   	ClearAnimations(playerid);
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					break;
 				}
 		 	}
@@ -49028,7 +49027,7 @@ public OnPlayerEnterVehicle(playerid,vehicleid,ispassenger)
 			   	if(vehicleid == eventmobile[e])
 			   	{
 				   	ClearAnimations(playerid);
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 				   	break;
 			   	}
 		  	}
@@ -49044,7 +49043,7 @@ public OnPlayerExitVehicle(playerid,vehicleid)
 	 	{
 		    if(BusCheckpointStatus1[playerid] != -1 || BusCheckpointStatus2[playerid] != -1 || BusCheckpointStatus3[playerid] != -1 || BusCheckpointStatus4[playerid] != -1 || BusCheckpointStatus5[playerid] != -1 || BusCheckpointStatus6[playerid] != -1 || BusCheckpointStatus7[playerid] != -1 || BusCheckpointStatus8[playerid] != -1)
 		    {
-			    JobTimer[playerid] = SetTimerEx("JobExit",2*60000,0,"i",playerid);
+			    JobTimer[playerid] = SetTimerEx("JobExit",2*60000,false,"i",playerid);
 			    SCM(playerid,SAMP_WEISS,"Achtung! Du darfst dich nur 2 Minuten ausserhalb des Fahrzeuges bewegen,da der Job sonst abbricht!");
 		    }
 	    }
@@ -49092,7 +49091,7 @@ public OnPlayerExitVehicle(playerid,vehicleid)
 		{
 		    DeleteVehicle(vehicleid);
 		    PutPlayerInVehicleEx(playerid,Pvehicles[Spieler[playerid][PprobefahrtVehID]],0);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			ShowPlayerDialog(playerid,DIALOG_AutoKaufen_Liste,DIALOG_STYLE_LIST,""ClanTagDialoge" Auothaus - Hauptmenü",""#HTML_BLAU"1."#HTML_WEISS" Auto Kaufen\n"#HTML_BLAU"2."#HTML_WEISS" Probefahrt\n"#HTML_BLAU"3."#HTML_WEISS" Fahrzeug Papiere","Nehmen","Abbrechen");
 		    Spieler[playerid][PprobefahrtVeh] = 0;
 			Spieler[playerid][PprobefahrtTime] = 0;
@@ -49103,7 +49102,7 @@ public OnPlayerExitVehicle(playerid,vehicleid)
 		{
 		    DeleteVehicle(vehicleid);
 		    PutPlayerInVehicleEx(playerid,Fvehicles[Spieler[playerid][PprobefahrtVehID]],0);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			new Float:Pos[3];
 			GetVehicleModelInfo(FvehicleBuyVehicles[i][modelid],VEHICLE_MODEL_INFO_SIZE,Pos[0],Pos[1],Pos[2]);
 			ShowPlayerDialog(playerid,DIALOG_AutoKaufen_Liste,DIALOG_STYLE_LIST,""ClanTagDialoge" Auothaus - Hauptmenü",""#HTML_BLAU"1."#HTML_WEISS" Auto Kaufen\n"#HTML_BLAU"2."#HTML_WEISS" Probefahrt\n"#HTML_BLAU"3."#HTML_WEISS" Fahrzeug Papiere","Nehmen","Abbrechen");
@@ -49150,7 +49149,7 @@ public OnPlayerExitVehicle(playerid,vehicleid)
 	 	{
 		    if(postjobgo[playerid] != 0 || postjobgo2[playerid] != 0)
 		    {
-			    JobTimer[playerid] = SetTimerEx("JobExit",2*60000,0,"i",playerid);
+			    JobTimer[playerid] = SetTimerEx("JobExit",2*60000,false,"i",playerid);
 			    SCM(playerid,SAMP_WEISS,"Achtung! Du darfst dich nur 2 Minuten ausserhalb des Fahrzeuges bewegen,da der Job sonst abbricht!");
 		    }
 	    }
@@ -49162,7 +49161,7 @@ public OnPlayerExitVehicle(playerid,vehicleid)
 	 	{
 		    if(fjobgo[playerid] != 0)
 		    {
-			    JobTimer[playerid] = SetTimerEx("JobExit",2*60000,0,"i",playerid);
+			    JobTimer[playerid] = SetTimerEx("JobExit",2*60000,false,"i",playerid);
 			    SCM(playerid,SAMP_WEISS,"Achtung! Du darfst dich nur 2 Minuten ausserhalb des Fahrzeuges bewegen,da der Job sonst abbricht!");
 		    }
 	    }
@@ -49174,7 +49173,7 @@ public OnPlayerExitVehicle(playerid,vehicleid)
 	 	{
 		    if(fjobgo1[playerid] != 0)
 		    {
-			    JobTimer[playerid] = SetTimerEx("JobExit",2*60000,0,"i",playerid);
+			    JobTimer[playerid] = SetTimerEx("JobExit",2*60000,false,"i",playerid);
 			    SCM(playerid,SAMP_WEISS,"Achtung! Du darfst dich nur 2 Minuten ausserhalb des Fahrzeuges bewegen,da der Job sonst abbricht!");
 		    }
 	    }
@@ -49186,7 +49185,7 @@ public OnPlayerExitVehicle(playerid,vehicleid)
 	 	{
 		    if(fjobgo2[playerid] != 0)
 		    {
-			    JobTimer[playerid] = SetTimerEx("JobExit",2*60000,0,"i",playerid);
+			    JobTimer[playerid] = SetTimerEx("JobExit",2*60000,false,"i",playerid);
 			    SCM(playerid,SAMP_WEISS,"Achtung! Du darfst dich nur 2 Minuten ausserhalb des Fahrzeuges bewegen,da der Job sonst abbricht!");
 		    }
 	    }
@@ -49237,7 +49236,7 @@ public OnPlayerExitVehicle(playerid,vehicleid)
 	return 1;
 }
 
-public OnPlayerStateChange(playerid,newstate,oldstate)
+public OnPlayerStateChange(playerid,PLAYER_STATE:newstate,PLAYER_STATE:oldstate)
 {
     new vehicleid = GetPlayerVehicleID(playerid),string[512];
     ForEachPlayer(i)
@@ -49269,7 +49268,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 		SetPlayerArmedWeapon(playerid,0);
 		if(IsVehicleATaxi(vehicleid))
 	    {
-		    new driver = GetVehicleDriver(vehicleid);
+		    new driver = Script_GetVehicleDriver(vehicleid);
 			if(Spieler[driver][pTaxiDuty] == 1)
 			{
 				if((GetACMoney(playerid) - MAX_TAXI_PRICE) < 0)
@@ -49279,7 +49278,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 					PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 					StopAudioStreamForPlayer(playerid);
 					
-				 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+				 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 					return RemovePlayerFromVehicle(playerid);
 				}
 				Spieler[playerid][pTaxiBeifahrerPreis] = 0;
@@ -49293,7 +49292,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				format(string,sizeof(string),"%s ist in dein Taxi eingestiegen! Dienstpreis : %i$ (Dienstpreis + Fahrzeit alle 15 Sekunden)",SpielerName(playerid),MAX_TAXI_PRICE);
 				SCM(driver,SAMP_WEISS,string);
 				Spieler[playerid][pTaxiSeat] = GetPlayerVehicleSeat(playerid);
-			 	Spieler[playerid][pTaxiTimer] = SetTimerEx("Taxometer",753,1,"ii",playerid,driver);
+			 	Spieler[playerid][pTaxiTimer] = SetTimerEx("Taxometer",753,true,"ii",playerid,driver);
 			 	switch(GetPlayerVehicleSeat(playerid))
 			    {
 				   	case 1:
@@ -49337,15 +49336,15 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-				SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+				SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 			format(string,sizeof(string),""IINFO" du hast %i$ für dein Busfahrticket bezahlen!",MAX_BUS_PRICE);
 			SCM(playerid,SAMP_WEISS,string);
 			ACMoney(playerid,- MAX_BUS_PRICE);
-			ACMoney(GetVehicleDriver(vehicleid),MAX_BUS_PRICE);
+			ACMoney(Script_GetVehicleDriver(vehicleid),MAX_BUS_PRICE);
 			format(string,sizeof(string),"%s hat ein Busfahrticket für %i$ gekauft!",SpielerName(playerid),MAX_BUS_PRICE);
-			SCM(GetVehicleDriver(vehicleid),SAMP_WEISS,string);
+			SCM(Script_GetVehicleDriver(vehicleid),SAMP_WEISS,string);
 		}
 	}
 	if(newstate == PLAYER_STATE_DRIVER)
@@ -49353,7 +49352,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 		SetPlayerArmedWeapon(playerid,0);
 		if(Spieler[playerid][TachoShow] == false)
 		{
-			Spieler[playerid][TachoTimer] = SetTimerEx("Tachometer",986,1,"i",playerid);
+			Spieler[playerid][TachoTimer] = SetTimerEx("Tachometer",986,true,"i",playerid);
 			Spieler[playerid][TachoShow] = true;
 		}
 		if(GetVehicleModel(vehicleid) == 481 || GetVehicleModel(vehicleid) == 509 || GetVehicleModel(vehicleid) == 510)
@@ -49371,7 +49370,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 			PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 			StopAudioStreamForPlayer(playerid);
 			
-		 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+		 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 			return RemovePlayerFromVehicle(playerid);
 	    }
 		if(IsVehAGWDVehicle(vehicleid) && Spieler[playerid][pGrundwehrdienst] > 2)
@@ -49382,7 +49381,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 			PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 			StopAudioStreamForPlayer(playerid);
 			
-		 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+		 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 			return RemovePlayerFromVehicle(playerid);
 		}
 		if(Spieler[playerid][InFahrSchulPruefung] == 0)
@@ -49399,7 +49398,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 					PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 					StopAudioStreamForPlayer(playerid);
 					
-				 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+				 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 					return RemovePlayerFromVehicle(playerid);
 				}
 				if(Spieler[playerid][pPlaneLic] == 0)
@@ -49410,7 +49409,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 					PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 					StopAudioStreamForPlayer(playerid);
 					
-				 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+				 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				}
 			}
 			if(IsVehAHelicopter(vehicleid))
@@ -49422,7 +49421,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 					PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 					StopAudioStreamForPlayer(playerid);
 					
-				 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+				 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 					return RemovePlayerFromVehicle(playerid);
 				}
 				if(Spieler[playerid][pHeliLic] == 0)
@@ -49433,7 +49432,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 					PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 					StopAudioStreamForPlayer(playerid);
 					
-				 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+				 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				}
 			}
 			if(IsVehicleACar(vehicleid) && Spieler[playerid][pAutoLic] == 0) SCM(playerid,SAMP_WEISS,""IINFO" du hast keinen Führerschein."),SCM(playerid,SAMP_WEISS,"Lass dich nicht von der Polizei oder dem Ordnungsamt erwischen.");
@@ -49451,7 +49450,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 						PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 						StopAudioStreamForPlayer(playerid);
 						
-					 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+					 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 						return RemovePlayerFromVehicle(playerid);
 					}
 				}
@@ -49466,7 +49465,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 			if(farmjobgo[playerid] == 0 && farmjobgo2[playerid] == 0 || farmjobgo2[playerid] == 0 && farmjobgo[playerid] == 0)
@@ -49478,7 +49477,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				TextDrawShowForPlayer(playerid,InfoSign);
 			    PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Fahre nun weiter das Feld ab!");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				KillTimer(JobTimer[playerid]);
 			}
 		}
@@ -49491,7 +49490,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 			if(truckerjobgo[playerid] == 0 && truckerjobgo2[playerid] == 0 && truckerjobgo3[playerid] == 0 && truckerjobgo4[playerid] == 0 && truckerjobgo5[playerid] == 0
@@ -49507,7 +49506,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				TextDrawShowForPlayer(playerid,InfoSign);
 			    PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Fahre nun weiter die Ladungs aus!");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				KillTimer(JobTimer[playerid]);
 			}
 		}
@@ -49520,7 +49519,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 			if(BusCheckpointStatus1[playerid] == -1 && BusCheckpointStatus2[playerid] == -1 && BusCheckpointStatus3[playerid] == -1 && BusCheckpointStatus4[playerid] == -1 && BusCheckpointStatus5[playerid] == -1 && BusCheckpointStatus6[playerid] == -1 && BusCheckpointStatus7[playerid] == -1 && BusCheckpointStatus8[playerid] == -1
@@ -49539,7 +49538,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				TextDrawShowForPlayer(playerid,InfoSign);
 			    PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Fahre nun weiter die Haltestellen ab!");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				KillTimer(JobTimer[playerid]);
 			}
 		}
@@ -49552,7 +49551,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 			SCM(playerid,SAMP_WEISS,"Befehle: /loaddirtstatus,/unloaddirt,/cleanmachine");
@@ -49583,7 +49582,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 			SCM(playerid,SAMP_WEISS,"Befehle: /loadrubbish,/loadrubbishstatus,/unloadrubbish,/landfill,/op,/accept rubbish");
@@ -49597,7 +49596,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 			if(fjobgo[playerid] == 0)
@@ -49609,7 +49608,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				TextDrawShowForPlayer(playerid,InfoSign);
 			    PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Fliege nun weiter die Checkpoints ab!");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				KillTimer(JobTimer[playerid]);
 			}
 		}
@@ -49622,7 +49621,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 			if(fjobgo1[playerid] == 0)
@@ -49634,7 +49633,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				TextDrawShowForPlayer(playerid,InfoSign);
 			    PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Fliege nun weiter die Checkpoints ab!");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				KillTimer(JobTimer[playerid]);
 			}
 		}
@@ -49647,7 +49646,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 			if(fjobgo2[playerid] == 0)
@@ -49659,7 +49658,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				TextDrawShowForPlayer(playerid,InfoSign);
 			    PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Fliege nun weiter die Checkpoints ab!");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				KillTimer(JobTimer[playerid]);
 			}
 		}
@@ -49672,7 +49671,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 		}
@@ -49685,7 +49684,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 		}
@@ -49699,7 +49698,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 		}
@@ -49712,7 +49711,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 			if(postjobgo[playerid] == 0 && postjobgo2[playerid] == 0 || postjobgo2[playerid] == 0 && postjobgo[playerid] == 0)
@@ -49724,7 +49723,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				TextDrawShowForPlayer(playerid,InfoSign);
 			    PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Fahre nun weiter die Checkpoints ab!");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				KillTimer(JobTimer[playerid]);
 			}
 		}
@@ -49762,7 +49761,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 					PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 					StopAudioStreamForPlayer(playerid);
 					
-				 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+				 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 					return RemovePlayerFromVehicle(playerid);
 				}
 				TextDrawShowForPlayer(playerid,InfoSign);
@@ -49770,7 +49769,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 			SCM(playerid,SAMP_WEISS,"Befehle: /bstarten, /baufladen");
@@ -49799,7 +49798,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				return RemovePlayerFromVehicle(playerid);
 			}
 			SCM(playerid,SAMP_WEISS,"Befehle: /startbaggern");
@@ -49814,7 +49813,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 					{
 						new Float:Pos[3];
 						GetVehicleModelInfo(FvehicleBuyVehicles[i][modelid],VEHICLE_MODEL_INFO_SIZE,Pos[0],Pos[1],Pos[2]);
-						TogglePlayerControllable(playerid,0);
+						TogglePlayerControllable(playerid,false);
 						ShowPlayerDialog(playerid,DIALOG_AutoKaufen_Liste,DIALOG_STYLE_LIST,""ClanTagDialoge" Auothaus - Hauptmenü",""#HTML_BLAU"1."#HTML_WEISS" Auto Kaufen\n"#HTML_BLAU"2."#HTML_WEISS" Probefahrt\n"#HTML_BLAU"3."#HTML_WEISS" Fahrzeug Papiere","Nehmen","Abbrechen");
 						return 1;
 					}
@@ -49858,7 +49857,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 						return RemovePlayerFromVehicle(playerid);
 					}
 				}
-				TogglePlayerControllable(playerid,0);
+				TogglePlayerControllable(playerid,false);
 			    ShowPlayerDialog(playerid,DIALOG_AutoKaufen_Liste,DIALOG_STYLE_LIST,""ClanTagDialoge" Auothaus - Hauptmenü",""#HTML_BLAU"1."#HTML_WEISS" Auto Kaufen\n"#HTML_BLAU"2."#HTML_WEISS" Probefahrt\n"#HTML_BLAU"3."#HTML_WEISS" Fahrzeug Papiere","Nehmen","Abbrechen");
 				return 1;
 			}
@@ -49873,7 +49872,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 					{
 						if(!strcmp(Spieler[playerid][pName],Pfahrzeug[slot][i][Besitzer],true))
 						{
-							TogglePlayerControllable(playerid,0);
+							TogglePlayerControllable(playerid,false);
 							format(string,sizeof(string),""#HTML_WEISS"Ihr Fahrzeug: "#HTML_ROT"%s"#HTML_WEISS" wurde von uns Abgeschleppt, der Grund lautet: "#HTML_ROT"%s"#HTML_WEISS".\nIhr Fahrzeug wurde von einem ADAC Mitglied Beschlagnamt.\nDer Freikaufpreis liegt bei: "#HTML_GRUEN"%i"#HTML_WEISS"$",VehicleDefinations[GetVehicleModel(GetPlayerVehicleID(playerid))-400],vFahrzeug[Pfahrzeug[slot][i][Vehicle]][AbgeschlepptGrund],vFahrzeug[Pfahrzeug[slot][i][Vehicle]][AbgeschlepptPreis]);
        						ShowPlayerDialog(playerid,DIALOG_USERvehicleTowFree,DIALOG_STYLE_MSGBOX,""#HTML_BLAU"[ADAC]:"#HTML_WEISS" Ticket",string,"Freikaufen","Abbrechen");
 							return 1;
@@ -49889,7 +49888,7 @@ public OnPlayerStateChange(playerid,newstate,oldstate)
 				{
 					if(isPlayerInFrakt(playerid,Fahrzeug[fv][Fraktion]))
 					{
-						TogglePlayerControllable(playerid,0);
+						TogglePlayerControllable(playerid,false);
 						format(string,sizeof(string),"Ihr Fraktions Fahrzeug: "#HTML_ROT"%s"#HTML_WEISS" wurde von uns Abgeschleppt, der Grund lautet: "#HTML_ROT"%s"#HTML_WEISS".\nIhr Fahrzeug wurde von einem ADAC Mitglied Beschlagnamt.\nDer Freikaufpreis liegt bei: "#HTML_GRUEN"%i"#HTML_WEISS"$",VehicleDefinations[GetVehicleModel(GetPlayerVehicleID(playerid))-400],vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptGrund],vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptPreis]);
 						ShowPlayerDialog(playerid,DIALOG_FvehicleTowFree,DIALOG_STYLE_MSGBOX,""#HTML_BLAU"[ADAC]:"#HTML_WEISS" Ticket",string,"Freikaufen","Abbrechen");
 						return 1;
@@ -49955,8 +49954,8 @@ public OnPlayerEnterCheckpoint(playerid)
 	    DisablePlayerCheckpoint(playerid);
 	    tutorialpickup[playerid][0] = CreateDynamicPickup(1550,1,3562.4568,-987.5737,618.4721,GetPlayerVirtualWorld(playerid));
 	    SetPlayerPos(playerid,3562.4568,-987.5737,618.4721);
-		Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",2500,0,"ii",playerid,4);
-		TogglePlayerControllable(playerid,0);
+		Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",2500,false,"ii",playerid,4);
+		TogglePlayerControllable(playerid,false);
 		SpamChat(playerid,0);
 		return 1;
 	}
@@ -49966,8 +49965,8 @@ public OnPlayerEnterCheckpoint(playerid)
 	    DisablePlayerCheckpoint(playerid);
 	    tutorialpickup[playerid][1] = CreateDynamicPickup(1461,1,3562.4568,-987.5737,618.4721,GetPlayerVirtualWorld(playerid));
 	    SetPlayerPos(playerid,3562.4568,-987.5737,618.4721);
-		Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",5000,0,"ii",playerid,4);
-		TogglePlayerControllable(playerid,0);
+		Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",5000,false,"ii",playerid,4);
+		TogglePlayerControllable(playerid,false);
 		return 1;
 	}
 	if(Spieler[playerid][pTutMissionComplete][2] == true)
@@ -49977,8 +49976,8 @@ public OnPlayerEnterCheckpoint(playerid)
 	    Spieler[playerid][pTutMissionComplete][2] = false;
 		//SCM(playerid,SAMP_WEISS,""#HTML_BLAU"Pilot"#HTML_WEISS": Okay, wir sind nun über Los-Santos machen sie sich absprung bereit!");
 	    SetPlayerPos(playerid,3562.4568,-987.5737,618.4721);
-		Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",5000,0,"ii",playerid,4);
-		TogglePlayerControllable(playerid,0);
+		Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",5000,false,"ii",playerid,4);
+		TogglePlayerControllable(playerid,false);
 		SetPlayerCheckpoint(playerid,3562.4568,-987.5737,618.4721,3.0);
 		Spieler[playerid][pTutMissionComplete][3] = true;
 		return 1;
@@ -49994,11 +49993,11 @@ public OnPlayerEnterCheckpoint(playerid)
 	    Spieler[playerid][pTutMissionComplete][3] = false;
 		SetPlayerVirtualWorld(playerid,0);
 		SetPlayerPos(playerid,3562.4568,-987.5737,618.4721);
-		Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",1000,1,"ii",playerid,5);
-		TogglePlayerControllable(playerid,0);
+		Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",1000,true,"ii",playerid,5);
+		TogglePlayerControllable(playerid,false);
 		Spieler[playerid][pTutMissionComplete][4] = true;
 		SetPVarInt(playerid,"Eingeloggt",1);
-		SetTimerEx("SpielerFertig",15000,0,"i",playerid);
+		SetTimerEx("SpielerFertig",15000,false,"i",playerid);
 	}
 	if(Spieler[playerid][pBuyVehicleCP] == 1)
 	{
@@ -50024,8 +50023,8 @@ public OnPlayerEnterCheckpoint(playerid)
 	{
 		DisablePlayerCheckpoint(playerid);
 		SCM(playerid,SAMP_WEISS,""IINFO" warte einen Moment! Dein Essen wird zubereitet.");
-		TogglePlayerControllable(playerid,0);
-		SetTimerEx("DriveIn",5000,0,"i",playerid);
+		TogglePlayerControllable(playerid,false);
+		SetTimerEx("DriveIn",5000,false,"i",playerid);
 		if(Spieler[playerid][pIsearch] == 1)
 		{
 			new Float:x,Float:y,Float:z;
@@ -50033,14 +50032,14 @@ public OnPlayerEnterCheckpoint(playerid)
 			{
 				GetPlayerPos(Spieler[playerid][pOrtenVehIDplayerid],x,y,z);
 				SetPlayerCheckpoint(playerid,x,y,z,3);
-				SpielerOrtenTimer[playerid]=SetTimerEx("SpielerOderFahrzeugOrten",1000,1,"iii",playerid,Spieler[playerid][pOrtenVehIDplayerid],1);
+				SpielerOrtenTimer[playerid]=SetTimerEx("SpielerOderFahrzeugOrten",1000,true,"iii",playerid,Spieler[playerid][pOrtenVehIDplayerid],1);
 				return 1;
 			}
 			if(Spieler[playerid][pOrtenVehORPlayer] == 2)//ortet fahrzeug
 			{
 				GetVehiclePos(Spieler[playerid][pOrtenVehIDplayerid],x,y,z);
 				SetPlayerCheckpoint(playerid,x,y,z,3);
-				SpielerOrtenTimer[playerid]=SetTimerEx("SpielerOderFahrzeugOrten",1000,1,"iii",playerid,Spieler[playerid][pOrtenVehIDplayerid],2);
+				SpielerOrtenTimer[playerid]=SetTimerEx("SpielerOderFahrzeugOrten",1000,true,"iii",playerid,Spieler[playerid][pOrtenVehIDplayerid],2);
 				return 1;
 			}
 			if(Spieler[playerid][pOrtenVehORPlayer] == 3)//service accept
@@ -50062,7 +50061,7 @@ public OnPlayerEnterCheckpoint(playerid)
 		//TextDrawShowForPlayer(playerid,InfoSign);
 		//PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Ziel erreicht!");
 		//PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-		//SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+		//SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 		SCM(playerid,SAMP_WEISS,""IINFO" Ziel erreicht!");
 		Spieler[playerid][pIsearch] = 0;
 	}
@@ -50163,13 +50162,13 @@ public OnPlayerEnterCheckpoint(playerid)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-				SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+				SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				DisablePlayerCheckpoint(playerid);
 				SetPlayerCheckpoint(playerid,-2015.1486,-140.7914,35.0225,3.0);
 				Spieler[playerid][pSchulungsCPautolic] = 12;
 				MoveDynamicObject(tor[39],-2043.7734375,-80.568031311035,34.921920776367 + 0.01,0.01,0,0,0);
 				torstatus[39] = 1;
-				SetTimerEx("MoveGate",10000,0,"i",3);
+				SetTimerEx("MoveGate",10000,false,"i",3);
 			}
 			case 12:
 			{
@@ -50297,13 +50296,13 @@ public OnPlayerEnterCheckpoint(playerid)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-				SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+				SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				DisablePlayerCheckpoint(playerid);
 				SetPlayerCheckpoint(playerid,-2015.6865,-155.4101,34.8927,3.0);
 				Spieler[playerid][pSchulungsCPmotorbikelic] = 15;
 				MoveDynamicObject(tor[39],-2043.7734375,-80.568031311035,34.921920776367 + 0.01,0.01,0,0,0);
 				torstatus[39] = 1;
-				SetTimerEx("MoveGate",10000,0,"i",3);
+				SetTimerEx("MoveGate",10000,false,"i",3);
 			}
 			case 15:
 			{
@@ -50433,13 +50432,13 @@ public OnPlayerEnterCheckpoint(playerid)
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 				StopAudioStreamForPlayer(playerid);
 				
-				SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+				SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				DisablePlayerCheckpoint(playerid);
 				SetPlayerCheckpoint(playerid,-2015.6865,-155.4101,34.8927,3.0);
 				Spieler[playerid][pSchulungsCProllerlic] = 15;
 				MoveDynamicObject(tor[39],-2043.7734375,-80.568031311035,34.921920776367 + 0.01,0.01,0,0,0);
 				torstatus[39] = 1;
-				SetTimerEx("MoveGate",10000,0,"i",3);
+				SetTimerEx("MoveGate",10000,false,"i",3);
 			}
 			case 15:
 			{
@@ -50571,8 +50570,8 @@ public OnPlayerEnterCheckpoint(playerid)
 	if(IsTrailerAttachedToVehicle(vehicleid))
 	{
 	PlayerPlaySound(playerid,1058,0.0,0.0,0.0);
-	TogglePlayerControllable(playerid,0);
-	SetTimerEx("TruckerStuffUnload",60000,0,"ii",playerid,1);
+	TogglePlayerControllable(playerid,false);
+	SetTimerEx("TruckerStuffUnload",60000,false,"ii",playerid,1);
 	SCM(playerid,SAMP_WEISS,"Warte eine Minute,die Ware wird entladen!");
 	}
 	}
@@ -50649,8 +50648,8 @@ public OnPlayerEnterCheckpoint(playerid)
 	if(IsVehicleATruck(vehicleid))
 	{
 	PlayerPlaySound(playerid,1058,0.0,0.0,0.0);
-	TogglePlayerControllable(playerid,0);
-	SetTimerEx("TruckerStuffUnload",60000,0,"ii",playerid,2);
+	TogglePlayerControllable(playerid,false);
+	SetTimerEx("TruckerStuffUnload",60000,false,"ii",playerid,2);
 	SCM(playerid,SAMP_WEISS,"Warte eine Minute,die Autoteile werden entladen!");
 	}
 	}
@@ -50726,8 +50725,8 @@ public OnPlayerEnterCheckpoint(playerid)
 	if(IsVehicleATruck(vehicleid))
 	{
 	PlayerPlaySound(playerid,1058,0.0,0.0,0.0);
-	TogglePlayerControllable(playerid,0);
-	SetTimerEx("TruckerStuffUnload",60000,0,"ii",playerid,3);
+	TogglePlayerControllable(playerid,false);
+	SetTimerEx("TruckerStuffUnload",60000,false,"ii",playerid,3);
 	SCM(playerid,SAMP_WEISS,"Warte eine Minute,der Bauschutt wird entladen! Fahre nach dem entladen zurück zum Anhängerstellplatz.");
 	}
 	}
@@ -50803,8 +50802,8 @@ public OnPlayerEnterCheckpoint(playerid)
 	if(IsVehicleATruck(vehicleid))
 	{
 	PlayerPlaySound(playerid,1058,0.0,0.0,0.0);
-	TogglePlayerControllable(playerid,0);
-	SetTimerEx("TruckerStuffUnload",60000,0,"ii",playerid,4);
+	TogglePlayerControllable(playerid,false);
+	SetTimerEx("TruckerStuffUnload",60000,false,"ii",playerid,4);
 	SCM(playerid,SAMP_WEISS,"Warte eine Minute,der Treibstoff wird abgefüllt!");
 	}
 	}
@@ -50880,8 +50879,8 @@ public OnPlayerEnterCheckpoint(playerid)
 	if(IsVehicleATruck(vehicleid))
 	{
 	PlayerPlaySound(playerid,1058,0.0,0.0,0.0);
-	TogglePlayerControllable(playerid,0);
-	SetTimerEx("TruckerStuffUnload",60000,0,"ii",playerid,5);
+	TogglePlayerControllable(playerid,false);
+	SetTimerEx("TruckerStuffUnload",60000,false,"ii",playerid,5);
 	SCM(playerid,SAMP_WEISS,"Warte eine Minute,das Eisen wird entladen! Fahre nach dem entladen zurück zum Anhängerstellplatz.");
 	}
 	}
@@ -50949,8 +50948,8 @@ public OnPlayerEnterCheckpoint(playerid)
 				    format(string,sizeof(string),"Verdienst: %i$",randpay);
 				    SCM(playerid,0x37DB0044,string);
 					SCM(playerid,0x37DB0044,"Info: Die Auszahlung wird am Zahltag auf dein Konto überwiesen.");
-					TogglePlayerControllable(playerid,0);
-					SetTimerEx("UnTazer",2000,0,"i",playerid);
+					TogglePlayerControllable(playerid,false);
+					SetTimerEx("UnTazer",2000,false,"i",playerid);
 					RepairVehicle(GetPlayerVehicleID(playerid));
 					BusCheckpointStatus1[playerid] = -1;
 					DisablePlayerCheckpoint(playerid);
@@ -50959,14 +50958,14 @@ public OnPlayerEnterCheckpoint(playerid)
 					ShowPlayerDialog(playerid,DIALOG_JOB_STRECKEN_AUSWAHL,DIALOG_STYLE_LIST,"Buslinien","Linie 11 (Los Santos Ost/Zentrum Ost)\nLinie 30 (Zentrum West/Los Santos Airport)\nLinie 22 (Industrie Gebiet/Los Santos Ost)\nLinie 14 (Zentrum LS/ Downtown LS)\nLinie 1 (Zentrum LS/San Fierro)\nLinie 16 (Zentrum LS/Las Venturas)\nLinie 7 (Los Santos Ost/Zentrum LS)\nLinie 21 (Los Santos Süd)","Auswählen","Abbrechen");
 					return 1;
 				}
-			    TogglePlayerControllable(playerid,0);
+			    TogglePlayerControllable(playerid,false);
 			    DisablePlayerCheckpoint(playerid);
-			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,0,"iii",playerid,1,BusCheckpointStatus1[playerid]);
+			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,false,"iii",playerid,1,BusCheckpointStatus1[playerid]);
 				SCM(playerid,SAMP_WEISS,"Haltestelle erreicht,warte hier nun 15 Sekunden.");
 		        TextDrawShowForPlayer(playerid,InfoSign);
 		   		PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Haltestelle erreicht,warte hier nun 15 Sekunden.");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-		 		SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+		 		SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 			}
 		}
 
@@ -50994,8 +50993,8 @@ public OnPlayerEnterCheckpoint(playerid)
 				    format(string,sizeof(string),"Verdienst: %i$",randpay);
 				    SCM(playerid,0x37DB0044,string);
 					SCM(playerid,0x37DB0044,"Info: Die Auszahlung wird am Zahltag auf dein Konto überwiesen.");
-					TogglePlayerControllable(playerid,0);
-					SetTimerEx("UnTazer",2000,0,"i",playerid);
+					TogglePlayerControllable(playerid,false);
+					SetTimerEx("UnTazer",2000,false,"i",playerid);
 					RepairVehicle(GetPlayerVehicleID(playerid));
 					BusCheckpointStatus2[playerid] = -1;
 					DisablePlayerCheckpoint(playerid);
@@ -51004,14 +51003,14 @@ public OnPlayerEnterCheckpoint(playerid)
 					ShowPlayerDialog(playerid,DIALOG_JOB_STRECKEN_AUSWAHL,DIALOG_STYLE_LIST,"Buslinien","Linie 11 (Los Santos Ost/Zentrum Ost)\nLinie 30 (Zentrum West/Los Santos Airport)\nLinie 22 (Industrie Gebiet/Los Santos Ost)\nLinie 14 (Zentrum LS/ Downtown LS)\nLinie 1 (Zentrum LS/San Fierro)\nLinie 16 (Zentrum LS/Las Venturas)\nLinie 7 (Los Santos Ost/Zentrum LS)\nLinie 21 (Los Santos Süd)","Auswählen","Abbrechen");
 					return 1;
 				}
-			    TogglePlayerControllable(playerid,0);
+			    TogglePlayerControllable(playerid,false);
 			    DisablePlayerCheckpoint(playerid);
-			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,0,"iii",playerid,2,BusCheckpointStatus2[playerid]);
+			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,false,"iii",playerid,2,BusCheckpointStatus2[playerid]);
 				SCM(playerid,SAMP_WEISS,"Haltestelle erreicht,warte hier nun 15 Sekunden.");
 		        TextDrawShowForPlayer(playerid,InfoSign);
 		   		PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Haltestelle erreicht,warte hier nun 15 Sekunden.");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-		 		SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+		 		SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 			}
 		}
 
@@ -51039,8 +51038,8 @@ public OnPlayerEnterCheckpoint(playerid)
 				    format(string,sizeof(string),"Verdienst: %i$",randpay);
 				    SCM(playerid,0x37DB0044,string);
 					SCM(playerid,0x37DB0044,"Info: Die Auszahlung wird am Zahltag auf dein Konto überwiesen.");
-					TogglePlayerControllable(playerid,0);
-					SetTimerEx("UnTazer",2000,0,"i",playerid);
+					TogglePlayerControllable(playerid,false);
+					SetTimerEx("UnTazer",2000,false,"i",playerid);
 					RepairVehicle(GetPlayerVehicleID(playerid));
 					BusCheckpointStatus3[playerid] = -1;
 					DisablePlayerCheckpoint(playerid);
@@ -51049,14 +51048,14 @@ public OnPlayerEnterCheckpoint(playerid)
 					ShowPlayerDialog(playerid,DIALOG_JOB_STRECKEN_AUSWAHL,DIALOG_STYLE_LIST,"Buslinien","Linie 11 (Los Santos Ost/Zentrum Ost)\nLinie 30 (Zentrum West/Los Santos Airport)\nLinie 22 (Industrie Gebiet/Los Santos Ost)\nLinie 14 (Zentrum LS/ Downtown LS)\nLinie 1 (Zentrum LS/San Fierro)\nLinie 16 (Zentrum LS/Las Venturas)\nLinie 7 (Los Santos Ost/Zentrum LS)\nLinie 21 (Los Santos Süd)","Auswählen","Abbrechen");
 					return 1;
 				}
-			    TogglePlayerControllable(playerid,0);
+			    TogglePlayerControllable(playerid,false);
 			    DisablePlayerCheckpoint(playerid);
-			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,0,"iii",playerid,3,BusCheckpointStatus3[playerid]);
+			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,false,"iii",playerid,3,BusCheckpointStatus3[playerid]);
 				SCM(playerid,SAMP_WEISS,"Haltestelle erreicht,warte hier nun 15 Sekunden.");
 		        TextDrawShowForPlayer(playerid,InfoSign);
 		   		PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Haltestelle erreicht,warte hier nun 15 Sekunden.");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-		 		SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+		 		SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 			}
 		}
 		if(BusCheckpointStatus4[playerid] != -1)
@@ -51083,8 +51082,8 @@ public OnPlayerEnterCheckpoint(playerid)
 				    format(string,sizeof(string),"Verdienst: %i$",randpay);
 				    SCM(playerid,0x37DB0044,string);
 					SCM(playerid,0x37DB0044,"Info: Die Auszahlung wird am Zahltag auf dein Konto überwiesen.");
-					TogglePlayerControllable(playerid,0);
-					SetTimerEx("UnTazer",2000,0,"i",playerid);
+					TogglePlayerControllable(playerid,false);
+					SetTimerEx("UnTazer",2000,false,"i",playerid);
 					RepairVehicle(GetPlayerVehicleID(playerid));
 					BusCheckpointStatus4[playerid] = -1;
 					DisablePlayerCheckpoint(playerid);
@@ -51093,14 +51092,14 @@ public OnPlayerEnterCheckpoint(playerid)
 					ShowPlayerDialog(playerid,DIALOG_JOB_STRECKEN_AUSWAHL,DIALOG_STYLE_LIST,"Buslinien","Linie 11 (Los Santos Ost/Zentrum Ost)\nLinie 30 (Zentrum West/Los Santos Airport)\nLinie 22 (Industrie Gebiet/Los Santos Ost)\nLinie 14 (Zentrum LS/ Downtown LS)\nLinie 1 (Zentrum LS/San Fierro)\nLinie 16 (Zentrum LS/Las Venturas)\nLinie 7 (Los Santos Ost/Zentrum LS)\nLinie 21 (Los Santos Süd)","Auswählen","Abbrechen");
 					return 1;
 				}
-			    TogglePlayerControllable(playerid,0);
+			    TogglePlayerControllable(playerid,false);
 			    DisablePlayerCheckpoint(playerid);
-			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,0,"iii",playerid,4,BusCheckpointStatus4[playerid]);
+			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,false,"iii",playerid,4,BusCheckpointStatus4[playerid]);
 				SCM(playerid,SAMP_WEISS,"Haltestelle erreicht,warte hier nun 15 Sekunden.");
 		        TextDrawShowForPlayer(playerid,InfoSign);
 		   		PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Haltestelle erreicht,warte hier nun 15 Sekunden.");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-		 		SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+		 		SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 			}
 		}
 
@@ -51128,8 +51127,8 @@ public OnPlayerEnterCheckpoint(playerid)
 				    format(string,sizeof(string),"Verdienst: %i$",randpay);
 				    SCM(playerid,0x37DB0044,string);
 					SCM(playerid,0x37DB0044,"Info: Die Auszahlung wird am Zahltag auf dein Konto überwiesen.");
-					TogglePlayerControllable(playerid,0);
-					SetTimerEx("UnTazer",2000,0,"i",playerid);
+					TogglePlayerControllable(playerid,false);
+					SetTimerEx("UnTazer",2000,false,"i",playerid);
 					RepairVehicle(GetPlayerVehicleID(playerid));
 					BusCheckpointStatus5[playerid] = -1;
 					DisablePlayerCheckpoint(playerid);
@@ -51138,14 +51137,14 @@ public OnPlayerEnterCheckpoint(playerid)
 					ShowPlayerDialog(playerid,DIALOG_JOB_STRECKEN_AUSWAHL,DIALOG_STYLE_LIST,"Buslinien","Linie 11 (Los Santos Ost/Zentrum Ost)\nLinie 30 (Zentrum West/Los Santos Airport)\nLinie 22 (Industrie Gebiet/Los Santos Ost)\nLinie 14 (Zentrum LS/ Downtown LS)\nLinie 1 (Zentrum LS/San Fierro)\nLinie 16 (Zentrum LS/Las Venturas)\nLinie 7 (Los Santos Ost/Zentrum LS)\nLinie 21 (Los Santos Süd)","Auswählen","Abbrechen");
 					return 1;
 				}
-			    TogglePlayerControllable(playerid,0);
+			    TogglePlayerControllable(playerid,false);
 			    DisablePlayerCheckpoint(playerid);
-			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,0,"iii",playerid,5,BusCheckpointStatus5[playerid]);
+			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,false,"iii",playerid,5,BusCheckpointStatus5[playerid]);
 				SCM(playerid,SAMP_WEISS,"Haltestelle erreicht,warte hier nun 15 Sekunden.");
 		        TextDrawShowForPlayer(playerid,InfoSign);
 		   		PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Haltestelle erreicht,warte hier nun 15 Sekunden.");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-		 		SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+		 		SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 		  	}
 		}
 
@@ -51173,8 +51172,8 @@ public OnPlayerEnterCheckpoint(playerid)
 				    format(string,sizeof(string),"Verdienst: %i$",randpay);
 				    SCM(playerid,0x37DB0044,string);
 					SCM(playerid,0x37DB0044,"Info: Die Auszahlung wird am Zahltag auf dein Konto überwiesen.");
-					TogglePlayerControllable(playerid,0);
-					SetTimerEx("UnTazer",2000,0,"i",playerid);
+					TogglePlayerControllable(playerid,false);
+					SetTimerEx("UnTazer",2000,false,"i",playerid);
 					RepairVehicle(GetPlayerVehicleID(playerid));
 					BusCheckpointStatus6[playerid] = -1;
 					DisablePlayerCheckpoint(playerid);
@@ -51183,14 +51182,14 @@ public OnPlayerEnterCheckpoint(playerid)
 					ShowPlayerDialog(playerid,DIALOG_JOB_STRECKEN_AUSWAHL,DIALOG_STYLE_LIST,"Buslinien","Linie 11 (Los Santos Ost/Zentrum Ost)\nLinie 30 (Zentrum West/Los Santos Airport)\nLinie 22 (Industrie Gebiet/Los Santos Ost)\nLinie 14 (Zentrum LS/ Downtown LS)\nLinie 1 (Zentrum LS/San Fierro)\nLinie 16 (Zentrum LS/Las Venturas)\nLinie 7 (Los Santos Ost/Zentrum LS)\nLinie 21 (Los Santos Süd)","Auswählen","Abbrechen");
 					return 1;
 				}
-			    TogglePlayerControllable(playerid,0);
+			    TogglePlayerControllable(playerid,false);
 			    DisablePlayerCheckpoint(playerid);
-			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,0,"iii",playerid,6,BusCheckpointStatus6[playerid]);
+			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,false,"iii",playerid,6,BusCheckpointStatus6[playerid]);
 				SCM(playerid,SAMP_WEISS,"Haltestelle erreicht,warte hier nun 15 Sekunden.");
 		        TextDrawShowForPlayer(playerid,InfoSign);
 		   		PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Haltestelle erreicht,warte hier nun 15 Sekunden.");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-		 		SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+		 		SetTimerEx("HideInfoBox",3000,false,"i",playerid);
     		}
 		}
 
@@ -51218,8 +51217,8 @@ public OnPlayerEnterCheckpoint(playerid)
 				    format(string,sizeof(string),"Verdienst: %i$",randpay);
 				    SCM(playerid,0x37DB0044,string);
 					SCM(playerid,0x37DB0044,"Info: Die Auszahlung wird am Zahltag auf dein Konto überwiesen.");
-					TogglePlayerControllable(playerid,0);
-					SetTimerEx("UnTazer",2000,0,"i",playerid);
+					TogglePlayerControllable(playerid,false);
+					SetTimerEx("UnTazer",2000,false,"i",playerid);
 					RepairVehicle(GetPlayerVehicleID(playerid));
 					BusCheckpointStatus7[playerid] = -1;
 					DisablePlayerCheckpoint(playerid);
@@ -51228,14 +51227,14 @@ public OnPlayerEnterCheckpoint(playerid)
 					ShowPlayerDialog(playerid,DIALOG_JOB_STRECKEN_AUSWAHL,DIALOG_STYLE_LIST,"Buslinien","Linie 11 (Los Santos Ost/Zentrum Ost)\nLinie 30 (Zentrum West/Los Santos Airport)\nLinie 22 (Industrie Gebiet/Los Santos Ost)\nLinie 14 (Zentrum LS/ Downtown LS)\nLinie 1 (Zentrum LS/San Fierro)\nLinie 16 (Zentrum LS/Las Venturas)\nLinie 7 (Los Santos Ost/Zentrum LS)\nLinie 21 (Los Santos Süd)","Auswählen","Abbrechen");
 					return 1;
 				}
-			    TogglePlayerControllable(playerid,0);
+			    TogglePlayerControllable(playerid,false);
 			    DisablePlayerCheckpoint(playerid);
-			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,0,"iii",playerid,7,BusCheckpointStatus7[playerid]);
+			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,false,"iii",playerid,7,BusCheckpointStatus7[playerid]);
 				SCM(playerid,SAMP_WEISS,"Haltestelle erreicht,warte hier nun 15 Sekunden.");
 		        TextDrawShowForPlayer(playerid,InfoSign);
 		   		PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Haltestelle erreicht,warte hier nun 15 Sekunden.");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-		 		SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+		 		SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 	   		}
 		}
 
@@ -51263,8 +51262,8 @@ public OnPlayerEnterCheckpoint(playerid)
 				    format(string,sizeof(string),"Verdienst: %i$",randpay);
 				    SCM(playerid,0x37DB0044,string);
 					SCM(playerid,0x37DB0044,"Info: Die Auszahlung wird am Zahltag auf dein Konto überwiesen.");
-					TogglePlayerControllable(playerid,0);
-					SetTimerEx("UnTazer",2000,0,"i",playerid);
+					TogglePlayerControllable(playerid,false);
+					SetTimerEx("UnTazer",2000,false,"i",playerid);
 					RepairVehicle(GetPlayerVehicleID(playerid));
 					BusCheckpointStatus8[playerid] = -1;
 					DisablePlayerCheckpoint(playerid);
@@ -51273,14 +51272,14 @@ public OnPlayerEnterCheckpoint(playerid)
 					ShowPlayerDialog(playerid,DIALOG_JOB_STRECKEN_AUSWAHL,DIALOG_STYLE_LIST,"Buslinien","Linie 11 (Los Santos Ost/Zentrum Ost)\nLinie 30 (Zentrum West/Los Santos Airport)\nLinie 22 (Industrie Gebiet/Los Santos Ost)\nLinie 14 (Zentrum LS/ Downtown LS)\nLinie 1 (Zentrum LS/San Fierro)\nLinie 16 (Zentrum LS/Las Venturas)\nLinie 7 (Los Santos Ost/Zentrum LS)\nLinie 21 (Los Santos Süd)","Auswählen","Abbrechen");
 					return 1;
 				}
-			    TogglePlayerControllable(playerid,0);
+			    TogglePlayerControllable(playerid,false);
 			    DisablePlayerCheckpoint(playerid);
-			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,0,"iii",playerid,8,BusCheckpointStatus8[playerid]);
+			    Spieler[playerid][pBusTimer]=SetTimerEx("BushalteStelle",15000,false,"iii",playerid,8,BusCheckpointStatus8[playerid]);
 				SCM(playerid,SAMP_WEISS,"Haltestelle erreicht,warte hier nun 15 Sekunden.");
 				TextDrawShowForPlayer(playerid,InfoSign);
 		   		PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~r~Info:~w~~n~Haltestelle erreicht,warte hier nun 15 Sekunden.");
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-		 		SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+		 		SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 			}
 		}
 	}
@@ -51295,8 +51294,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 2;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,848.0532,-1476.5647,13.2468,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 2)
@@ -51307,8 +51306,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 3;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,833.8272,-1476.0249,13.2486,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 3)
@@ -51319,8 +51318,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 4;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,887.2758,-1411.6548,13.1529,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 4)
@@ -51331,8 +51330,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 5;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,1365.1929,-1341.8944,13.6153,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 5)
@@ -51343,8 +51342,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 6;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,1370.4171,-1079.6606,24.9071,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 6)
@@ -51355,8 +51354,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 7;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,1246.4785,-1107.6014,25.2108,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 7)
@@ -51367,8 +51366,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 8;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,1108.8102,-1078.7096,29.0787,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 8)
@@ -51379,8 +51378,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 9;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,699.1013,-1186.9063,15.3269,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 9)
@@ -51391,8 +51390,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 10;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,492.8371,-1416.2289,16.0252,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 10)
@@ -51403,8 +51402,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 11;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,401.0830,-1840.1525,7.5199,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 11)
@@ -51415,8 +51414,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 12;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,892.7609,-1798.6621,13.3846,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 12)
@@ -51427,8 +51426,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 13;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,1203.1635,-1641.8203,13.4583,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 13)
@@ -51439,8 +51438,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 14;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,1104.6093,-1510.4706,15.4809,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 14)
@@ -51451,8 +51450,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 15;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,956.3175,-1509.1664,13.5493,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 15)
@@ -51463,8 +51462,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo[playerid] = 16;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,966.4571,-1541.6678,13.6585,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo[playerid] == 16)
@@ -51489,8 +51488,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 2;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,1686.2708,-1453.7396,13.2517,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 2)
@@ -51501,8 +51500,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 3;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,2136.8330,-1409.1222,23.6926,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 3)
@@ -51513,8 +51512,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 4;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,2250.5413,-1413.5774,23.6159,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 4)
@@ -51525,8 +51524,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 5;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,2316.2197,-1664.2942,13.8799,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 5)
@@ -51537,8 +51536,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 6;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,2371.2871,-1791.5236,13.2524,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 6)
@@ -51549,8 +51548,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 7;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,2352.0928,-1990.7290,13.1580,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 7)
@@ -51561,8 +51560,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 8;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,1958.6400,-2183.3323,13.2520,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 8)
@@ -51573,8 +51572,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 9;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,1483.5613,-1867.0662,13.1668,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 9)
@@ -51585,8 +51584,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 10;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,1027.1990,-1771.7144,13.2579,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 10)
@@ -51597,8 +51596,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 11;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,852.6225,-1527.8512,12.7062,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 11)
@@ -51609,8 +51608,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 12;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,890.9756,-1477.3403,12.8570,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 12)
@@ -51621,8 +51620,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 13;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,964.6371,-1621.4927,13.2571,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 13)
@@ -51633,8 +51632,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 14;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,864.2777,-1645.0133,13.2580,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 14)
@@ -51645,8 +51644,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 15;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,956.3386,-1557.2798,13.2807,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 15)
@@ -51657,8 +51656,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			postjobgo2[playerid] = 16;
 			DisablePlayerCheckpoint(playerid);
 			SetPlayerCheckpoint(playerid,966.4571,-1541.6678,13.6585,3.0);
-			SetTimerEx("UnTazer",3000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",3000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 		}
 	}
 	else if(postjobgo2[playerid] == 16)
@@ -51682,8 +51681,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			SCM(playerid,SAMP_WEISS,"Warte einen Moment! Die Waren werden aufgeladen.");
 			fjobgo[playerid] = 2;
 			DisablePlayerCheckpoint(playerid);
-			SetTimerEx("UnTazer",10000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",10000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerCheckpoint(playerid,1605.3542,1618.5204,11.2839,7.5);
 		}
 	}
@@ -51695,8 +51694,8 @@ public OnPlayerEnterCheckpoint(playerid)
             SCM(playerid,SAMP_WEISS,"Fliege nun zurück zum Stützpunkt");
 			fjobgo[playerid] = 3;
 			DisablePlayerCheckpoint(playerid);
-			SetTimerEx("UnTazer",10000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",10000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerCheckpoint(playerid,1986.6482,-2252.1704,13.1510,7.5);
 		}
 	}
@@ -51723,8 +51722,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			SCM(playerid,SAMP_WEISS,"Warte einen Moment! Die Waren werden aufgeladen.");
 			fjobgo1[playerid] = 2;
 			DisablePlayerCheckpoint(playerid);
-			SetTimerEx("UnTazer",7500,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",7500,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerCheckpoint(playerid,-1047.7731,-1162.9846,128.1114,7.5);
 		}
 	}
@@ -51735,8 +51734,8 @@ public OnPlayerEnterCheckpoint(playerid)
             SCM(playerid,SAMP_WEISS,"Ladung wird entladen!");
 			fjobgo1[playerid] = 3;
 			DisablePlayerCheckpoint(playerid);
-			SetTimerEx("UnTazer",7500,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",7500,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerCheckpoint(playerid,-82.6951,68.4228,3.2939,7.5);
 		}
 	}
@@ -51747,8 +51746,8 @@ public OnPlayerEnterCheckpoint(playerid)
             SCM(playerid,SAMP_WEISS,"Warte einen Moment! Die Waren werden aufgeladen.");
 			fjobgo1[playerid] = 4;
 			DisablePlayerCheckpoint(playerid);
-			SetTimerEx("UnTazer",7500,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",7500,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerCheckpoint(playerid,1918.5844,136.4769,34.5078,7.5);
 		}
 	}
@@ -51759,8 +51758,8 @@ public OnPlayerEnterCheckpoint(playerid)
             SCM(playerid,SAMP_WEISS,"Ladung wird entladen!");
 			fjobgo1[playerid] = 5;
 			DisablePlayerCheckpoint(playerid);
-			SetTimerEx("UnTazer",7500,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",7500,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerCheckpoint(playerid,404.8213,2457.8833,16.6769,7.5);
 		}
 	}
@@ -51771,8 +51770,8 @@ public OnPlayerEnterCheckpoint(playerid)
             SCM(playerid,SAMP_WEISS,"Warte einen Moment! Die Waren werden aufgeladen.");
 			fjobgo1[playerid] = 6;
 			DisablePlayerCheckpoint(playerid);
-			SetTimerEx("UnTazer",7500,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",7500,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 			SetPlayerCheckpoint(playerid,1730.8606,-2421.1853,13.7313,7.5);
 		}
 	}
@@ -51788,8 +51787,8 @@ public OnPlayerEnterCheckpoint(playerid)
 			Spieler[playerid][pLohn] += randcash;
 			SCM(playerid,SAMP_WEISS,"Info: Die Auszahlung wird am Zahltag auf dein Konto überwiesen.");
 			fjobgo1[playerid] = 0;
-			SetTimerEx("UnTazer",2000,0,"i",playerid);
-			TogglePlayerControllable(playerid,0);
+			SetTimerEx("UnTazer",2000,false,"i",playerid);
+			TogglePlayerControllable(playerid,false);
 			DisablePlayerCheckpoint(playerid);
 			ShowPlayerDialog(playerid,DIALOG_JOB_START_AUSWAHL,DIALOG_STYLE_MSGBOX,"Versorgungslieferant","Entscheide dich ob du den Job ´Starten´ oder ´Abbrechen´ willst !?","Starten","Abbrechen");
 		}
@@ -52036,7 +52035,7 @@ public Other()
 						    {
 								armybaseschwulies++;
 								StopAudioStreamForPlayer(i);
-								PlayAudioStreamForPlayer(i,ServerSounds[0],214.5937,1909.3901,17.6406,350.0,1);
+								PlayAudioStreamForPlayer(i,ServerSounds[0],214.5937,1909.3901,17.6406,350.0,true);
 								SCM(i,SAMP_WEISS,"ACHTUNG: Du hast das Sperrgebiet betreten.");
 							}
 						}
@@ -52071,7 +52070,7 @@ public Other()
 						if(IsPlayerInZone(i,-128.4566,1646.58,467.115,2172.085) && Pos[2] < 175)
 						{
 							StopAudioStreamForPlayer(i);
-							PlayAudioStreamForPlayer(i,ServerSounds[0],214.5937,1909.3901,17.6406,350.0,1);
+							PlayAudioStreamForPlayer(i,ServerSounds[0],214.5937,1909.3901,17.6406,350.0,true);
 						}
 					}
 				}
@@ -52091,7 +52090,7 @@ public Other()
 			}
 		}
 	}
-	SetTimer("Other",30569,0);
+	SetTimer("Other",30569,false);
 	return 1;
 }
 public OnPlayerLeaveCheckpoint(playerid)
@@ -52155,11 +52154,11 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 		{
 		if((Spieler[playerid][pKartracingCP1]+1) == sizeof(KartRace)-1)
 		{
-			SetPlayerRaceCheckpoint(playerid,1,KartRace[Spieler[playerid][pKartracingCP1]][0],KartRace[Spieler[playerid][pKartracingCP1]][1],KartRace[Spieler[playerid][pKartracingCP1]][2],0.0,0.0,0.0,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_GROUND_FINISH,KartRace[Spieler[playerid][pKartracingCP1]][0],KartRace[Spieler[playerid][pKartracingCP1]][1],KartRace[Spieler[playerid][pKartracingCP1]][2],0.0,0.0,0.0,6.0);
 		}
 		else
 		{
-			SetPlayerRaceCheckpoint(playerid,0,KartRace[Spieler[playerid][pKartracingCP1]][0],KartRace[Spieler[playerid][pKartracingCP1]][1],KartRace[Spieler[playerid][pKartracingCP1]][2],0.0,0.0,0.0,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_GROUND_NORMAL,KartRace[Spieler[playerid][pKartracingCP1]][0],KartRace[Spieler[playerid][pKartracingCP1]][1],KartRace[Spieler[playerid][pKartracingCP1]][2],0.0,0.0,0.0,6.0);
 		}
  		}
 	 	Spieler[playerid][pKartracingCP1]++;
@@ -52182,7 +52181,7 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 			}
 			Spieler[playerid][pKartCountdown] = gettime();
 			Spieler[playerid][pKartracingCP1] = 1;
-			SetPlayerRaceCheckpoint(playerid,0,KartRace[0][0],KartRace[0][1],KartRace[0][2],KartRace[1][0],KartRace[1][1],KartRace[1][2],6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_GROUND_NORMAL,KartRace[0][0],KartRace[0][1],KartRace[0][2],KartRace[1][0],KartRace[1][1],KartRace[1][2],6.0);
 			return 1;
  		}
 	}
@@ -52356,7 +52355,7 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 				if(fjobgoaktivatewater[playerid] == 0)return SCM(playerid,SAMP_WEISS,"Schalte erst die Sprenckleranlage deines Flugzeuges an !(Taste: 2)");
 				DisablePlayerRaceCheckpoint(playerid);
 				SCM(playerid,SAMP_WEISS,"Feld bewässert | Bewässer nun das nächste Feld.");
-				SetPlayerRaceCheckpoint(playerid,3,-291.5621,-1356.8193,41.6516,-258.8042,-1499.5674,38.6397,6.0);
+				SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-291.5621,-1356.8193,41.6516,-258.8042,-1499.5674,38.6397,6.0);
 				fjobgo2[playerid] = 2;
 			}
 			case 2:
@@ -52364,7 +52363,7 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 				if(fjobgoaktivatewater[playerid] == 0)return SCM(playerid,SAMP_WEISS,"Schalte erst die Sprenckleranlage deines Flugzeuges an !(Taste: 2)");
 				DisablePlayerRaceCheckpoint(playerid);
 				SCM(playerid,SAMP_WEISS,"Feld bewässert | Bewässer nun das nächste Feld.");
-				SetPlayerRaceCheckpoint(playerid,3,-258.8042,-1499.5674,38.6397,-194.9877,10.8612,47.0122,6.0);
+				SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-258.8042,-1499.5674,38.6397,-194.9877,10.8612,47.0122,6.0);
 			    fjobgo2[playerid] = 3;
 			}
 			case 3:
@@ -52372,7 +52371,7 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 				if(fjobgoaktivatewater[playerid] == 0)return SCM(playerid,SAMP_WEISS,"Schalte erst die Sprenckleranlage deines Flugzeuges an !(Taste: 2)");
 				DisablePlayerRaceCheckpoint(playerid);
 				SCM(playerid,SAMP_WEISS,"Feld bewässert | Bewässer nun das nächste Feld.");
-				SetPlayerRaceCheckpoint(playerid,3,-194.9877,10.8612,47.0122,-153.0159,132.1006,33.7347,6.0);
+				SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-194.9877,10.8612,47.0122,-153.0159,132.1006,33.7347,6.0);
 			    fjobgo2[playerid] = 4;
 			}
 			case 4:
@@ -52380,7 +52379,7 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 				if(fjobgoaktivatewater[playerid] == 0)return SCM(playerid,SAMP_WEISS,"Schalte erst die Sprenckleranlage deines Flugzeuges an !(Taste: 2)");
 				DisablePlayerRaceCheckpoint(playerid);
 				SCM(playerid,SAMP_WEISS,"Feld bewässert | Bewässer nun das nächste Feld.");
-				SetPlayerRaceCheckpoint(playerid,3,-153.0159,132.1006,33.7347,55.9207,42.7917,41.1383,6.0);
+				SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-153.0159,132.1006,33.7347,55.9207,42.7917,41.1383,6.0);
 			    fjobgo2[playerid] = 5;
 			}
 			case 5:
@@ -52388,7 +52387,7 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 				if(fjobgoaktivatewater[playerid] == 0)return SCM(playerid,SAMP_WEISS,"Schalte erst die Sprenckleranlage deines Flugzeuges an !(Taste: 2)");
 				DisablePlayerRaceCheckpoint(playerid);
 				SCM(playerid,SAMP_WEISS,"Feld bewässert | Bewässer nun das nächste Feld.");
-				SetPlayerRaceCheckpoint(playerid,3,55.9207,42.7917,41.1383,12.8734,-38.9983,40.4909,6.0);
+				SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,55.9207,42.7917,41.1383,12.8734,-38.9983,40.4909,6.0);
 			    fjobgo2[playerid] = 6;
 			}
 			case 6:
@@ -52396,7 +52395,7 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 				if(fjobgoaktivatewater[playerid] == 0)return SCM(playerid,SAMP_WEISS,"Schalte erst die Sprenckleranlage deines Flugzeuges an !(Taste: 2)");
 				DisablePlayerRaceCheckpoint(playerid);
 				SCM(playerid,SAMP_WEISS,"Feld bewässert | Bewässer nun das nächste Feld.");
-				SetPlayerRaceCheckpoint(playerid,3,12.8734,-38.9983,40.4909,1942.6062,199.6291,62.2072,6.0);
+				SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,12.8734,-38.9983,40.4909,1942.6062,199.6291,62.2072,6.0);
 			    fjobgo2[playerid] = 7;
 			}
 			case 7:
@@ -52404,7 +52403,7 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 				if(fjobgoaktivatewater[playerid] == 0)return SCM(playerid,SAMP_WEISS,"Schalte erst die Sprenckleranlage deines Flugzeuges an !(Taste: 2)");
 				DisablePlayerRaceCheckpoint(playerid);
 				SCM(playerid,SAMP_WEISS,"Feld bewässert | Bewässer nun das nächste Feld.");
-				SetPlayerRaceCheckpoint(playerid,3,1942.6062,199.6291,62.2072,-1195.1132,-1113.2594,128.4392,6.0);
+				SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,1942.6062,199.6291,62.2072,-1195.1132,-1113.2594,128.4392,6.0);
 			    fjobgo2[playerid] = 8;
 			}
 			case 8:
@@ -52412,7 +52411,7 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 				if(fjobgoaktivatewater[playerid] == 0)return SCM(playerid,SAMP_WEISS,"Schalte erst die Sprenckleranlage deines Flugzeuges an !(Taste: 2)");
 				DisablePlayerRaceCheckpoint(playerid);
 				SCM(playerid,SAMP_WEISS,"Feld bewässert | Fliege nun das Flugzeug zurück zum Stützpunkt.");
-				SetPlayerRaceCheckpoint(playerid,4,-1195.1132,-1113.2594,128.4392,-1,-1,-1,6.0);
+				SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_FINISH,-1195.1132,-1113.2594,128.4392,-1,-1,-1,6.0);
 			    fjobgo2[playerid] = 9;
 			}
 			case 9:
@@ -52437,127 +52436,127 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 		case 1:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1362.1414,-56.7459,14.6053,-1434.2920,15.0462,14.6076,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1362.1414,-56.7459,14.6053,-1434.2920,15.0462,14.6076,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 2;
 		}
 		case 2:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1434.2920,15.0462,14.6076,-1418.5139,74.2757,14.6044,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1434.2920,15.0462,14.6076,-1418.5139,74.2757,14.6044,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 3;
 		}
 		case 3:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1418.5139,74.2757,14.6044,-1065.3138,432.7307,36.5271,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1418.5139,74.2757,14.6044,-1065.3138,432.7307,36.5271,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 4;
 		}
 		case 4:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1065.3138,432.7307,36.5271,-723.9344,838.1880,98.2325,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1065.3138,432.7307,36.5271,-723.9344,838.1880,98.2325,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 5;
 		}
 		case 5:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-723.9344,838.1880,98.2325,-582.0987,1392.1179,78.2399,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-723.9344,838.1880,98.2325,-582.0987,1392.1179,78.2399,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 6;
 		}
 		case 6:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-582.0987,1392.1179,78.2399,-925.1884,2589.0847,119.6859,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-582.0987,1392.1179,78.2399,-925.1884,2589.0847,119.6859,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 7;
 		}
 		case 7:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-925.1884,2589.0847,119.6859,-1468.9075,2557.8906,118.9085,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-925.1884,2589.0847,119.6859,-1468.9075,2557.8906,118.9085,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 8;
 		}
 		case 8:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1468.9075,2557.8906,118.9085,-2173.8909,2442.3428,122.7543,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1468.9075,2557.8906,118.9085,-2173.8909,2442.3428,122.7543,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 9;
 		}
 		case 9:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-2173.8909,2442.3428,122.7543,-2207.4648,1829.7314,89.0173,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-2173.8909,2442.3428,122.7543,-2207.4648,1829.7314,89.0173,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 10;
 		}
 		case 10:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-2207.4648,1829.7314,89.0173,-1235.6174,1377.2429,63.5573,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-2207.4648,1829.7314,89.0173,-1235.6174,1377.2429,63.5573,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 11;
 		}
 		case 11:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1235.6174,1377.2429,63.5573,-877.3915,1133.0790,80.6505,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1235.6174,1377.2429,63.5573,-877.3915,1133.0790,80.6505,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 12;
 		}
 		case 12:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-877.3915,1133.0790,80.6505,-911.1490,774.3206,80.7303,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-877.3915,1133.0790,80.6505,-911.1490,774.3206,80.7303,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 13;
 		}
 		case 13:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-911.1490,774.3206,80.7303,-1032.8035,498.1943,44.0964,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-911.1490,774.3206,80.7303,-1032.8035,498.1943,44.0964,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 14;
 		}
 		case 14:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1032.8035,498.1943,44.0964,-1229.4800,262.9662,20.6847,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1032.8035,498.1943,44.0964,-1229.4800,262.9662,20.6847,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 15;
 		}
 		case 15:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1229.4800,262.9662,20.6847,-1443.4478,49.6018,14.6138,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1229.4800,262.9662,20.6847,-1443.4478,49.6018,14.6138,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 16;
 		}
 		case 16:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1443.4478,49.6018,14.6138,-1369.8273,-49.1678,14.6086,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1443.4478,49.6018,14.6138,-1369.8273,-49.1678,14.6086,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 17;
 		}
 		case 17:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1369.8273,-49.1678,14.6086,-1185.6812,-276.3453,14.6075,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1369.8273,-49.1678,14.6086,-1185.6812,-276.3453,14.6075,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 18;
 		}
 		case 18:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1185.6812,-276.3453,14.6075,-1168.5151,-410.1544,14.5995,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1185.6812,-276.3453,14.6075,-1168.5151,-410.1544,14.5995,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 19;
 		}
 		case 19:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1168.5151,-410.1544,14.5995,-1308.6582,-517.2249,14.6132,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1168.5151,-410.1544,14.5995,-1308.6582,-517.2249,14.6132,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 20;
 		}
 		case 20:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1308.6582,-517.2249,14.6132,-1439.1703,-527.6115,14.6379,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1308.6582,-517.2249,14.6132,-1439.1703,-527.6115,14.6379,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 21;
 		}
 		case 21:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,4,-1439.1703,-527.6115,14.6379,-1,-1,-1,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_FINISH,-1439.1703,-527.6115,14.6379,-1,-1,-1,6.0);
 			Spieler[playerid][pSchulungsCPfluglic] = 22;
 		}
 		case 22:
@@ -52602,61 +52601,61 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 		case 1:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1419.5118,-74.8639,194.2487,-851.6804,-133.0752,150.9639,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1419.5118,-74.8639,194.2487,-851.6804,-133.0752,150.9639,6.0);
 			Spieler[playerid][pSchulungsCPhelilic] = 2;
 		}
 		case 2:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-851.6804,-133.0752,150.9639,-506.5811,-169.9932,115.2301,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-851.6804,-133.0752,150.9639,-506.5811,-169.9932,115.2301,6.0);
 			Spieler[playerid][pSchulungsCPhelilic] = 3;
 		}
 		case 3:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-506.5811,-169.9932,115.2301,-390.3022,43.2353,64.7687,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-506.5811,-169.9932,115.2301,-390.3022,43.2353,64.7687,6.0);
 			Spieler[playerid][pSchulungsCPhelilic] = 4;
 		}
 		case 4:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-390.3022,43.2353,64.7687,-599.6872,449.9696,21.5411,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-390.3022,43.2353,64.7687,-599.6872,449.9696,21.5411,6.0);
 			Spieler[playerid][pSchulungsCPhelilic] = 5;
 		}
 		case 5:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-599.6872,449.9696,21.5411,-1314.5969,820.6479,85.6561,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-599.6872,449.9696,21.5411,-1314.5969,820.6479,85.6561,6.0);
 			Spieler[playerid][pSchulungsCPhelilic] = 6;
 		}
 		case 6:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1314.5969,820.6479,85.6561,-1662.7325,764.6374,141.8928,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1314.5969,820.6479,85.6561,-1662.7325,764.6374,141.8928,6.0);
 			Spieler[playerid][pSchulungsCPhelilic] = 7;
 		}
 		case 7:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1942.6071,599.1707,135.8376,-2227.9277,188.3811,190.4216,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1942.6071,599.1707,135.8376,-2227.9277,188.3811,190.4216,6.0);
 			Spieler[playerid][pSchulungsCPhelilic] = 8;
 		}
 		case 8:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-2227.9277,188.3811,190.4216,-2113.7690,-113.3858,77.1527,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-2227.9277,188.3811,190.4216,-2113.7690,-113.3858,77.1527,6.0);
 			Spieler[playerid][pSchulungsCPhelilic] = 9;
 		}
 		case 9:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-2113.7690,-113.3858,77.1527,-2077.8093,-115.1018,35.5082,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-2113.7690,-113.3858,77.1527,-2077.8093,-115.1018,35.5082,6.0);
 			Spieler[playerid][pSchulungsCPhelilic] = 10;
 		}
 		case 10:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,4,-2077.8093,-115.1018,35.5082,-1,-1,-1,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_FINISH,-2077.8093,-115.1018,35.5082,-1,-1,-1,6.0);
 			Spieler[playerid][pSchulungsCPhelilic] = 11;
 		}
 		case 11:
@@ -52701,55 +52700,55 @@ public OnPlayerEnterRaceCheckpoint(playerid)
 		case 1:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1606.1478,-55.0084,-0.1773,-1185.7489,398.1356,-0.1124,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1606.1478,-55.0084,-0.1773,-1185.7489,398.1356,-0.1124,6.0);
 			Spieler[playerid][pSchulungsCPbootlic] = 2;
 		}
 		case 2:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1185.7489,398.1356,-0.1124,-1079.4410,856.1459,-0.0855,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1185.7489,398.1356,-0.1124,-1079.4410,856.1459,-0.0855,6.0);
 			Spieler[playerid][pSchulungsCPbootlic] = 3;
 		}
 		case 3:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1079.4410,856.1459,-0.0855,-1260.2295,1504.9331,-0.1738,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1079.4410,856.1459,-0.0855,-1260.2295,1504.9331,-0.1738,6.0);
 			Spieler[playerid][pSchulungsCPbootlic] = 4;
 		}
 		case 4:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1260.2295,1504.9331,-0.1738,-1482.8121,1503.0782,-0.3302,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1260.2295,1504.9331,-0.1738,-1482.8121,1503.0782,-0.3302,6.0);
 			Spieler[playerid][pSchulungsCPbootlic] = 5;
 		}
 		case 5:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1482.8121,1503.0782,-0.3302,-1525.5292,1372.7129,-0.1806,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1482.8121,1503.0782,-0.3302,-1525.5292,1372.7129,-0.1806,6.0);
 			Spieler[playerid][pSchulungsCPbootlic] = 6;
 		}
 		case 6:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1525.5292,1372.7129,-0.1806,-1440.9004,755.4795,-0.1002,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1525.5292,1372.7129,-0.1806,-1440.9004,755.4795,-0.1002,6.0);
 			Spieler[playerid][pSchulungsCPbootlic] = 7;
 		}
 		case 7:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1440.9004,755.4795,-0.1002,-1460.7301,100.2672,-0.0914,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1440.9004,755.4795,-0.1002,-1460.7301,100.2672,-0.0914,6.0);
 			Spieler[playerid][pSchulungsCPbootlic] = 8;
 		}
 		case 8:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,3,-1460.7301,100.2672,-0.0914,-1758.4717,-193.7079,-0.2016,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1460.7301,100.2672,-0.0914,-1758.4717,-193.7079,-0.2016,6.0);
 			Spieler[playerid][pSchulungsCPbootlic] = 9;
 		}
 		case 9:
 		{
 			DisablePlayerRaceCheckpoint(playerid);
-			SetPlayerRaceCheckpoint(playerid,4,-1758.4717,-193.7079,-0.2016,-1,-1,-1,6.0);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_FINISH,-1758.4717,-193.7079,-0.2016,-1,-1,-1,6.0);
 			Spieler[playerid][pSchulungsCPbootlic] = 10;
 		}
 		case 10:
@@ -52823,7 +52822,7 @@ public OnPlayerClickMap(playerid,Float:fX,Float:fY,Float:fZ)
     }
     return 0;
 }
-public OnPlayerClickPlayer(playerid,clickedplayerid,source)
+public OnPlayerClickPlayer(playerid,clickedplayerid,CLICK_SOURCE:source)
 {
 	AP[playerid] = clickedplayerid;
 	if(Spieler[playerid][pLevel]>=3){
@@ -52854,7 +52853,7 @@ public OnPlayerClickPlayerTextDraw(playerid,PlayerText:playertextid)
 	}
     if(playertextid == BUYSMARKTWEAPONdraw[playerid][0])
 	{
-		TogglePlayerControllable(playerid,1);
+		TogglePlayerControllable(playerid,true);
 		PlayerTextDrawHide(playerid,BUYSMARKTWEAPONdraw[playerid][0]);
 		PlayerTextDrawHide(playerid,BUYSMARKTWEAPONdraw[playerid][1]);
 		CancelSelectTextDraw(playerid);
@@ -52891,7 +52890,7 @@ public OnPlayerClickPlayerTextDraw(playerid,PlayerText:playertextid)
 	}
 	if(playertextid == BUYSMARKTWEAPONdraw[playerid][1])
 	{
-		TogglePlayerControllable(playerid,1);
+		TogglePlayerControllable(playerid,true);
 		PlayerTextDrawHide(playerid,BUYSMARKTWEAPONdraw[playerid][0]);
 		PlayerTextDrawHide(playerid,BUYSMARKTWEAPONdraw[playerid][1]);
 		CancelSelectTextDraw(playerid);
@@ -53054,7 +53053,7 @@ public OnPlayerClickTextDraw(playerid,Text:clickedid)
 					HideBinco(playerid);
 				  	PlayerTextDrawHide(playerid,BINCOplayerdraw[playerid]);
 					SetCameraBehindPlayer(playerid);
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					Spieler[playerid][Skin] = 0;
 					Spieler[playerid][pSkin] = GetPlayerSkin(playerid);
 					ImTutorial[playerid] = 0;
@@ -53092,7 +53091,7 @@ public OnPlayerClickTextDraw(playerid,Text:clickedid)
 				  	PlayerTextDrawHide(playerid,BINCOplayerdraw[playerid]);
 					SetCameraBehindPlayer(playerid);
 					SetPlayerVirtualWorld(playerid,0);
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					Spieler[playerid][Skin] = 0;
 					Spieler[playerid][Skinchange] = 0;
 					Spieler[playerid][AmUmkleiden] = 0;
@@ -53107,7 +53106,7 @@ public OnPlayerClickTextDraw(playerid,Text:clickedid)
 			  	PlayerTextDrawHide(playerid,BINCOplayerdraw[playerid]);
 				SetCameraBehindPlayer(playerid);
 				SetPlayerVirtualWorld(playerid,0);
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				Spieler[playerid][Skin] = 0;
 				Spieler[playerid][FSkinchange] = 0;
 				Spieler[playerid][AmUmkleiden] = 0;
@@ -53219,7 +53218,7 @@ public OnDynamicObjectMoved(objectid)
 			if(Pos[0] == BalongRoute1[i][0] && Pos[1] == BalongRoute1[i][1] && Pos[2] == BalongRoute1[i][2])
 			{
 				BalongMoveToRoutCP[0]++;
-				if(BalongMoveToRoutCP[0] >= sizeof(BalongRoute1)) StopDynamicObject(Balongs[0]),SetTimerEx("StartBalongMoving",2*57899,0,"i",0);
+				if(BalongMoveToRoutCP[0] >= sizeof(BalongRoute1)) StopDynamicObject(Balongs[0]),SetTimerEx("StartBalongMoving",2*57899,false,"i",0);
 			 	else MoveDynamicObject(Balongs[0],BalongRoute1[BalongMoveToRoutCP[0]][0],BalongRoute1[BalongMoveToRoutCP[0]][1],BalongRoute1[BalongMoveToRoutCP[0]][2],MAX_BALONGSPEED);
 			}
 		}
@@ -53232,7 +53231,7 @@ public OnDynamicObjectMoved(objectid)
 			if(Pos[0] == BalongRoute2[i][0] && Pos[1] == BalongRoute2[i][1] && Pos[2] == BalongRoute2[i][2])
 			{
 				BalongMoveToRoutCP[1]++;
-				if(BalongMoveToRoutCP[1] >= sizeof(BalongRoute2)) StopDynamicObject(Balongs[1]),SetTimerEx("StartBalongMoving",2*57899,0,"i",1);
+				if(BalongMoveToRoutCP[1] >= sizeof(BalongRoute2)) StopDynamicObject(Balongs[1]),SetTimerEx("StartBalongMoving",2*57899,false,"i",1);
 			 	else MoveDynamicObject(Balongs[1],BalongRoute2[BalongMoveToRoutCP[1]][0],BalongRoute2[BalongMoveToRoutCP[1]][1],BalongRoute2[BalongMoveToRoutCP[1]][2],MAX_BALONGSPEED);
 			}
 		}
@@ -53245,7 +53244,7 @@ public OnDynamicObjectMoved(objectid)
 			if(Pos[0] == BalongRoute3[i][0] && Pos[1] == BalongRoute3[i][1] && Pos[2] == BalongRoute3[i][2])
 			{
 				BalongMoveToRoutCP[2]++;
-				if(BalongMoveToRoutCP[2] >= sizeof(BalongRoute3)) StopDynamicObject(Balongs[2]),SetTimerEx("StartBalongMoving",2*57899,0,"i",2);
+				if(BalongMoveToRoutCP[2] >= sizeof(BalongRoute3)) StopDynamicObject(Balongs[2]),SetTimerEx("StartBalongMoving",2*57899,false,"i",2);
 			 	else MoveDynamicObject(Balongs[2],BalongRoute3[BalongMoveToRoutCP[2]][0],BalongRoute3[BalongMoveToRoutCP[2]][1],BalongRoute3[BalongMoveToRoutCP[2]][2],MAX_BALONGSPEED);
 			}
 		}
@@ -53272,13 +53271,13 @@ public OnDynamicObjectMoved(objectid)
 	    GetDynamicObjectPos(Obj_Elevator,Pos[0],Pos[1],Pos[2]);
 		//Label_Elevator	= CreateDynamic3DTextLabel("[ "IINFO2"Aufzug ~ Hotel"#HTML_WEISS" ]\n/aufzug",SAMP_WEISS,1784.9822,-1302.0426,Pos[2] - 0.9,8.0,INVALID_PLAYER_ID,INVALID_VEHICLE_ID,1,0);
 	    ElevatorState = ELEVATOR_STATE_WAITING;
-	    SetTimer("Elevator_TurnToIdle",ELEVATOR_WAIT_TIME,0);
+	    SetTimer("Elevator_TurnToIdle",ELEVATOR_WAIT_TIME,false);
 	}
 	return 1;
 }/*
 public OnObjectMoved(objectid)
 {
-    if(objectid == FerrisWheelObjects[10]) SetTimer("RotateFerrisWheel",3000,0);
+    if(objectid == FerrisWheelObjects[10]) SetTimer("RotateFerrisWheel",3000,false);
  	return 1;
 }*/
 forward ServerNamenChangerSystemNeu();
@@ -53392,7 +53391,7 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 		PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 		StopAudioStreamForPlayer(playerid);
 		
-	 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+	 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 		if(GetPlayerVirtualWorld(playerid) == 1)
 		{
 			SetPlayerPosEx(playerid,2695.7078,-1704.6866,11.8438);
@@ -53413,7 +53412,7 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 		PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 		StopAudioStreamForPlayer(playerid);
 		
-	 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+	 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 	    if(GetPlayerVirtualWorld(playerid) == 1)
 		{
 			SetPlayerPosEx(playerid,2695.7078,-1704.6866,11.8438);
@@ -53434,7 +53433,7 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 		PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 		StopAudioStreamForPlayer(playerid);
 		
-	 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+	 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 		if(GetPlayerVirtualWorld(playerid) == 1)
 		{
 			SetPlayerPosEx(playerid,2695.7078,-1704.6866,11.8438);
@@ -53474,7 +53473,7 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 			PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 			StopAudioStreamForPlayer(playerid);
 			
-		 	return SetTimerEx("HideInfoBox",1000,0,"i",playerid);
+		 	return SetTimerEx("HideInfoBox",1000,false,"i",playerid);
 		}
 	}
 	if(pickupid == getgrenade)
@@ -53486,7 +53485,7 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 			PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 			StopAudioStreamForPlayer(playerid);
 			
-		 	return SetTimerEx("HideInfoBox",1000,0,"i",playerid);
+		 	return SetTimerEx("HideInfoBox",1000,false,"i",playerid);
 		}
 	}
 	if(pickupid == Maklerlicpoint)
@@ -53874,6 +53873,8 @@ public OnVehicleMod(playerid,vehicleid,componentid)
 				case 11:Fahrzeug[fv][RearBumper] = componentid;
 				case 12:Fahrzeug[fv][VentRight] = componentid;
 				case 13:Fahrzeug[fv][VentLeft] = componentid;
+				case 14:Fahrzeug[fv][FrontBumper] = componentid;   // open.mp: Front-Bullbar, in SA-MP Slot 10
+				case 15:Fahrzeug[fv][RearBumper] = componentid;    // open.mp: Rear-Bullbar, in SA-MP Slot 11
 			}
 			return 1;
 	   	}
@@ -53900,6 +53901,8 @@ public OnVehicleMod(playerid,vehicleid,componentid)
 					case 11:Pfahrzeug[slot][i][RearBumper] = componentid;
 					case 12:Pfahrzeug[slot][i][VentRight] = componentid;
 					case 13:Pfahrzeug[slot][i][VentLeft] = componentid;
+					case 14:Pfahrzeug[slot][i][FrontBumper] = componentid;   // open.mp: Front-Bullbar, in SA-MP Slot 10
+					case 15:Pfahrzeug[slot][i][RearBumper] = componentid;    // open.mp: Rear-Bullbar, in SA-MP Slot 11
 				}
 				return 1;
 			}
@@ -53911,7 +53914,7 @@ public OnVehicleMod(playerid,vehicleid,componentid)
 public OnEnterExitModShop(playerid,enterexit,interiorid)
 {
 	new fv = IsAFraktionsVeh(playerid);
-	if(enterexit == 0 && fv != -1) ChangeVehicleColor(Fahrzeug[fv][Vehicle],Fahrzeug[fv][Colour1],Fahrzeug[fv][Colour2]);
+	if(enterexit == 0 && fv != -1) ChangeVehicleColours(Fahrzeug[fv][Vehicle],Fahrzeug[fv][Colour1],Fahrzeug[fv][Colour2]);
 	return 1;
 }
 
@@ -53990,7 +53993,7 @@ public OnVehicleRespray(playerid,vehicleid,color1,color2)
 	        Fahrzeug[fv][Colour1] = color1;
 			Fahrzeug[fv][Colour2] = color2;
 	    }
-		ChangeVehicleColor(Fahrzeug[fv][Vehicle],Fahrzeug[fv][Colour1],Fahrzeug[fv][Colour2]);
+		ChangeVehicleColours(Fahrzeug[fv][Vehicle],Fahrzeug[fv][Colour1],Fahrzeug[fv][Colour2]);
 	}
     ForEachPlayer(i)
 	{
@@ -54000,7 +54003,7 @@ public OnVehicleRespray(playerid,vehicleid,color1,color2)
 		 	{
 				Pfahrzeug[slot][i][Colour1] = color1;
 				Pfahrzeug[slot][i][Colour2] = color2;
-				ChangeVehicleColor(Pfahrzeug[slot][i][Vehicle],Pfahrzeug[slot][i][Colour1],Pfahrzeug[slot][i][Colour2]);
+				ChangeVehicleColours(Pfahrzeug[slot][i][Vehicle],Pfahrzeug[slot][i][Colour1],Pfahrzeug[slot][i][Colour2]);
 				return 1;
 			}
 		}
@@ -54019,13 +54022,13 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			{
 				if(GetACMoney(playerid) < 2)
 				{
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					return SCM(playerid,SAMP_WEISS,"Nicht genug Geld!");
 				}
 				SCM(playerid,WEISS,""IINFO" du hast dir eine Cola bestellt. Fahre zum nächsten Schalter um dir dein Essen abzuholen.");
 			    Spieler[playerid][pWaitEating] = 1;
 			    Spieler[playerid][pWaitEatingMenu] = 1;
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    ACMoney(playerid,-2);
 			    for(new biz=1;biz<MAX_BIZ;biz++)
 				{
@@ -54043,13 +54046,13 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			{
 				if(GetACMoney(playerid) < 3)
 				{
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					return SCM(playerid,SAMP_WEISS,"Nicht genug Geld!");
 				}
 				SCM(playerid,WEISS,""IINFO" du hast dir einen Cheeseburger bestellt. Fahre zum nächsten Schalter um dir dein Essen abzuholen.");
 			    Spieler[playerid][pWaitEating] = 1;
 			    Spieler[playerid][pWaitEatingMenu] = 2;
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    ACMoney(playerid,-3);
 			    for(new biz=1;biz<MAX_BIZ;biz++)
 				{
@@ -54067,13 +54070,13 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			{
 				if(GetACMoney(playerid) < 5)
 				{
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					return SCM(playerid,SAMP_WEISS,"Nicht genug Geld!");
 				}
 				SCM(playerid,WEISS,""IINFO" du hast dir eine Tüte Pommes bestellt. Fahre zum nächsten Schalter um dir dein Essen abzuholen.");
 			    Spieler[playerid][pWaitEating] = 1;
 			    Spieler[playerid][pWaitEatingMenu] = 3;
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    ACMoney(playerid,-5);
 			    for(new biz=1;biz<MAX_BIZ;biz++)
 				{
@@ -54091,13 +54094,13 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			{
 				if(GetACMoney(playerid) < 6)
 				{
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					return SCM(playerid,SAMP_WEISS,"Nicht genug Geld!");
 				}
 				SCM(playerid,WEISS,""IINFO" du hast dir einen Big Mac bestellt. Fahre zum nächsten Schalter um dir dein Essen abzuholen.");
 			    Spieler[playerid][pWaitEating] = 1;
 			    Spieler[playerid][pWaitEatingMenu] = 4;
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    ACMoney(playerid,-6);
 			    for(new biz=1;biz<MAX_BIZ;biz++)
 				{
@@ -54115,13 +54118,13 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			{
 				if(GetACMoney(playerid) < 12)
 				{
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					return SCM(playerid,SAMP_WEISS,"Nicht genug Geld!");
 				}
 				SCM(playerid,WEISS,""IINFO" du hast dir einen Hamburger bestellt. Fahre zum nächsten Schalter um dir dein Essen abzuholen.");
 			    Spieler[playerid][pWaitEating] = 1;
 			    Spieler[playerid][pWaitEatingMenu] = 5;
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    ACMoney(playerid,-12);
 			    for(new biz=1;biz<MAX_BIZ;biz++)
 				{
@@ -54146,13 +54149,13 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			{
 				if(GetACMoney(playerid) < 2)
 				{
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					return SCM(playerid,SAMP_WEISS,"Nicht genug Geld!");
 				}
 				SCM(playerid,WEISS,""IINFO" du hast dir eine Sprite bestellt. Fahre zum nächsten Schalter um dir dein Essen abzuholen.");
 			    Spieler[playerid][pWaitEating] = 1;
 			    Spieler[playerid][pWaitEatingMenu] = 1;
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    ACMoney(playerid,-2);
 			    for(new biz=1;biz<MAX_BIZ;biz++)
 				{
@@ -54170,13 +54173,13 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			{
 				if(GetACMoney(playerid) < 3)
 				{
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					return SCM(playerid,SAMP_WEISS,"Nicht genug Geld!");
 				}
 				SCM(playerid,WEISS,""IINFO" du hast dir einen Cripsy Chicken bestellt. Fahre zum nächsten Schalter um dir dein Essen abzuholen.");
 			    Spieler[playerid][pWaitEating] = 1;
 			    Spieler[playerid][pWaitEatingMenu] = 2;
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    ACMoney(playerid,-3);
 			    for(new biz=1;biz<MAX_BIZ;biz++)
 				{
@@ -54194,13 +54197,13 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			{
 				if(GetACMoney(playerid) < 5)
 				{
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					return SCM(playerid,SAMP_WEISS,"Nicht genug Geld!");
 				}
 				SCM(playerid,WEISS,""IINFO" du hast dir Chicken Wings bestellt. Fahre zum nächsten Schalter um dir dein Essen abzuholen.");
 			    Spieler[playerid][pWaitEating] = 1;
 			    Spieler[playerid][pWaitEatingMenu] = 3;
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    ACMoney(playerid,-5);
 			    for(new biz=1;biz<MAX_BIZ;biz++)
 				{
@@ -54218,13 +54221,13 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			{
 				if(GetACMoney(playerid) < 6)
 				{
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					return SCM(playerid,SAMP_WEISS,"Nicht genug Geld!");
 				}
 				SCM(playerid,WEISS,""IINFO" du hast dir Chicken Mcnuggets bestellt. Fahre zum nächsten Schalter um dir dein Essen abzuholen.");
 			    Spieler[playerid][pWaitEating] = 1;
 			    Spieler[playerid][pWaitEatingMenu] = 4;
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    ACMoney(playerid,-6);
 			    for(new biz=1;biz<MAX_BIZ;biz++)
 				{
@@ -54242,13 +54245,13 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			{
 				if(GetACMoney(playerid) < 12)
 				{
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					return SCM(playerid,SAMP_WEISS,"Nicht genug Geld!");
 				}
 				SCM(playerid,WEISS,""IINFO" du hast dir einen Chicken Burger bestellt. Fahre zum nächsten Schalter um dir dein Essen abzuholen.");
 			    Spieler[playerid][pWaitEating] = 1;
 			    Spieler[playerid][pWaitEatingMenu] = 5;
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    ACMoney(playerid,-12);
 			    for(new biz=1;biz<MAX_BIZ;biz++)
 				{
@@ -54271,7 +54274,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 	    {
 		    case 0:
 		    {
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    format(string,sizeof(string),"** %s nimmt sich einen Feuerlöscher aus dem Einsatzfahrzeug heraus **",SpielerName(playerid));
 				PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 			    GiveWeapon(playerid,42,9000,false);
@@ -54280,7 +54283,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 1:
 		    {
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    format(string,sizeof(string),"** %s nimmt sich eine Schaufel aus dem Einsatzfahrzeug heraus **",SpielerName(playerid));
 				PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 			    GiveWeapon(playerid,6,1,false);
@@ -54289,7 +54292,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 2:
 		    {
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    format(string,sizeof(string),"** %s nimmt sich ein Spray aus dem Einsatzfahrzeug heraus **",SpielerName(playerid));
 				PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 				GiveWeapon(playerid,41,500,false);
@@ -54299,7 +54302,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    case 3:
 		    {
 			    if(Spieler[playerid][pFunkgeraet] == 1)return SCM(playerid,SAMP_WEISS,""IINFO" du trägst bereits ein Funkgerät mit dir.");
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    format(string,sizeof(string),"** %s nimmt sich ein Funkgerät aus dem Einsatzfahrzeug heraus **",SpielerName(playerid));
 				PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 			    Spieler[playerid][pFunkgeraet] = 1;
@@ -54309,7 +54312,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    case 4:
 		    {
 			    if(Spieler[playerid][pMegaphon] == 1)return SCM(playerid,SAMP_WEISS,""IINFO" du trägst bereits ein Megaphon mit dir.");
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    format(string,sizeof(string),"** %s nimmt sich ein Megaphon aus dem Einsatzfahrzeug heraus **",SpielerName(playerid));
 				PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 			    Spieler[playerid][pMegaphon] = 1;
@@ -54325,7 +54328,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 	    {
 		    case 0:
 		    {
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    if((GetACMoney(playerid) - 3) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld auf der Hand!");
 			    ACMoney(playerid,-3);
 			    fverwaltungen[16][Geld] += 3;
@@ -54341,7 +54344,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			}
 		    case 1:
 		    {
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    if((GetACMoney(playerid) - 5) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld auf der Hand!");
 			    ACMoney(playerid,-5);
 			    fverwaltungen[16][Geld] += 5;
@@ -54357,7 +54360,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			}
 		    case 2:
 			{
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				if((GetACMoney(playerid) - 8) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld auf der Hand!");
 			    ACMoney(playerid,-8);
 			    fverwaltungen[16][Geld] += 8;
@@ -54376,7 +54379,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 
     if(CurrentMenu == VehicleComponentrelay[0])
     {
-	    TogglePlayerControllable(playerid,1);
+	    TogglePlayerControllable(playerid,true);
 	    switch(row)
 	    {
 		    case 0:
@@ -54405,14 +54408,14 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 1://hood
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),1) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_HOOD) >= 1000)
 				{
 					if((GetACMoney(playerid) - 125) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-125);
 					ShowMenuForPlayer(VehicleComponentrelay[0],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast das Hood deines Fahrzeuges für 125$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),1));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_HOOD));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54437,14 +54440,14 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 2://roof
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),2) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_ROOF) >= 1000)
 				{
 					if((GetACMoney(playerid) - 130) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-130);
 					ShowMenuForPlayer(VehicleComponentrelay[0],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast das Roof deines Fahrzeuges für 130$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),2));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_ROOF));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54469,14 +54472,14 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 3://sideskirt
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),3) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_SIDESKIRT) >= 1000)
 				{
 					if((GetACMoney(playerid) - 75) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-75);
 					ShowMenuForPlayer(VehicleComponentrelay[0],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast die Seitenschütze deines Fahrzeuges für 75$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),3));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_SIDESKIRT));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54501,14 +54504,14 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 4://lamps
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),4) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_LAMPS) >= 1000)
 				{
 					if((GetACMoney(playerid) - 144) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-144);
 					ShowMenuForPlayer(VehicleComponentrelay[0],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast die Lampen deines Fahrzeuges für 144$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),4));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_LAMPS));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54533,14 +54536,14 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 5://nitro
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),5) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_NITRO) >= 1000)
 				{
 					if((GetACMoney(playerid) - 220) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-220);
 					ShowMenuForPlayer(VehicleComponentrelay[0],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast das Nitro deines Fahrzeuges für 220$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),5));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_NITRO));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54565,14 +54568,14 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 6://exhaust
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),6) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_EXHAUST) >= 1000)
 				{
 					if((GetACMoney(playerid) - 55) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-55);
 					ShowMenuForPlayer(VehicleComponentrelay[0],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast den Auspuff deines Fahrzeuges für 55$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),6));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_EXHAUST));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54598,26 +54601,26 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    case 7:
 		    {
 			    ShowMenuForPlayer(VehicleComponentrelay[1],playerid);
-				TogglePlayerControllable(playerid,0);
+				TogglePlayerControllable(playerid,false);
 		    }
 	    }
     }
 
     if(CurrentMenu == VehicleComponentrelay[1])
     {
-	    TogglePlayerControllable(playerid,1);
+	    TogglePlayerControllable(playerid,true);
 	    switch(row)
 	    {
 		    case 0://wheels
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),7) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_WHEELS) >= 1000)
 				{
 					if((GetACMoney(playerid) - 166) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-166);
 					ShowMenuForPlayer(VehicleComponentrelay[1],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast die Reifen deines Fahrzeuges für 166$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),7));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_WHEELS));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54642,14 +54645,14 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 1://stereo
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),8) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_STEREO) >= 1000)
 				{
 					if((GetACMoney(playerid) - 35) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-35);
 					ShowMenuForPlayer(VehicleComponentrelay[1],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast die Stereoanlage deines Fahrzeuges für 35$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),8));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_STEREO));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54674,14 +54677,14 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 2://hydraulics
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),9) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_HYDRAULICS) >= 1000)
 				{
 					if((GetACMoney(playerid) - 450) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-450);
 					ShowMenuForPlayer(VehicleComponentrelay[1],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast die Hydraulic deines Fahrzeuges für 450$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),9));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_HYDRAULICS));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54706,14 +54709,14 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 3://frontbumper
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),10) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_FRONT_BUMPER) >= 1000)
 				{
 					if((GetACMoney(playerid) - 150) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-150);
 					ShowMenuForPlayer(VehicleComponentrelay[1],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast den Frontbumper deines Fahrzeuges für 150$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),10));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_FRONT_BUMPER));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54738,14 +54741,14 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 4://rearbumper
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),11) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_REAR_BUMPER) >= 1000)
 				{
 					if((GetACMoney(playerid) - 150) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-150);
 					ShowMenuForPlayer(VehicleComponentrelay[1],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast den Rearbumper deines Fahrzeuges für 150$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),11));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_REAR_BUMPER));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54770,14 +54773,14 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 5://ventright
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),12) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_VENT_RIGHT) >= 1000)
 				{
 					if((GetACMoney(playerid) - 25) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-25);
 					ShowMenuForPlayer(VehicleComponentrelay[1],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast das Ventright deines Fahrzeuges für 25$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),12));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_VENT_RIGHT));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54802,14 +54805,14 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 6://ventleft
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),13) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_VENT_LEFT) >= 1000)
 				{
 					if((GetACMoney(playerid) - 25) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-25);
 					ShowMenuForPlayer(VehicleComponentrelay[1],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast das Ventleft deines Fahrzeuges für 25$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),13));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_VENT_LEFT));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54834,14 +54837,14 @@ public OnPlayerSelectedMenuRow(playerid,row)
 		    }
 		    case 7://spoiler
 		    {
-			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),0) >= 1000)
+			    if(GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_SPOILER) >= 1000)
 				{
 					if((GetACMoney(playerid) - 25) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
 					ACMoney(playerid,-25);
 					ShowMenuForPlayer(VehicleComponentrelay[1],playerid);
-					TogglePlayerControllable(playerid,0);
+					TogglePlayerControllable(playerid,false);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast den Spoiler deines Fahrzeuges für 25$ abmontieren lassen!");
-				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),0));
+				    RemoveVehicleComponent(GetPlayerVehicleID(playerid),GetVehicleComponentInSlot(GetPlayerVehicleID(playerid),CARMODTYPE_SPOILER));
 				    for(new fv;fv<MAX_FVEHS;fv++)
 					{
 						if(GetPlayerVehicleID(playerid) == Fahrzeug[fv][Vehicle])
@@ -54867,7 +54870,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			case 8:
 			{
 				ShowMenuForPlayer(VehicleComponentrelay[0],playerid);
-				TogglePlayerControllable(playerid,0);
+				TogglePlayerControllable(playerid,false);
 			}
 		}
     }
@@ -54887,7 +54890,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 1:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -54897,7 +54900,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 2:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -54911,7 +54914,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					}
 					case 4:
 					{
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						SCM(playerid,SAMP_WEISS,""IINFO" du hast die theoretische Prüfung bestanden! Nun geht's los mit der Praktischen Prüfung.");
 						Spieler[playerid][pSchulungsVEH] = CreateVehicleEx(405,2020.3961,-1926.6791,13.1151,89.0223,1,1,-1,false);
 						format(string,sizeof(string),"SA-OF-%i",Spieler[playerid][pSchulungsVEH]);
@@ -54936,7 +54939,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 1:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -54946,7 +54949,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 2:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -54960,7 +54963,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					}
 					case 4:
 					{
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						SCM(playerid,SAMP_WEISS,""IINFO" du hast die theoretische Prüfung bestanden!");
 						SCM(playerid,SAMP_WEISS,"Fahre nun die Checkpoints ab | Steige nicht aus dem Fahrzeug,da die Prüfung sonst abbricht!");
 						SCM(playerid,SAMP_WEISS,"Info: Fahre nicht schneller als 80 Km/h,da es sonst Verwarnungen gibt!");
@@ -54986,7 +54989,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			case 3:
 			{
 				SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				StopLoopingAnim(playerid);
 				SetPlayerVirtualWorld(playerid,0);
 				Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -54996,7 +54999,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			case 4:
 			{
 			    SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				StopLoopingAnim(playerid);
 				SetPlayerVirtualWorld(playerid,0);
 				Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55006,7 +55009,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			case 5:
 			{
 				SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				StopLoopingAnim(playerid);
 				SetPlayerVirtualWorld(playerid,0);
 				Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55020,7 +55023,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 1:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55030,7 +55033,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 2:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55044,7 +55047,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					}
 					case 4:
 					{
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						SCM(playerid,SAMP_WEISS,""IINFO" du hast die theoretische Prüfung bestanden!");
 						SCM(playerid,SAMP_WEISS,"Fahre nun die Checkpoints ab | Steige nicht aus dem Fahrzeug,da die Prüfung sonst abbricht!");
 						SCM(playerid,SAMP_WEISS,"Info: Fahre nicht schneller als 80 Km/h,da es sonst Verwarnungen gibt!");
@@ -55080,7 +55083,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 1:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55095,7 +55098,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 3:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55105,7 +55108,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 4:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55121,7 +55124,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 1:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55136,7 +55139,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 3:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55146,7 +55149,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 4:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55162,7 +55165,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 1:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55172,7 +55175,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 2:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55186,7 +55189,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					}
 					case 4:
 					{
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						SCM(playerid,SAMP_WEISS,""IINFO" du hast die theoretische Prüfung bestanden!");
 						SCM(playerid,SAMP_WEISS,"Fliege nun die Checkpoints ab | Steige nicht aus dem Fahrzeug,da die Prüfung sonst abbricht!");
 				        SCM(playerid,SAMP_WEISS,"Ebenso darf dein Fahrzeug am Ende der Prüfung nicht zu stark beschädigt sein!");
@@ -55199,7 +55202,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 						SetVehicleVirtualWorld(Spieler[playerid][pSchulungsVEH],playerid+1);
 						Spieler[playerid][InFahrSchulPruefung] = 1;
 						SetPlayerPosEx(playerid,-1439.1473,-529.1509,14.6338);
-						SetPlayerRaceCheckpoint(playerid,3,-1168.8451,-411.7661,14.6082,-1362.1414,-56.7459,14.6053,6.0);
+						SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1168.8451,-411.7661,14.6082,-1362.1414,-56.7459,14.6053,6.0);
 						Spieler[playerid][pSchulungsCPfluglic] = 1;
 						PutPlayerInVehicleEx(playerid,Spieler[playerid][pSchulungsVEH],0);
 					}
@@ -55212,7 +55215,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 1:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55222,7 +55225,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 2:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55236,7 +55239,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					}
 					case 4:
 					{
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						SCM(playerid,SAMP_WEISS,""IINFO" du hast die theoretische Prüfung bestanden!");
 						SCM(playerid,SAMP_WEISS,"Fliege nun die Checkpoints ab | Steige nicht aus dem Fahrzeug,da die Prüfung sonst abbricht!");
 				        SCM(playerid,SAMP_WEISS,"Ebenso darf dein Fahrzeug am Ende der Prüfung nicht zu stark beschädigt sein!");
@@ -55250,7 +55253,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 						Spieler[playerid][InFahrSchulPruefung] = 1;
 						Spieler[playerid][pSchulungsCPhelilic] = 1;
 						SetPlayerPosEx(playerid,-2077.7974,-115.0267,35.4541);
-						SetPlayerRaceCheckpoint(playerid,3,-1797.9918,-52.7710,141.1407,-1419.5118,-74.8639,194.2487,6.0);
+						SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1797.9918,-52.7710,141.1407,-1419.5118,-74.8639,194.2487,6.0);
 						PutPlayerInVehicleEx(playerid,Spieler[playerid][pSchulungsVEH],0);
 					}
 				}
@@ -55267,7 +55270,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 2:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55276,7 +55279,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 				}
 				case 3:
 				{
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					SCM(playerid,SAMP_WEISS,""IINFO" du hast die theoretische Prüfung bestanden!");
 					SCM(playerid,SAMP_WEISS,"Fahre nun die Checkpoints ab | Steige nicht aus dem Fahrzeug,da die Prüfung sonst abbricht!");
 			        SCM(playerid,SAMP_WEISS,"Ebenso darf dein Fahrzeug am Ende der Prüfung nicht zu stark beschädigt sein!");
@@ -55290,13 +55293,13 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					Spieler[playerid][InFahrSchulPruefung] = 1;
 					Spieler[playerid][pSchulungsCPbootlic] = 1;
 					SetPlayerPosEx(playerid,-1761.2767,-193.2538,-0.0887);
-					SetPlayerRaceCheckpoint(playerid,3,-1606.1478,-55.0084,-0.1773,-1185.7489,398.1356,-0.1124,6.0);
+					SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-1606.1478,-55.0084,-0.1773,-1185.7489,398.1356,-0.1124,6.0);
 					PutPlayerInVehicleEx(playerid,Spieler[playerid][pSchulungsVEH],0);
 				}
 				case 4:
 				{
 					SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					StopLoopingAnim(playerid);
 					SetPlayerVirtualWorld(playerid,0);
 					Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55312,7 +55315,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 				case 1:
 				{
 					SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					StopLoopingAnim(playerid);
 					SetPlayerVirtualWorld(playerid,0);
 					Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55327,7 +55330,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 				case 3:
 				{
 					SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					StopLoopingAnim(playerid);
 					SetPlayerVirtualWorld(playerid,0);
 					Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55337,7 +55340,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 				case 4:
 				{
 					SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					StopLoopingAnim(playerid);
 					SetPlayerVirtualWorld(playerid,0);
 					Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55364,7 +55367,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 2:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55374,7 +55377,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 3:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55383,7 +55386,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					}
 					case 4:
 					{
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						SCM(playerid,SAMP_WEISS,""IINFO" du hast die theoretische Prüfung bestanden!");
 						SCM(playerid,SAMP_WEISS,"Fahre nun die Checkpoints ab | Steige nicht aus dem Fahrzeug,da die Prüfung sonst abbricht!");
 						SCM(playerid,SAMP_WEISS,"Info: Fahre nicht schneller als 80 Km/h,da es sonst Verwarnungen gibt!");
@@ -55418,7 +55421,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 2:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55428,7 +55431,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 3:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55437,7 +55440,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					}
 					case 4:
 					{
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						SCM(playerid,SAMP_WEISS,""IINFO" du hast die theoretische Prüfung bestanden!");
 						SCM(playerid,SAMP_WEISS,"Fahre nun die Checkpoints ab | Steige nicht aus dem Fahrzeug,da die Prüfung sonst abbricht!");
 						SCM(playerid,SAMP_WEISS,"Info: Fahre nicht schneller als 80 Km/h,da es sonst Verwarnungen gibt!");
@@ -55477,7 +55480,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 3:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55487,7 +55490,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 4:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55513,7 +55516,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 3:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55523,7 +55526,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 4:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55539,7 +55542,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 1:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55554,7 +55557,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 3:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55564,7 +55567,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 4:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55585,7 +55588,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 2:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55595,7 +55598,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					case 3:
 					{
 						SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						StopLoopingAnim(playerid);
 						SetPlayerVirtualWorld(playerid,0);
 						Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55604,7 +55607,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 					}
 					case 4:
 					{
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						SCM(playerid,SAMP_WEISS,""IINFO" du hast die theoretische Prüfung bestanden!");
 						SCM(playerid,SAMP_WEISS,"Fahre nun die Checkpoints ab | Steige nicht aus dem Fahrzeug,da die Prüfung sonst abbricht!");
 						SCM(playerid,SAMP_WEISS,"Info: Fahre nicht schneller als 80 Km/h,da es sonst Verwarnungen gibt!");
@@ -55636,7 +55639,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 			    case 1:
 				{
 					SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					StopLoopingAnim(playerid);
 					SetPlayerVirtualWorld(playerid,0);
 					Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55646,7 +55649,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 				case 2:
 				{
 					SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					StopLoopingAnim(playerid);
 					SetPlayerVirtualWorld(playerid,0);
 					Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55656,7 +55659,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 				case 3:
 				{
 				    SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					StopLoopingAnim(playerid);
 					SetPlayerVirtualWorld(playerid,0);
 					Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55666,7 +55669,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 				case 4:
 				{
 					SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					StopLoopingAnim(playerid);
 					SetPlayerVirtualWorld(playerid,0);
 					Spieler[playerid][InFahrSchulPruefung] = 0;
@@ -55676,7 +55679,7 @@ public OnPlayerSelectedMenuRow(playerid,row)
 				case 5:
 				{
 					SCM(playerid,SAMP_WEISS,"Falsche Antwort!");
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					StopLoopingAnim(playerid);
 					Spieler[playerid][InFahrSchulPruefung] = 0;
 					SetPlayerVirtualWorld(playerid,0);
@@ -55701,13 +55704,13 @@ public OnPlayerExitedMenu(playerid)
 		{
 			GetPlayerPos(Spieler[playerid][pOrtenVehIDplayerid],x,y,z);
 			SetPlayerCheckpoint(playerid,x,y,z,3);
-			SpielerOrtenTimer[playerid]=SetTimerEx("SpielerOderFahrzeugOrten",1000,1,"iii",playerid,Spieler[playerid][pOrtenVehIDplayerid],1);
+			SpielerOrtenTimer[playerid]=SetTimerEx("SpielerOderFahrzeugOrten",1000,true,"iii",playerid,Spieler[playerid][pOrtenVehIDplayerid],1);
 		}
 		if(Spieler[playerid][pOrtenVehORPlayer] == 2)//ortet fahrzeug
 		{
 			GetVehiclePos(Spieler[playerid][pOrtenVehIDplayerid],x,y,z);
 			SetPlayerCheckpoint(playerid,x,y,z,3);
-			SpielerOrtenTimer[playerid]=SetTimerEx("SpielerOderFahrzeugOrten",1000,1,"iii",playerid,Spieler[playerid][pOrtenVehIDplayerid],2);
+			SpielerOrtenTimer[playerid]=SetTimerEx("SpielerOderFahrzeugOrten",1000,true,"iii",playerid,Spieler[playerid][pOrtenVehIDplayerid],2);
 		}
 		if(Spieler[playerid][pOrtenVehORPlayer] == 3)//service accept
 		{
@@ -55717,7 +55720,7 @@ public OnPlayerExitedMenu(playerid)
 		}
 	}
 	if(IsPlayerInAnyVehicle(playerid)) seatid = GetPlayerVehicleSeat(playerid),vehicleid = GetPlayerVehicleID(playerid);
-	TogglePlayerControllable(playerid,1);
+	TogglePlayerControllable(playerid,true);
 	StopLoopingAnim(playerid);
 	if(IsValidVehicle(vehicleid)) PutPlayerInVehicleEx(playerid,vehicleid,seatid);
     DisablePlayerCheckpoint(playerid);
@@ -55729,7 +55732,7 @@ public OnPlayerExitedMenu(playerid)
 		StopAudioStreamForPlayer(playerid);
 		
 		PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-	 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+	 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 		SetPlayerVirtualWorld(playerid,0);
 		SetPlayerPosEx(playerid,-2033.4276,-117.4092,1035.1719);
 		SetCameraBehindPlayer(playerid);
@@ -55751,7 +55754,7 @@ public OnPlayerInteriorChange(playerid,newinteriorid,oldinteriorid)
 	}
     return 1;
 }
-public OnPlayerKeyStateChange(playerid,newkeys,oldkeys)
+public OnPlayerKeyStateChange(playerid,KEY:newkeys,KEY:oldkeys)
 {
     new string[188],vehicleid = GetPlayerVehicleID(playerid);
     Spieler[playerid][pAFKKeyStates] = 0;
@@ -55789,7 +55792,7 @@ public OnPlayerKeyStateChange(playerid,newkeys,oldkeys)
         {
             if(AC_BUNNY == 1)
             {
-	            ApplyAnimation(playerid,"PED","BIKE_fall_off",4.1,0,1,1,1,0,1);
+	            ApplyAnimation(playerid,"PED","BIKE_fall_off",4.1,false,true,true,true,0,SYNC_ALL);
 	            SCM(playerid,SAMP_WEISS,""IINFO" Unterlasse das Bunnyhopping!");
 	            SetTimerEx("AntiBunnyDeaktiv",6343,false,"i",playerid);
             }
@@ -55812,7 +55815,7 @@ public OnPlayerKeyStateChange(playerid,newkeys,oldkeys)
 		    {
 			Motor[vehicleid] = true;
 			KillTimer(vFahrzeug[vehicleid][VehicleEngineTimer]);
-			vFahrzeug[vehicleid][VehicleEngineTimer] = SetTimerEx("VehicleEngine",VehicleInfo[GetVehicleModel(vehicleid)-400][vEngineStartInSek]*1000,0,"ii",playerid,vehicleid);
+			vFahrzeug[vehicleid][VehicleEngineTimer] = SetTimerEx("VehicleEngine",VehicleInfo[GetVehicleModel(vehicleid)-400][vEngineStartInSek]*1000,false,"ii",playerid,vehicleid);
 			GameTextForPlayer(playerid,"~w~Motor~g~ wird gestartet",VehicleInfo[GetVehicleModel(vehicleid)-400][vEngineStartInSek]*1000,6);
 			}
 			else
@@ -56030,7 +56033,7 @@ public OnPlayerKeyStateChange(playerid,newkeys,oldkeys)
 		{
 			if(VehicleLoadTank[vehicleid] > 0)return SCM(playerid,SAMP_WEISS,"Die Schaufel des Baggers ist randgefüllt.");
 		    KillTimer(Spieler[playerid][pBaggerTimer]);
-			Spieler[playerid][pBaggerTimer]=SetTimerEx("Erzbaggern",7000,0,"ii",playerid,0);
+			Spieler[playerid][pBaggerTimer]=SetTimerEx("Erzbaggern",7000,false,"ii",playerid,0);
 		}
 	}
 	if(newkeys & KEY_ANALOG_UP)
@@ -56039,7 +56042,7 @@ public OnPlayerKeyStateChange(playerid,newkeys,oldkeys)
 	 	{
 			if(VehicleLoadTank[vehicleid] == 0)return SCM(playerid,SAMP_WEISS,"Die Schaufel des Baggers ist nicht beladen.");
 		    KillTimer(Spieler[playerid][pBaggerTimer]);
-			Spieler[playerid][pBaggerTimer]=SetTimerEx("Erzbaggern",7000,0,"ii",playerid,1);
+			Spieler[playerid][pBaggerTimer]=SetTimerEx("Erzbaggern",7000,false,"ii",playerid,1);
 		}
 	}
 	if(newkeys & KEY_N)
@@ -56060,7 +56063,7 @@ public OnPlayerKeyStateChange(playerid,newkeys,oldkeys)
 			Spieler[playerid][pAimbotTest] = gettime() + 10;
 			GetPlayerPos(playerid,Pos[0],Pos[1],Pos[2]);
 			GetPlayerFacingAngle(playerid,Pos[3]);
-			SetTimerEx("AimbotTest",500,0,"iffff",playerid,Pos[0],Pos[1],Pos[2],Pos[3]);
+			SetTimerEx("AimbotTest",500,false,"iffff",playerid,Pos[0],Pos[1],Pos[2],Pos[3]);
 			GetXYInFrontOfPlayer(pID,Pos[0],Pos[1],Pos[2],Pos[3],-2.5);
 			SetPlayerPos(playerid,Pos[0],Pos[1],Pos[2]);
 			SetPlayerFacingAngle(playerid,Pos[3]);
@@ -56088,7 +56091,7 @@ public OnPlayerKeyStateChange(playerid,newkeys,oldkeys)
 						PlayerTextDrawShow(playerid,BUYSMARKTWEAPONdraw[playerid][0]);
 						PlayerTextDrawShow(playerid,BUYSMARKTWEAPONdraw[playerid][1]);
 					    SelectTextDraw(playerid,GRAU);
-					    TogglePlayerControllable(playerid,0);
+					    TogglePlayerControllable(playerid,false);
 						return 1;
 					}
 				}
@@ -56421,7 +56424,7 @@ public OnPlayerKeyStateChange(playerid,newkeys,oldkeys)
 		if(IsPlayerInRangeOfPoint(playerid,5.0,2695.7078,-1704.6866,11.8438) || IsPlayerInRangeOfPoint(playerid,5.0,-2109.6663,-444.1563,38.7344))
 		{
 			ShowMenuForPlayer(EVENTSTADIUMmenu,playerid);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			return 1;
 		}
 		if(IsPlayerInRangeOfPoint(playerid,2,1396.1234,-1146.7310,-82.6553))
@@ -56543,7 +56546,7 @@ public OnPlayerKeyStateChange(playerid,newkeys,oldkeys)
 		    if(!IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du sitzt in keinem Fahrzeug.");
 		    if(GetPlayerVehicleSeat(playerid) != 0)return SCM(playerid,SAMP_WEISS,""IINFO" nicht der Fahrer des Fahrzeugs.");
 		    ShowMenuForPlayer(VehicleComponentrelay[0],playerid);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			return 1;
 		}
 		if(ReturnWiwLoacationID(playerid) != -1)
@@ -56561,7 +56564,7 @@ public OnPlayerKeyStateChange(playerid,newkeys,oldkeys)
 			DisablePlayerCheckpoint(playerid);
 		    if(DriveInPos[did][ItsABSN] == true) ShowMenuForPlayer(DriveinMenu[0],playerid);
 		    else ShowMenuForPlayer(DriveinMenu[1],playerid);
-		    TogglePlayerControllable(playerid,0);
+		    TogglePlayerControllable(playerid,false);
 		    return SetPlayerCheckpoint(playerid,DriveInPos[did][Deatx],DriveInPos[did][Deaty],DriveInPos[did][Deatz],2.0);
 		}
 		new nearestzig = ReturnZTM(playerid);
@@ -56635,12 +56638,12 @@ public OnPlayerKeyStateChange(playerid,newkeys,oldkeys)
 		    if(isPlayerInFrakt(playerid,4) || isPlayerInFrakt(playerid,5) || isPlayerInFrakt(playerid,7) || isPlayerInFrakt(playerid,13) || isPlayerInFrakt(playerid,17))
 		    {
 			    KillTimer(Spieler[playerid][pSpraytagTimer]);
-				Spieler[playerid][pSpraytagTimer]=SetTimerEx("Spraytag",5000,0,"ii",playerid,0);
+				Spieler[playerid][pSpraytagTimer]=SetTimerEx("Spraytag",5000,false,"ii",playerid,0);
 			}
 			if((isPlayerInFrakt(playerid,1) || isPlayerInFrakt(playerid,11)) && Spieler[playerid][pDuty] != 0)
 			{
 			    KillTimer(Spieler[playerid][pSpraytagTimer]);
-				Spieler[playerid][pSpraytagTimer]=SetTimerEx("Spraytag",5000,0,"ii",playerid,1);
+				Spieler[playerid][pSpraytagTimer]=SetTimerEx("Spraytag",5000,false,"ii",playerid,1);
 			}
 	    }
     }
@@ -56692,33 +56695,33 @@ public OnPlayerKeyStateChange(playerid,newkeys,oldkeys)
 								{
 									if(Spieler[playerid][pTazerAkku] <= 5)
 									{
-										TazerTimer[i] = SetTimerEx("UnTazer",2000,0,"i",i);
+										TazerTimer[i] = SetTimerEx("UnTazer",2000,false,"i",i);
 										format(string,sizeof(string),"** %s streckt %s mit einem mildem Stromschock nieder **",SpielerName(playerid),SpielerName(i));
 										PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 										SCM(playerid,SAMP_WEISS,"Dein Tazerakku gibt langsam den Geist auf,lade ihn in einem Fahrzeug auf!");
 									}
 									else if(Spieler[playerid][pTazerAkku] <= 30)
 									{
-										TazerTimer[i] = SetTimerEx("UnTazer",10000,0,"i",i);
+										TazerTimer[i] = SetTimerEx("UnTazer",10000,false,"i",i);
 										format(string,sizeof(string),"** %s streckt %s mit einem beschränktem Stromschock nieder **",SpielerName(playerid),SpielerName(i));
 										PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 									}
 									else if(Spieler[playerid][pTazerAkku] <= 90)
 									{
-										TazerTimer[i] = SetTimerEx("UnTazer",20000,0,"i",i);
+										TazerTimer[i] = SetTimerEx("UnTazer",20000,false,"i",i);
 										format(string,sizeof(string),"** %s streckt %s mit einem teilweise starken Stromschock nieder **",SpielerName(playerid),SpielerName(i));
 										PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 									}
 									else if(Spieler[playerid][pTazerAkku] >= 90)
 									{
-									    TazerTimer[i] = SetTimerEx("UnTazer",30000,0,"i",i);
+									    TazerTimer[i] = SetTimerEx("UnTazer",30000,false,"i",i);
 										format(string,sizeof(string),"** %s streckt %s mit einem starken Stromschock nieder **",SpielerName(playerid),SpielerName(i));
 										PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 									}
 									format(string,sizeof(string),"** %s hat dich getazert sodass du nicht flüchten kannst **",SpielerName(playerid));
 									SCM(i,SAMP_WEISS,string);
 									GameTextForPlayer(i,"~r~Geschockt",3000,3);
-									TogglePlayerControllable(i,0);
+									TogglePlayerControllable(i,false);
 									Spieler[i][pTazerd] = 1;
 									LoopingAnim(i,"CRACK","crckdeth2",4.0,1,0,0,0,0);
 								}
@@ -56775,7 +56778,7 @@ public OnPlayerKeyStateChange(playerid,newkeys,oldkeys)
 				}
 				SprunkInfo[nearestsprunk][SprunkInhalt] --;
 				SetTimerEx("GetSprunk",3329,false,"i",playerid);
-				ApplyAnimation(playerid,"VENDING","VEND_Use_pt2",4.0,0,1,1,0,0,1);
+				ApplyAnimation(playerid,"VENDING","VEND_Use_pt2",4.0,false,true,true,false,0,SYNC_ALL);
 				PlayerPlaySound(playerid,1054,0.0,0.0,0.0);
 				SetPVarInt(playerid,"Sprunkcooldown",gettime()+(60*1));
 				SCM(playerid,SAMP_WEISS,""IINFO" du hast ein Dose "IINFO2"Sprunk"#HTML_WEISS" gekauft!");
@@ -57288,7 +57291,7 @@ public Tutorial4All(playerid,tut)
 			    TextDrawHideForPlayer(playerid,Introdraw[1]);
 			    SetPlayerVirtualWorld(playerid,0);
 			    SetCameraBehindPlayer(playerid);
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    KillTimer(Spieler[playerid][pTutTimer4All]);
 			}
 			return 1;
@@ -57321,7 +57324,7 @@ public Tutorial4All(playerid,tut)
 			    TextDrawHideForPlayer(playerid,Introdraw[1]);
 			    SetPlayerVirtualWorld(playerid,0);
 			    SetCameraBehindPlayer(playerid);
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    KillTimer(Spieler[playerid][pTutTimer4All]);
 			}
 			return 1;
@@ -57337,7 +57340,7 @@ public Tutorial4All(playerid,tut)
 			    TextDrawHideForPlayer(playerid,Introdraw[1]);
 			    SetPlayerVirtualWorld(playerid,0);
 			    SetCameraBehindPlayer(playerid);
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 			    KillTimer(Spieler[playerid][pTutTimer4All]);
 			}
 			return 1;
@@ -57345,7 +57348,7 @@ public Tutorial4All(playerid,tut)
 		case 4://Szenarion Cam
 		{
 			SetCameraBehindPlayer(playerid);
-			TogglePlayerControllable(playerid,1);
+			TogglePlayerControllable(playerid,true);
 			return 1;
 		}
 		case 5://Szenario Schiffuntergang
@@ -57387,7 +57390,7 @@ public PlayerLoseHeal()
 			}
 		}
 	}
-	SetTimer("PlayerLoseHeal",59688*2,0);
+	SetTimer("PlayerLoseHeal",59688*2,false);
 	return 1;
 }
 public Server()
@@ -57441,10 +57444,10 @@ public ServerTutorial()
 			Spieler[playerid][pTutorialTime]++;
 			if(Spieler[playerid][pTutorialTime] >= 1 && Spieler[playerid][AmUmkleiden] == 0)
 			{
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 				StopAudioStreamForPlayer(playerid);
 				SpamChat(playerid,0);
-				TogglePlayerSpectating(playerid,0);
+				TogglePlayerSpectating(playerid,false);
 				StopPlayerPlaySound(playerid);
 				SetPlayerACHealth(playerid,100);
 			    SetPlayerACArmour(playerid,0);
@@ -57475,7 +57478,7 @@ public PayDay()
 					if(Spieler[playerid][pMinutesAfterPayday] >= 3600)
 					{
 						new geld = Spieler[playerid][pFraktionsGehalt],price = GetPlayerLevel(playerid) * 25,lohnsteuer,kirchensteuer,solidsteuer;
-						SetTimerEx("StopPlayerPlaySound",5000,0,"i",playerid);
+						SetTimerEx("StopPlayerPlaySound",5000,false,"i",playerid);
 						//SetPlayerChatBubble(playerid,"Hat soeben einen PayDay Bekommen",SAMP_WEISS,MAX_STREAM_NAME_DISTANCE,30000);
 						Spieler[playerid][pMinutesAfterPayday] = 0;
 						//GameTextForPlayer(playerid,"~b~Zahltag",6000,1);
@@ -58227,7 +58230,7 @@ public Tachometer(playerid)
 					StopAudioStreamForPlayer(playerid);
 					
 					PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-				 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+				 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				}
 			}
 			if(Spieler[playerid][pSchulungsWARNS] >= 3)
@@ -58238,7 +58241,7 @@ public Tachometer(playerid)
 				StopAudioStreamForPlayer(playerid);
 				
 				PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
-			 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+			 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 				Spieler[playerid][pSchulungsCPautolic] = 0;
 			    Spieler[playerid][pSchulungsCPmotorbikelic] = 0;
 			    Spieler[playerid][pSchulungsCProllerlic] = 0;
@@ -58512,11 +58515,11 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				    {
 					    if(Spieler[playerid][pAutoLic] == 1)return SCM(playerid,SAMP_WEISS,""IINFO" du hast bereits einen Führerschein!");
 					    if((GetACMoney(playerid) - fsteuern[PreisLicCar]) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
-					    TogglePlayerControllable(playerid,0);
-					    FschulTimer[playerid] = SetTimerEx("FahrschulTutorial",1000,1,"ii",playerid,1);
+					    TogglePlayerControllable(playerid,false);
+					    FschulTimer[playerid] = SetTimerEx("FahrschulTutorial",1000,true,"ii",playerid,1);
 					    SetPlayerPosEx(playerid,-2024.3129,-116.5095,1035.1719);
 					    SetPlayerFacingAngle(playerid,269.3920);
-						ApplyAnimation(playerid,"PED","SEAT_idle",4.0,0,1,0,0,0,1);
+						ApplyAnimation(playerid,"PED","SEAT_idle",4.0,false,true,false,false,0,SYNC_ALL);
 					    //SetPlayerVirtualWorld(playerid,500+playerid);
 					    SetCameraBehindPlayer(playerid);
 					    return 1;
@@ -58525,11 +58528,11 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				    {
 					    if(Spieler[playerid][pBikeLic] == 1)return SCM(playerid,SAMP_WEISS,""IINFO" du hast bereits einen Motorradschein!");
 					    if((GetACMoney(playerid) - fsteuern[PreisLicBike]) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
-					    TogglePlayerControllable(playerid,0);
-					    FschulTimer[playerid] = SetTimerEx("FahrschulTutorial",1000,1,"ii",playerid,2);
+					    TogglePlayerControllable(playerid,false);
+					    FschulTimer[playerid] = SetTimerEx("FahrschulTutorial",1000,true,"ii",playerid,2);
 					    SetPlayerPosEx(playerid,-2024.3129,-116.5095,1035.1719);
 					    SetPlayerFacingAngle(playerid,269.3920);
-						ApplyAnimation(playerid,"PED","SEAT_idle",4.0,0,1,0,0,0,1);
+						ApplyAnimation(playerid,"PED","SEAT_idle",4.0,false,true,false,false,0,SYNC_ALL);
 					    //SetPlayerVirtualWorld(playerid,500+playerid);
 					    SetCameraBehindPlayer(playerid);
 				    	return 1;
@@ -58538,11 +58541,11 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				    {
 					    if(Spieler[playerid][pRollerLic] == 1)return SCM(playerid,SAMP_WEISS,""IINFO" du hast bereits einen Rollerschein!");
 					    if((GetACMoney(playerid) - fsteuern[PreisLicRoller]) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
-					    TogglePlayerControllable(playerid,0);
-					    FschulTimer[playerid] = SetTimerEx("FahrschulTutorial",1000,1,"ii",playerid,6);
+					    TogglePlayerControllable(playerid,false);
+					    FschulTimer[playerid] = SetTimerEx("FahrschulTutorial",1000,true,"ii",playerid,6);
 					    SetPlayerPosEx(playerid,-2024.3129,-116.5095,1035.1719);
 					    SetPlayerFacingAngle(playerid,269.3920);
-						ApplyAnimation(playerid,"PED","SEAT_idle",4.0,0,1,0,0,0,1);
+						ApplyAnimation(playerid,"PED","SEAT_idle",4.0,false,true,false,false,0,SYNC_ALL);
 					    //SetPlayerVirtualWorld(playerid,500+playerid);
 					    SetCameraBehindPlayer(playerid);
 					    return 1;
@@ -58551,11 +58554,11 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				    {
 					    if(Spieler[playerid][pPlaneLic] == 1)return SCM(playerid,SAMP_WEISS,""IINFO" du hast bereits einen Flugzeugschein!");
 					    if((GetACMoney(playerid) - fsteuern[PreisLicPlane]) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
-					    TogglePlayerControllable(playerid,0);
-					    FschulTimer[playerid] = SetTimerEx("FahrschulTutorial",1000,1,"ii",playerid,3);
+					    TogglePlayerControllable(playerid,false);
+					    FschulTimer[playerid] = SetTimerEx("FahrschulTutorial",1000,true,"ii",playerid,3);
 					    SetPlayerPosEx(playerid,-2024.3129,-116.5095,1035.1719);
 					    SetPlayerFacingAngle(playerid,269.3920);
-						ApplyAnimation(playerid,"PED","SEAT_idle",4.0,0,1,0,0,0,1);
+						ApplyAnimation(playerid,"PED","SEAT_idle",4.0,false,true,false,false,0,SYNC_ALL);
 					    //SetPlayerVirtualWorld(playerid,500+playerid);
 					    SetCameraBehindPlayer(playerid);
 					    return 1;
@@ -58564,11 +58567,11 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				    {
 					    if(Spieler[playerid][pHeliLic] == 1)return SCM(playerid,SAMP_WEISS,""IINFO" du hast bereits einen Helikopterschein!");
 					    if((GetACMoney(playerid) - fsteuern[PreisLicHeli]) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
-					    TogglePlayerControllable(playerid,0);
-					    FschulTimer[playerid] = SetTimerEx("FahrschulTutorial",1000,1,"ii",playerid,4);
+					    TogglePlayerControllable(playerid,false);
+					    FschulTimer[playerid] = SetTimerEx("FahrschulTutorial",1000,true,"ii",playerid,4);
 					    SetPlayerPosEx(playerid,-2024.3129,-116.5095,1035.1719);
 					    SetPlayerFacingAngle(playerid,269.3920);
-						ApplyAnimation(playerid,"PED","SEAT_idle",4.0,0,1,0,0,0,1);
+						ApplyAnimation(playerid,"PED","SEAT_idle",4.0,false,true,false,false,0,SYNC_ALL);
 					    //SetPlayerVirtualWorld(playerid,500+playerid);
 					    SetCameraBehindPlayer(playerid);
 					    return 1;
@@ -58577,11 +58580,11 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				    {
 					    if(Spieler[playerid][pBoatLic] == 1)return SCM(playerid,SAMP_WEISS,""IINFO" du hast bereits einen Bootsschein!");
 					    if((GetACMoney(playerid) - fsteuern[PreisLicBoat]) < 0)return SCM(playerid,SAMP_WEISS,"Nicht genug Geld dabei!");
-					    TogglePlayerControllable(playerid,0);
-					    FschulTimer[playerid] = SetTimerEx("FahrschulTutorial",1000,1,"ii",playerid,5);
+					    TogglePlayerControllable(playerid,false);
+					    FschulTimer[playerid] = SetTimerEx("FahrschulTutorial",1000,true,"ii",playerid,5);
 					    SetPlayerPosEx(playerid,-2024.3129,-116.5095,1035.1719);
 					    SetPlayerFacingAngle(playerid,269.3920);
-						ApplyAnimation(playerid,"PED","SEAT_idle",4.0,0,1,0,0,0,1);
+						ApplyAnimation(playerid,"PED","SEAT_idle",4.0,false,true,false,false,0,SYNC_ALL);
 					    //SetPlayerVirtualWorld(playerid,500+playerid);
 					    SetCameraBehindPlayer(playerid);
 					    return 1;
@@ -58596,7 +58599,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		 	{
 			 	new kopfbedekung = Spieler[playerid][pBuyClothes];
 				if(kopfbedekung != -1) SetPlayerAttachedObject(playerid,0,ClothesInfo[kopfbedekung][cobjectid],ClothesInfo[kopfbedekung][cbone],ClothesInfo[kopfbedekung][OffSetX],ClothesInfo[kopfbedekung][OffSetY],ClothesInfo[kopfbedekung][OffSetZ],ClothesInfo[kopfbedekung][RotX],ClothesInfo[kopfbedekung][RotY],ClothesInfo[kopfbedekung][RotZ],ClothesInfo[kopfbedekung][ScaleX],ClothesInfo[kopfbedekung][ScaleY],ClothesInfo[kopfbedekung][ScaleZ]);
-			    TogglePlayerControllable(playerid,1);
+			    TogglePlayerControllable(playerid,true);
 		 	}
 		  	else
 		   	{
@@ -58619,7 +58622,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 							 	SCM(playerid,SAMP_WEISS,string);
 							 	SCM(playerid,SAMP_WEISS,""IINFO" das Kleidungsstück kannst du mit dem Befehl '/delclothes' entfernen.");
 								SetPlayerAttachedObject(playerid,0,ClothesInfo[i][cobjectid],ClothesInfo[i][cbone],ClothesInfo[i][OffSetX],ClothesInfo[i][OffSetY],ClothesInfo[i][OffSetZ],ClothesInfo[i][RotX],ClothesInfo[i][RotY],ClothesInfo[i][RotZ],ClothesInfo[i][ScaleX],ClothesInfo[i][ScaleY],ClothesInfo[i][ScaleZ]);
-							    TogglePlayerControllable(playerid,1);
+							    TogglePlayerControllable(playerid,true);
 								return 1;
 							}
 						}
@@ -58631,7 +58634,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 							if(IsPlayerInRangeOfPoint(playerid,1.5,ClothesInfo[i][cX],ClothesInfo[i][cY],ClothesInfo[i][cZ]))
 							{
 								new Float:angle;
-								TogglePlayerControllable(playerid,0);
+								TogglePlayerControllable(playerid,false);
 								GetPlayerFacingAngle(playerid,angle);
 								SetPlayerFacingAngle(playerid,angle/2);
 								SetPlayerAttachedObject(playerid,0,ClothesInfo[i][cobjectid],ClothesInfo[i][cbone],ClothesInfo[i][OffSetX],ClothesInfo[i][OffSetY],ClothesInfo[i][OffSetZ],ClothesInfo[i][RotX],ClothesInfo[i][RotY],ClothesInfo[i][RotZ],ClothesInfo[i][ScaleX],ClothesInfo[i][ScaleY],ClothesInfo[i][ScaleZ]);
@@ -58644,7 +58647,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					{
 						new kopfbedekung = Spieler[playerid][pBuyClothes];
 						if(kopfbedekung != -1) SetPlayerAttachedObject(playerid,0,ClothesInfo[kopfbedekung][cobjectid],ClothesInfo[kopfbedekung][cbone],ClothesInfo[kopfbedekung][OffSetX],ClothesInfo[kopfbedekung][OffSetY],ClothesInfo[kopfbedekung][OffSetZ],ClothesInfo[kopfbedekung][RotX],ClothesInfo[kopfbedekung][RotY],ClothesInfo[kopfbedekung][RotZ],ClothesInfo[kopfbedekung][ScaleX],ClothesInfo[kopfbedekung][ScaleY],ClothesInfo[kopfbedekung][ScaleZ]);
-					    TogglePlayerControllable(playerid,1);
+					    TogglePlayerControllable(playerid,true);
 						return 1;
 					}
 				}
@@ -58675,7 +58678,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 						        SCM(playerid, GELB,"Du wurdest zur 'Hillside' Strecke geportet!");
 						    	SetPlayerPos(playerid,-3830.7678,-1363.3003,6.5879);
 						    	TogglePlayerControllable(playerid,false);
-								SetTimerEx("UnfreezePlayer_Obj",3000,0,"d",playerid);
+								SetTimerEx("UnfreezePlayer_Obj",3000,false,"d",playerid);
 						    	return 1;
 							}
 							else
@@ -58699,7 +58702,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 						    {
 						        SetPlayerVirtualWorld(playerid, 6);
 						        TogglePlayerControllable(playerid,false);
-								SetTimerEx("UnfreezePlayer_Obj",3000,0,"d",playerid);
+								SetTimerEx("UnfreezePlayer_Obj",3000,false,"d",playerid);
 						        SCM(playerid, GELB,"Du wurdest zur 'Race Track X' Strecke geportet!");
 						    	SetPlayerPos(playerid,-3830.7678,-1363.3003,6.5879);
 						    	return 1;
@@ -58766,7 +58769,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				        	CurrentSwitchRaceTracks[playerid] = 0;
 				        	SetPlayerVirtualWorld(playerid, 5);
 				        	TogglePlayerControllable(playerid,false);
-							SetTimerEx("UnfreezePlayer_Obj",3000,0,"d",playerid);
+							SetTimerEx("UnfreezePlayer_Obj",3000,false,"d",playerid);
 				        	SCM(playerid, GELB,"Du wurdest zur 'Hillside' Strecke teleportiert!");
 				        	return 1;
 						}
@@ -58776,7 +58779,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				        	CurrentSwitchRaceTracks[playerid] = 0;
 				        	SetPlayerVirtualWorld(playerid, 6);
 				        	TogglePlayerControllable(playerid,false);
-							SetTimerEx("UnfreezePlayer_Obj",3000,0,"d",playerid);
+							SetTimerEx("UnfreezePlayer_Obj",3000,false,"d",playerid);
 				        	SCM(playerid, GELB,"Du wurdest zur 'Race Track X' Strecke teleportiert!");
 				        	return 1;
 				        }
@@ -59075,7 +59078,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			if(response == 1){
 				SCM(playerid,SAMP_WEISS,""IINFO" Sie haben sich erfolgreich ein Schließfach zugelegt.");
 				Spieler[playerid][pBankSafeSafe] = 1;
-				//ApplyAnimation(GetPlayerID("[BOT]Bank"),"PED","IDLE_CHAT",4.0,0,0,0,0,0,1);
+				//ApplyAnimation(GetPlayerID("[BOT]Bank"),"PED","IDLE_CHAT",4.0,false,false,false,false,0,SYNC_ALL);
 				ACMoney(playerid,-150);
 			}
 		}
@@ -59633,7 +59636,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					    {
 					        SCM(playerid,SAMP_WEISS,""IINFO" du wurdest vom Server gekickt, da du zu oft das falsche Admin Passwort eingegeben hast!");
 					        TogglePlayerControllable(playerid,false);
-					        SetTimerEx("KickDenSpieler",2000,0,"i",playerid);
+					        SetTimerEx("KickDenSpieler",2000,false,"i",playerid);
 					        return 1;
 					    }
 					    format(adminpwmsg,sizeof(adminpwmsg),""#HTML_WEISS"Falsches Passwort! Bitte gib dein "IINFO2"Accountpasswort"#HTML_WEISS" ein.\nVersuch "IINFO2"%d"#HTML_WEISS" von "IINFO2"%d"#HTML_WEISS" - danach wirst du vom Server gekickt!",adminpwtry,MAX_ADMINPW_VERSUCHE);
@@ -60712,7 +60715,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					    SCM(playerid,WEISS,"Du kannst das Objekt nun mit den angezeigten Tasten bewegen und drehen.");
 					    SCM(playerid,WEISS,"Wenn du dich während des editierens bewegen möchtest halte die Leertaste gedrückt.");
 					    SCM(playerid,WEISS,"Möchtest du das Objekt kaufen klicke auf das 'Speichern'-Symbol.");
-					    SetTimerEx("EditObjectTimer",500,0,"i",playerid);
+					    SetTimerEx("EditObjectTimer",500,false,"i",playerid);
 					    return 1;
 			        }
 			    }
@@ -61527,7 +61530,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					SetVehicleZAngle(vfid,FlugbewaessererSpawns[spawnrand][3]);
 					RepairVehicle(vfid);
 					PutPlayerInVehicleEx(playerid, vfid, 0);
-					SetPlayerRaceCheckpoint(playerid,3,-447.2673,-1335.8694,76.2700,-291.5621,-1356.8193,41.6516,6.0);
+					SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,-447.2673,-1335.8694,76.2700,-291.5621,-1356.8193,41.6516,6.0);
 					return 1;
 			    }
 			    if(isPlayerInJob(playerid,6) && IsVehicleAFarmCar(GetPlayerVehicleID(playerid)) || IsVehicleAFarmCar2(GetPlayerVehicleID(playerid)))//farmerjob
@@ -61685,7 +61688,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					savetime = ReturnHempfangRate(playerid);
 				}
 				Spieler[playerid][pCallEntry] = strval(inputtext);
-				SetTimerEx("HandySendConnect",savetime*1000,0,"ii",playerid,0);
+				SetTimerEx("HandySendConnect",savetime*1000,false,"ii",playerid,0);
 				return 1;
 			}
 			return 1;
@@ -61752,7 +61755,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					savetime = ReturnHempfangRate(playerid);
 				}
 				strmid(Spieler[playerid][pSMSText],inputtext,0,strlen(inputtext),128);
-				SetTimerEx("HandySendConnect",savetime*1000,0,"ii",playerid,1);
+				SetTimerEx("HandySendConnect",savetime*1000,false,"ii",playerid,1);
 				return 1;
 			}
 		}
@@ -62009,7 +62012,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				{
 					savetime = ReturnHempfangRate(pID);
 				}
-				SetTimerEx("HandySendConnect",savetime*1000,0,"ii",playerid,2);
+				SetTimerEx("HandySendConnect",savetime*1000,false,"ii",playerid,2);
 			}
 		}
 
@@ -62053,7 +62056,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					ShowPlayerDialog(playerid,DIALOG_BANK_PINENTRY,DIALOG_STYLE_PASSWORD,""ClanTagDialoge" ATM",""#HTML_WEISS"Geben Sie Ihren gültigen "IINFO2"Bank-Pin"#HTML_WEISS" ein,um extern auf ihr Bankkonto zugreifen zu können.","Absenden","Abbrechen");					format(string,sizeof(string),""#HTML_WEISS"Falsche Bank-Pin eingabe. Versuche bis zur Kontosperrung: "IINFO2"%i"#HTML_WEISS" / "IINFO2"3",Spieler[playerid][pWrongBankPinEntry]);
 					return SCM(playerid,SAMP_WEISS,string);
 				}
-				ApplyAnimation(playerid,"PED","ATM",4.0,0,0,0,0,0,1);
+				ApplyAnimation(playerid,"PED","ATM",4.0,false,false,false,false,0,SYNC_ALL);
 				ShowPlayerDialog(playerid,DIALOG_BANK,DIALOG_STYLE_MSGBOX,"Bank","Falls du was auf dein Bankkonto einzahlen möchtest Klicke auf 'Einzahlen'\nUnd falls du etwas von deinem Bankkonto abbuchen willst 'Abbuchen'\nÜberweisungen lassen sich nur von der Bank of San Andreas aushandeln!","Einzahlen","Abbuchen");
 			}
 		}
@@ -62231,7 +62234,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					    ShowPlayerDialog(playerid,DIALOG_BANK_EINZAHLEN,DIALOG_STYLE_INPUT,"Einzahlung",string,"Einzahlen","Abbrechen");
 					    return SCM(playerid,SAMP_WEISS,""IINFO" nicht genug Geld.");
 				    }
-					ApplyAnimation(playerid,"PED","ATM",4.0,0,0,0,0,0,1);
+					ApplyAnimation(playerid,"PED","ATM",4.0,false,false,false,false,0,SYNC_ALL);
 				    SCM(playerid,SAMP_WEISS,"|___KONTOSTAND___|");
 				    format(string,sizeof(string),"Alter Kontostand: %i$",Spieler[playerid][pBank]);
 					SCM(playerid,SAMP_WEISS,string);
@@ -62281,7 +62284,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					    ShowPlayerDialog(playerid,DIALOG_BANK_AUSZAHLEN,DIALOG_STYLE_INPUT,"Auszahlung",string,"Auszahlen","Abbrechen");
 					    return SCM(playerid,SAMP_WEISS,"Nicht genug Geld auf dem Bankkonto.");
 					}
-					ApplyAnimation(playerid,"PED","ATM",4.0,0,0,0,0,0,1);
+					ApplyAnimation(playerid,"PED","ATM",4.0,false,false,false,false,0,SYNC_ALL);
 					SCM(playerid,SAMP_WEISS,"|___KONTOSTAND___|");
 				    format(string,sizeof(string),"Alter Kontostand: %i$",Spieler[playerid][pBank]);
 					SCM(playerid,SAMP_WEISS,string);
@@ -66823,7 +66826,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					torstatus[21] = 1;
 					torstatus[22] = 1;
 					PlayerHearMusicInRange(2571.1499,-1302.5300,1044.3400,1035,5,1,500);//x,y,z,soundid,radius,timer an = 1 wenn aus = 0,zeit wann timer music/sound beendet
-				    SetTimerEx("MoveGate",10000,0,"i",7);
+				    SetTimerEx("MoveGate",10000,false,"i",7);
 				}
 			    if(IsPlayerInRangeOfPoint(playerid,1.5,KeyPedPosALKA[1][0],KeyPedPosALKA[1][1],KeyPedPosALKA[1][2]))
 			    {
@@ -66832,35 +66835,35 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					torstatus[21] = 1;
 					torstatus[22] = 1;
 					PlayerHearMusicInRange(2571.1499,-1302.5300,1044.3400,1035,5,1,500);//x,y,z,soundid,radius,timer an = 1 wenn aus = 0,zeit wann timer music/sound beendet
-				    SetTimerEx("MoveGate",10000,0,"i",7);
+				    SetTimerEx("MoveGate",10000,false,"i",7);
 				}
 			    if(IsPlayerInRangeOfPoint(playerid,1.5,KeyPedPosALKA[2][0],KeyPedPosALKA[2][1],KeyPedPosALKA[2][2]))
 			    {
 				    MoveDynamicObject(tor[23],2542.1401,-1285.0200,1050.2800,2);
 					torstatus[23] = 1;
 					PlayerHearMusicInRange(2542.1401,-1285.0200,1050.2800,1035,5,1,500);//x,y,z,soundid,radius,timer an = 1 wenn aus = 0,zeit wann timer music/sound beendet
-				    SetTimerEx("MoveGate",10000,0,"i",8);
+				    SetTimerEx("MoveGate",10000,false,"i",8);
 				}
 			    if(IsPlayerInRangeOfPoint(playerid,1.5,KeyPedPosALKA[3][0],KeyPedPosALKA[3][1],KeyPedPosALKA[3][2]))
 			    {
 				    MoveDynamicObject(tor[23],2542.1401,-1285.0200,1050.2800,2);
 					torstatus[23] = 1;
 					PlayerHearMusicInRange(2542.1401,-1285.0200,1050.2800,1035,5,1,500);//x,y,z,soundid,radius,timer an = 1 wenn aus = 0,zeit wann timer music/sound beendet
-				    SetTimerEx("MoveGate",10000,0,"i",8);
+				    SetTimerEx("MoveGate",10000,false,"i",8);
 				}
 			    if(IsPlayerInRangeOfPoint(playerid,1.5,KeyPedPosALKA[4][0],KeyPedPosALKA[4][1],KeyPedPosALKA[4][2]))
 			    {
 				    MoveDynamicObject(tor[20],2578.0500,-1290.6700,1044.3400,2);
 					torstatus[20] = 1;
 					PlayerHearMusicInRange(2578.0500,-1290.6700,1044.3400,1035,5,1,500);//x,y,z,soundid,radius,timer an = 1 wenn aus = 0,zeit wann timer music/sound beendet
-				    SetTimerEx("MoveGate",10000,0,"i",6);
+				    SetTimerEx("MoveGate",10000,false,"i",6);
 			    }
 			    if(IsPlayerInRangeOfPoint(playerid,1.5,KeyPedPosALKA[5][0],KeyPedPosALKA[5][1],KeyPedPosALKA[5][2]))
 			    {
 				    MoveDynamicObject(tor[20],2578.0500,-1290.6700,1044.3400,2);
 					torstatus[20] = 1;
 					PlayerHearMusicInRange(2578.0500,-1290.6700,1044.3400,1035,5,1,500);//x,y,z,soundid,radius,timer an = 1 wenn aus = 0,zeit wann timer music/sound beendet
-				    SetTimerEx("MoveGate",10000,0,"i",6);
+				    SetTimerEx("MoveGate",10000,false,"i",6);
 			    }
 				SCM(playerid,SAMP_WEISS,"Eingabe Korrekt!");
 			    return 1;
@@ -66910,7 +66913,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][0]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][0]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir eine Sprite für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][0],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 5) > 100)return SetPlayerACHealth(playerid,100);
@@ -66923,7 +66926,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][0]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][0]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir eine Cola für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][0],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 5) > 100)return SetPlayerACHealth(playerid,100);
@@ -66949,7 +66952,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][0]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][0]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir eine Pizza Napoli für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][0],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 5) > 100)return SetPlayerACHealth(playerid,100);
@@ -66973,7 +66976,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][0]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][0]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Vanille Donut für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][0],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 5) > 100)return SetPlayerACHealth(playerid,100);
@@ -66986,7 +66989,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][0]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][0]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Fleischburger für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][0],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 5) > 100)return SetPlayerACHealth(playerid,100);
@@ -66999,7 +67002,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][1]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][1]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir eine Schale Pommes für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][1],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 5) > 100)return SetPlayerACHealth(playerid,100);
@@ -67041,7 +67044,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][1]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][1]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Crispy Chicken für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][1],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 10) > 100)return SetPlayerACHealth(playerid,100);
@@ -67054,7 +67057,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][1]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][1]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Cheeseburger für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][1],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 10) > 100)return SetPlayerACHealth(playerid,100);
@@ -67072,7 +67075,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][1]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][1]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir eine Pizza Margherita für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][1],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 10) > 100)return SetPlayerACHealth(playerid,100);
@@ -67098,7 +67101,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][1]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][1]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Schoko Donut für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][1],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 10) > 100)return SetPlayerACHealth(playerid,100);
@@ -67111,7 +67114,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][1]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][1]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir ein Salat für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][1],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 10) > 100)return SetPlayerACHealth(playerid,100);
@@ -67124,7 +67127,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][2]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][2]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir ein Kart-Menu für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][2],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 10) > 100)return SetPlayerACHealth(playerid,100);
@@ -67166,7 +67169,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][2]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][2]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Packung Chicken Wings für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][2],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 								if((GetPlayerACHealth(playerid) + 15) > 100)return SetPlayerACHealth(playerid,100);
@@ -67179,7 +67182,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][2]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][2]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir eine Tüte Pommes für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][2],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 15) > 100)return SetPlayerACHealth(playerid,100);
@@ -67212,7 +67215,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][2]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][2]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir eine Pizza Romana für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][2],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 15) > 100)return SetPlayerACHealth(playerid,100);
@@ -67238,7 +67241,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][2]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][2]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Strawberry Donut für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][2],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 15) > 100)return SetPlayerACHealth(playerid,100);
@@ -67251,7 +67254,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][2]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][2]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir ein Barguette für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][2],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 15) > 100)return SetPlayerACHealth(playerid,100);
@@ -67264,7 +67267,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][3]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][3]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir ein Sieger-Menu für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][3],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 15) > 100)return SetPlayerACHealth(playerid,100);
@@ -67299,7 +67302,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][3]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][3]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir eine Packung Chicken Nuggets für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][3],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 20) > 100)return SetPlayerACHealth(playerid,100);
@@ -67312,7 +67315,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][3]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][3]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Bigmac für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][3],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							   	if((GetPlayerACHealth(playerid) + 20) > 100)return SetPlayerACHealth(playerid,100);
@@ -67325,7 +67328,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][3]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][3]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir eine Pizza Spezial für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][3],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 20) > 100)return SetPlayerACHealth(playerid,100);
@@ -67351,7 +67354,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][3]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][3]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Strawberry Frosted Donut für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][3],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 								if((GetPlayerACHealth(playerid) + 20) > 100)return SetPlayerACHealth(playerid,100);
@@ -67364,7 +67367,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][3]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][3]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir ein Belegtes Brot für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][3],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 20) > 100)return SetPlayerACHealth(playerid,100);
@@ -67405,7 +67408,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][4]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][4]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Chicken Burger für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][4],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 35) > 100)return SetPlayerACHealth(playerid,100);
@@ -67418,7 +67421,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][4]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][4]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Hamburger für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][4],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 35) > 100)return SetPlayerACHealth(playerid,100);
@@ -67431,7 +67434,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][4]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][4]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir eine Pizza Super für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][4],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 35) > 100)return SetPlayerACHealth(playerid,100);
@@ -67457,7 +67460,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][4]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][4]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Blueberry Crunch Donut für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][4],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 								if((GetPlayerACHealth(playerid) + 35) > 100)return SetPlayerACHealth(playerid,100);
@@ -67470,7 +67473,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][4]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][4]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Remulade Brot für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][4],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 								if((GetPlayerACHealth(playerid) + 35) > 100)return SetPlayerACHealth(playerid,100);
@@ -67511,7 +67514,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][5]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][5]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Chicken Tripple Burger für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][5],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 								if((GetPlayerACHealth(playerid) + 40) > 100)return SetPlayerACHealth(playerid,100);
@@ -67524,7 +67527,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][5]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][5]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Hamburger Royal für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][5],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 40) > 100)return SetPlayerACHealth(playerid,100);
@@ -67537,7 +67540,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][5]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][5]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir eine Pizza De Luxe für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][5],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 40) > 100)return SetPlayerACHealth(playerid,100);
@@ -67563,7 +67566,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][5]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][5]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir einen Special Delux Donut für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][5],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 								if((GetPlayerACHealth(playerid) + 40) > 100)return SetPlayerACHealth(playerid,100);
@@ -67576,7 +67579,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								ACMoney(playerid,-BizInfo[biz][biz_artikel][5]);
 							    BizInfo[biz][biz_geldkasse] += floatround(BizInfo[biz][biz_artikel][5]-givemwst);
 							    fverwaltungen[16][Geld] += givemwst;
-								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,0,1,1,1,5000,1);
+								ApplyAnimation(playerid,"FOOD","EAT_Burger",4.0,false,true,true,true,5000,SYNC_ALL);
 							    format(string,sizeof(string),""IINFO" du hast dir eine Frikadele für %i$(davon versteuert: %i$) gekauft!",BizInfo[biz][biz_artikel][5],givemwst);
 							    SCM(playerid,SAMP_WEISS,string);
 							    if((GetPlayerACHealth(playerid) + 40) > 100)return SetPlayerACHealth(playerid,100);
@@ -71331,7 +71334,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 						Spieler[playerid][pC4] -= 5;
 						BombPickup = CreateDynamicPickup(1252,1,BombeX,BombeY,BombeZ);
 						BombSeconds = 0;
-						BombTimer = SetTimer("Bomb",1000,1);
+						BombTimer = SetTimer("Bomb",1000,true);
 						ForEachPlayer(i)
 					    {
 						    if(IsPlayerConnected(i) && !IsPlayerNPC(i))
@@ -71364,7 +71367,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 						Spieler[playerid][pC4] -= 5;
 						BombPickup = CreateDynamicPickup(1252,23,BombeX,BombeY,BombeZ);
 						BombSeconds = 0;
-						BombTimer = SetTimer("Bomb",1000,1);
+						BombTimer = SetTimer("Bomb",1000,true);
 						ForEachPlayer(i)
 					    {
 						    if(IsPlayerConnected(i) && !IsPlayerNPC(i))
@@ -71397,7 +71400,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 						Spieler[playerid][pC4] -= 5;
 						BombPickup = CreateDynamicPickup(1252,23,BombeX,BombeY,BombeZ);
 						BombSeconds = 0;
-						BombTimer = SetTimer("Bomb",1000,1);
+						BombTimer = SetTimer("Bomb",1000,true);
 						ForEachPlayer(i)
 					    {
 						    if(IsPlayerConnected(i) && !IsPlayerNPC(i))
@@ -71430,7 +71433,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 						Spieler[playerid][pC4] -= 5;
 						BombPickup = CreateDynamicPickup(1252,23,BombeX,BombeY,BombeZ);
 						BombSeconds = 0;
-						BombTimer = SetTimer("Bomb",1000,1);
+						BombTimer = SetTimer("Bomb",1000,true);
 						ForEachPlayer(i)
 					    {
 						    if(IsPlayerConnected(i) && !IsPlayerNPC(i))
@@ -71588,7 +71591,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 							ACMoney(playerid,-fsteuern[PersoLicPrice]);
 							fverwaltungen[16][Geld] += fsteuern[PersoLicPrice];
 						  	PlayerPlaySound(playerid,1183,0.0,0.0,0.0);
-						  	SetTimerEx("StopPlayerPlaySound",5000,0,"i",playerid);
+						  	SetTimerEx("StopPlayerPlaySound",5000,false,"i",playerid);
 						  	SCM(playerid,SAMP_WEISS,""IINFO2"Sekretärin:"#HTML_WEISS" Sie haben sich den Personalausweis erfolgreich beschafft.");
 						  	SCM(playerid,SAMP_WEISS,""IINFO2"Sekretärin:"#HTML_WEISS" Diesen brauchen Sie für viele wichtige Dinge.");
 						  	SCM(playerid,SAMP_WEISS,""IINFO2"Sekretärin:"#HTML_WEISS" Beispielsweise bei der Berufswahl oder einmieten in ein Haus.");
@@ -72059,7 +72062,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			new string[128];
 			if(response == 0)
 			{
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				RemovePlayerFromVehicle(playerid);
 				return 1;
 			}
@@ -72076,7 +72079,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 							 	if((GetACMoney(playerid) - vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptPreis]) < 0)
 								{
 									SCM(playerid,SAMP_WEISS,""IINFO" nicht genug Geld.");
-									TogglePlayerControllable(playerid,1);
+									TogglePlayerControllable(playerid,true);
 									return RemovePlayerFromVehicle(playerid);
 								}
 								ACMoney(playerid,- vFahrzeug[Fahrzeug[fv][Vehicle]][AbgeschlepptPreis]);
@@ -72086,7 +72089,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								SCM(playerid,WEISS,""IINFO" du kannst das Fahrzeug nun aus der Fahrzeugverwahrstelle fahren.('"IINFO" '/mv' am Tor)");
 							    SCM(playerid,WEISS,"Parke das Fahrzeug um sobald du die Fahrzeugverwahrstelle mit dem Fahrzeug verlassen hast.");
 								vFahrzeug[Fahrzeug[fv][Vehicle]][Abgeschleppt] = 0;
-								TogglePlayerControllable(playerid,1);
+								TogglePlayerControllable(playerid,true);
 								return 1;
 							}
 						}
@@ -72100,7 +72103,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			new string[128];
 			if(response == 0)
 			{
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				RemovePlayerFromVehicle(playerid);
 				return 1;
 			}
@@ -72115,7 +72118,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 							if((GetACMoney(playerid) - vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][AbgeschlepptPreis]) < 0)
 							{
 								SCM(playerid,SAMP_WEISS,""IINFO" nicht genug Geld.");
-								TogglePlayerControllable(playerid,1);
+								TogglePlayerControllable(playerid,true);
 								return RemovePlayerFromVehicle(playerid);
 							}
 							ACMoney(playerid,- vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][AbgeschlepptPreis]);
@@ -72125,7 +72128,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 							SCM(playerid,WEISS,""IINFO" du kannst das Fahrzeug nun aus der Fahrzeugverwahrstelle fahren.('"IINFO" '/mv' am Tor)");
 							SCM(playerid,WEISS,"Parke das Fahrzeug um sobald du die Fahrzeugverwahrstelle mit dem Fahrzeug verlassen hast.");
 							vFahrzeug[Pfahrzeug[slot][playerid][Vehicle]][Abgeschleppt] = 0;
-							TogglePlayerControllable(playerid,1);
+							TogglePlayerControllable(playerid,true);
 							return 1;
 						}
 					}
@@ -72146,7 +72149,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					TextDrawHideForPlayer(playerid,Introdraw[0]);
 				    TextDrawHideForPlayer(playerid,Introdraw[1]);
 					SetCameraBehindPlayer(playerid);
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					return RemovePlayerFromVehicle(playerid);
 				}
 				if(Spieler[playerid][pBankkonto] == 0)
@@ -72155,7 +72158,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					TextDrawHideForPlayer(playerid,Introdraw[0]);
 				    TextDrawHideForPlayer(playerid,Introdraw[1]);
 					SetCameraBehindPlayer(playerid);
-					TogglePlayerControllable(playerid,1);
+					TogglePlayerControllable(playerid,true);
 					return RemovePlayerFromVehicle(playerid);
 				}
 				for(new v=0;v<sizeof(AutohausVehicle);v++)
@@ -72168,7 +72171,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 							TextDrawHideForPlayer(playerid,Introdraw[0]);
 						    TextDrawHideForPlayer(playerid,Introdraw[1]);
 							SetCameraBehindPlayer(playerid);
-							TogglePlayerControllable(playerid,1);
+							TogglePlayerControllable(playerid,true);
 							return RemovePlayerFromVehicle(playerid);
 						}
 						ACMoney(playerid,-AutohausVehicle[v][Preis]);
@@ -72180,7 +72183,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 						TextDrawHideForPlayer(playerid,Introdraw[0]);
 					    TextDrawHideForPlayer(playerid,Introdraw[1]);
 						SetCameraBehindPlayer(playerid);
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						return RemovePlayerFromVehicle(playerid);
 					}
 				}
@@ -72194,7 +72197,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 							TextDrawHideForPlayer(playerid,Introdraw[0]);
 						    TextDrawHideForPlayer(playerid,Introdraw[1]);
 							SetCameraBehindPlayer(playerid);
-							TogglePlayerControllable(playerid,1);
+							TogglePlayerControllable(playerid,true);
 							return RemovePlayerFromVehicle(playerid);
 						}
 						if(GetMaxFraktionsVehs(Spieler[playerid][pFraktion]) >= MAX_OWNEDFVEHICLES)
@@ -72204,7 +72207,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 							TextDrawHideForPlayer(playerid,Introdraw[0]);
 						    TextDrawHideForPlayer(playerid,Introdraw[1]);
 							SetCameraBehindPlayer(playerid);
-							TogglePlayerControllable(playerid,1);
+							TogglePlayerControllable(playerid,true);
 							return RemovePlayerFromVehicle(playerid);
 						}
 						new rSpawn = random(sizeof(FvehicleAutoHausSpawn));
@@ -72218,7 +72221,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					    TextDrawHideForPlayer(playerid,Introdraw[0]);
 					    TextDrawHideForPlayer(playerid,Introdraw[1]);
 						SetCameraBehindPlayer(playerid);
-						TogglePlayerControllable(playerid,1);
+						TogglePlayerControllable(playerid,true);
 						return RemovePlayerFromVehicle(playerid);
 					}
 				}
@@ -72233,7 +72236,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				TextDrawHideForPlayer(playerid,Introdraw[0]);
 			    TextDrawHideForPlayer(playerid,Introdraw[1]);
 				SetCameraBehindPlayer(playerid);
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				RemovePlayerFromVehicle(playerid);
 				return 1;
 			}
@@ -72295,7 +72298,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								TextDrawHideForPlayer(playerid,Introdraw[0]);
 							    TextDrawHideForPlayer(playerid,Introdraw[1]);
 								SetCameraBehindPlayer(playerid);
-								TogglePlayerControllable(playerid,1);
+								TogglePlayerControllable(playerid,true);
 								return 1;
 							}
 						}
@@ -72315,7 +72318,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 								TextDrawHideForPlayer(playerid,Introdraw[0]);
 							    TextDrawHideForPlayer(playerid,Introdraw[1]);
 								SetCameraBehindPlayer(playerid);
-								TogglePlayerControllable(playerid,1);
+								TogglePlayerControllable(playerid,true);
 								return 1;
 							}
 						}
@@ -73353,7 +73356,7 @@ public CountDown(countdownc)
 							MotorDown[GetPlayerVehicleID(i)] = 0;
     						vFahrzeug[GetPlayerVehicleID(i)][FailGas] = 0;
 						}
-					    TogglePlayerControllable(i,1);
+					    TogglePlayerControllable(i,true);
 					    RaceBestzeit[i] = gettime();
 						SCM(i,SAMP_WEISS,"Los Los Los !!!");
 						DisablePlayerRaceCheckpoint(i);
@@ -73373,11 +73376,11 @@ public CountDown(countdownc)
 						PlayerTextDrawSetString(i,RACEdraw[i][5],"-");
 						if(RaceMode[r] == 0 || RaceMode[r] == 2 || RaceMode[r] == 3)
 						{
-							SetPlayerRaceCheckpoint(i,0,RaceInfo[r][0][0],RaceInfo[r][0][1],RaceInfo[r][0][2],RaceInfo[r][1][0],RaceInfo[r][1][1],RaceInfo[r][1][2],RACE_CP_SIZE[r][0]);
+							SetPlayerRaceCheckpoint(i,CP_TYPE_GROUND_NORMAL,RaceInfo[r][0][0],RaceInfo[r][0][1],RaceInfo[r][0][2],RaceInfo[r][1][0],RaceInfo[r][1][1],RaceInfo[r][1][2],RACE_CP_SIZE[r][0]);
 						}
 						else if(RaceMode[r] == 1)
 						{
-							SetPlayerRaceCheckpoint(i,3,RaceInfo[r][0][0],RaceInfo[r][0][1],RaceInfo[r][0][2],RaceInfo[r][1][0],RaceInfo[r][1][1],RaceInfo[r][1][2],RACE_CP_SIZE[r][0]);
+							SetPlayerRaceCheckpoint(i,CP_TYPE_AIR_NORMAL,RaceInfo[r][0][0],RaceInfo[r][0][1],RaceInfo[r][0][2],RaceInfo[r][1][0],RaceInfo[r][1][1],RaceInfo[r][1][2],RACE_CP_SIZE[r][0]);
 						}
 						RCountdownSec = 0;
 						BeforeRace[i] = false;
@@ -73402,7 +73405,7 @@ public StartKartRace(playerid)
     PlayerPlaySound(playerid,1056,0.0,0.0,0.0);
 	if(Spieler[playerid][pKartCountdown] >= 5)
 	{
-		TogglePlayerControllable(playerid,1);
+		TogglePlayerControllable(playerid,true);
 	    Spieler[playerid][pKartCountdown] = gettime();
 		SCM(playerid,SAMP_WEISS,"Los Los Los !!!");
 		SCM(playerid,SAMP_WEISS,"Steige aus dem Fahrzeug,falls du keine Lust mehr hast zu fahren.");
@@ -73410,7 +73413,7 @@ public StartKartRace(playerid)
 	    GameTextForPlayer(playerid,"~y~LOS LOS LOS",1000,3);
 	    PlayerPlaySound(playerid,3201,0.0,0.0,0.0);
 	    Spieler[playerid][pKartracingCP1] = 1;
-		SetPlayerRaceCheckpoint(playerid,0,KartRace[0][0],KartRace[0][1],KartRace[0][2],KartRace[1][0],KartRace[1][1],KartRace[1][2],6.0);
+		SetPlayerRaceCheckpoint(playerid,CP_TYPE_GROUND_NORMAL,KartRace[0][0],KartRace[0][1],KartRace[0][2],KartRace[1][0],KartRace[1][1],KartRace[1][2],6.0);
 		KillTimer(Spieler[playerid][pKartTimer]);
 		return 1;
 	}
@@ -73428,7 +73431,7 @@ public RespawnVehicles()
 	{
 		SetVehicleToRespawn(Fvehicles[fveh]);
 	}
-	SetTimer("RespawnVehicles",60354*3,0);
+	SetTimer("RespawnVehicles",60354*3,false);
 	return 1;
 }
 public FahrschulTutorial(playerid,schein)
@@ -74246,7 +74249,7 @@ public Bomb()
 			    if(IsPlayerInRangeOfPoint(i,25.0,BombeX,BombeY,BombeZ))
 			    {
 					StopAudioStreamForPlayer(i);
-			    	PlayAudioStreamForPlayer(i,ServerSounds[1],BombeX,BombeY,BombeZ,25.0,1);
+			    	PlayAudioStreamForPlayer(i,ServerSounds[1],BombeX,BombeY,BombeZ,25.0,true);
 			    }
 		    }
 	    }
@@ -74357,7 +74360,7 @@ public UnTazer(playerid)
     if(!IsPlayerConnected(playerid))return 1;
 	if(IsPlayerNPC(playerid))return 1;
 	SetCameraBehindPlayer(playerid);
-	TogglePlayerControllable(playerid,1);
+	TogglePlayerControllable(playerid,true);
     if(Spieler[playerid][pCuffed] == 1 || Spieler[playerid][pTazerd] == 1)
     {
 	    Spieler[playerid][pCuffed] = 0;
@@ -75016,7 +75019,7 @@ public Bankraub(playerid)
 	    case 600:
 		{
 			SendClientMessageToAll(ORANGE,"News: Die Bank wurde erfolgreich ausgeraubt.");
-			TogglePlayerControllable(playerid,1);
+			TogglePlayerControllable(playerid,true);
 			format(string,sizeof(string),"~w~Verdienst gesamt~g~ %i$",Spieler[playerid][pRobOtherThing]);
 			GameTextForPlayer(playerid,string,2000,1);
 			format(string,sizeof(string),""IINFO" du hast erfolgreich die Bank of San Andreas ausgeraubt. Verdienst %i$",Spieler[playerid][pRobOtherThing]);
@@ -75095,7 +75098,7 @@ public Waffenlagerraub(playerid)
 	    case 600:
 		{
 			SendClientMessageToAll(ORANGE,"News: Die Bank wurde erfolgreich ausgeraubt.");
-			TogglePlayerControllable(playerid,1);
+			TogglePlayerControllable(playerid,true);
 			format(string,sizeof(string),"~w~Verdienst gesamt~g~ %i$",Spieler[playerid][pRobOtherThing]);
 			GameTextForPlayer(playerid,string,2000,1);
 			format(string,sizeof(string),""IINFO" du hast erfolgreich das Waffenlager der Bundeswehr ausgeraubt. Verdienst %i Materials",Spieler[playerid][pWaffenlagerRobOtherThing]);
@@ -75408,7 +75411,7 @@ public HandyAkku(playerid)
 public Angeln(playerid)
 {
     new fisch = random(7)+1,gewicht = random(29)+1,fishname = random(8)+1,string[128];
-    TogglePlayerControllable(playerid,1);
+    TogglePlayerControllable(playerid,true);
 	RemovePlayerAttachedObject(playerid,6);
 	switch(fisch)
 	{
@@ -75872,7 +75875,7 @@ public TruckerTimer(playerid,tourid)
 	{
 		case 1://waren
 	 	{
-		  	TogglePlayerControllable(playerid,1);
+		  	TogglePlayerControllable(playerid,true);
 		   	new rSpawn = random(sizeof(TruckerLine1));
 			SetPlayerCheckpoint(playerid,TruckerLine1[rSpawn][0],TruckerLine1[rSpawn][1],TruckerLine1[rSpawn][2],7.5);
 			truckerjobgo[playerid] = 3;
@@ -75885,7 +75888,7 @@ public TruckerTimer(playerid,tourid)
 	  	}
 	  	case 2://autoteile
 	 	{
-		  	TogglePlayerControllable(playerid,1);
+		  	TogglePlayerControllable(playerid,true);
 		   	new rSpawn = random(sizeof(TruckerLine2));
 			SetPlayerCheckpoint(playerid,TruckerLine2[rSpawn][0],TruckerLine2[rSpawn][1],TruckerLine2[rSpawn][2],7.5);
 			truckerjobgo2[playerid] = 3;
@@ -75898,7 +75901,7 @@ public TruckerTimer(playerid,tourid)
 	  	}
 	  	case 3://bausschut
 	 	{
-		  	TogglePlayerControllable(playerid,1);
+		  	TogglePlayerControllable(playerid,true);
 		   	new rSpawn = random(sizeof(TruckerLine3));
 			SetPlayerCheckpoint(playerid,TruckerLine3[rSpawn][0],TruckerLine3[rSpawn][1],TruckerLine3[rSpawn][2],7.5);
 			truckerjobgo3[playerid] = 3;
@@ -75911,7 +75914,7 @@ public TruckerTimer(playerid,tourid)
 	  	}
 	  	case 4://treibstoff
 	 	{
-		  	TogglePlayerControllable(playerid,1);
+		  	TogglePlayerControllable(playerid,true);
 		   	new rSpawn = random(sizeof(TruckerLine4));
 			SetPlayerCheckpoint(playerid,TruckerLine4[rSpawn][0],TruckerLine4[rSpawn][1],TruckerLine4[rSpawn][2],7.5);
 			truckerjobgo4[playerid] = 3;
@@ -75924,7 +75927,7 @@ public TruckerTimer(playerid,tourid)
 	  	}
 	  	case 5://eisen
 	 	{
-		  	TogglePlayerControllable(playerid,1);
+		  	TogglePlayerControllable(playerid,true);
 			SetPlayerCheckpoint(playerid,823.6282,-1550.7629,13.5172,7.5);
 			truckerjobgo5[playerid] = 3;
 			ACMoney(playerid,-rcash);
@@ -75948,7 +75951,7 @@ public TruckerStuffUnload(playerid,tourid)
 	{
 		case 1://waren
 	 	{
-		  	TogglePlayerControllable(playerid,1);
+		  	TogglePlayerControllable(playerid,true);
 		  	DisablePlayerCheckpoint(playerid);
 		   	SetPlayerCheckpoint(playerid,89.7182,-307.4234,1.2831,7.5);
 			truckerjobgo[playerid] = 4;
@@ -75957,7 +75960,7 @@ public TruckerStuffUnload(playerid,tourid)
 	  	}
 	  	case 2://autoteile
 	 	{
-		  	TogglePlayerControllable(playerid,1);
+		  	TogglePlayerControllable(playerid,true);
 		  	DisablePlayerCheckpoint(playerid);
 		  	SetPlayerCheckpoint(playerid,89.7182,-307.4234,1.2831,7.5);
 			truckerjobgo2[playerid] = 4;
@@ -75966,7 +75969,7 @@ public TruckerStuffUnload(playerid,tourid)
 	  	}
 	  	case 3://bausschut
 	 	{
-		  	TogglePlayerControllable(playerid,1);
+		  	TogglePlayerControllable(playerid,true);
 		  	DisablePlayerCheckpoint(playerid);
 		  	SetPlayerCheckpoint(playerid,797.8452,-606.8371,16.0412,7.5);
 			truckerjobgo3[playerid] = 4;
@@ -75975,7 +75978,7 @@ public TruckerStuffUnload(playerid,tourid)
 	  	}
 	  	case 4://treibstoff
 	 	{
-		  	TogglePlayerControllable(playerid,1);
+		  	TogglePlayerControllable(playerid,true);
 		  	DisablePlayerCheckpoint(playerid);
 		  	SetPlayerCheckpoint(playerid,-1690.6570,398.8784,6.7432,7.5);
 			truckerjobgo4[playerid] = 4;
@@ -75984,7 +75987,7 @@ public TruckerStuffUnload(playerid,tourid)
 	  	}
 	  	case 5://eisen
 	 	{
-		  	TogglePlayerControllable(playerid,1);
+		  	TogglePlayerControllable(playerid,true);
 		  	DisablePlayerCheckpoint(playerid);
 		  	SetPlayerCheckpoint(playerid,797.8452,-606.8371,16.0412,7.5);
 			truckerjobgo5[playerid] = 4;
@@ -76037,7 +76040,7 @@ public BushalteStelle(playerid,fahrt,nextbusstop)
 			}
 			format(string,sizeof(string),"Linie %i\nNächster Halt: %s\nBusfahrer: %s\nKosten: %i$",buslinieninfo[playerid],buslinie1[nextbusstop][CheckPointText],SpielerName(playerid),MAX_BUS_PRICE);
 			UpdateDynamic3DTextLabelText(buspriceinfo[GetPlayerVehicleID(playerid)],BUSuTAXIDUTYFARBE,string);
-			TogglePlayerControllable(playerid,1);
+			TogglePlayerControllable(playerid,true);
 		    return 1;
 		}
 		case 2:
@@ -76075,7 +76078,7 @@ public BushalteStelle(playerid,fahrt,nextbusstop)
 			}
 			format(string,sizeof(string),"Linie %i\nNächster Halt: %s\nBusfahrer: %s\nKosten: %i$",buslinieninfo[playerid],buslinie2[nextbusstop][CheckPointText],SpielerName(playerid),MAX_BUS_PRICE);
 			UpdateDynamic3DTextLabelText(buspriceinfo[GetPlayerVehicleID(playerid)],BUSuTAXIDUTYFARBE,string);
-			TogglePlayerControllable(playerid,1);
+			TogglePlayerControllable(playerid,true);
 		    return 1;
 		}
 		case 3:
@@ -76113,7 +76116,7 @@ public BushalteStelle(playerid,fahrt,nextbusstop)
 			}
 			format(string,sizeof(string),"Linie %i\nNächster Halt: %s\nBusfahrer: %s\nKosten: %i$",buslinieninfo[playerid],buslinie3[nextbusstop][CheckPointText],SpielerName(playerid),MAX_BUS_PRICE);
 			UpdateDynamic3DTextLabelText(buspriceinfo[GetPlayerVehicleID(playerid)],BUSuTAXIDUTYFARBE,string);
-			TogglePlayerControllable(playerid,1);
+			TogglePlayerControllable(playerid,true);
 		    return 1;
 		}
 		case 4:
@@ -76151,7 +76154,7 @@ public BushalteStelle(playerid,fahrt,nextbusstop)
 			}
 			format(string,sizeof(string),"Linie %i\nNächster Halt: %s\nBusfahrer: %s\nKosten: %i$",buslinieninfo[playerid],buslinie4[nextbusstop][CheckPointText],SpielerName(playerid),MAX_BUS_PRICE);
 			UpdateDynamic3DTextLabelText(buspriceinfo[GetPlayerVehicleID(playerid)],BUSuTAXIDUTYFARBE,string);
-			TogglePlayerControllable(playerid,1);
+			TogglePlayerControllable(playerid,true);
 		    return 1;
 		}
 		case 5:
@@ -76189,7 +76192,7 @@ public BushalteStelle(playerid,fahrt,nextbusstop)
 			}
 			format(string,sizeof(string),"Linie %i\nNächster Halt: %s\nBusfahrer: %s\nKosten: %i$",buslinieninfo[playerid],buslinie5[nextbusstop][CheckPointText],SpielerName(playerid),MAX_BUS_PRICE);
 			UpdateDynamic3DTextLabelText(buspriceinfo[GetPlayerVehicleID(playerid)],BUSuTAXIDUTYFARBE,string);
-			TogglePlayerControllable(playerid,1);
+			TogglePlayerControllable(playerid,true);
 		    return 1;
 		}
 		case 6:
@@ -76227,7 +76230,7 @@ public BushalteStelle(playerid,fahrt,nextbusstop)
 			}
 			format(string,sizeof(string),"Linie %i\nNächster Halt: %s\nBusfahrer: %s\nKosten: %i$",buslinieninfo[playerid],buslinie6[nextbusstop][CheckPointText],SpielerName(playerid),MAX_BUS_PRICE);
 			UpdateDynamic3DTextLabelText(buspriceinfo[GetPlayerVehicleID(playerid)],BUSuTAXIDUTYFARBE,string);
-			TogglePlayerControllable(playerid,1);
+			TogglePlayerControllable(playerid,true);
 		    return 1;
 		}
 		case 7:
@@ -76265,7 +76268,7 @@ public BushalteStelle(playerid,fahrt,nextbusstop)
 			}
 			format(string,sizeof(string),"Linie %i\nNächster Halt: %s\nBusfahrer: %s\nKosten: %i$",buslinieninfo[playerid],buslinie7[nextbusstop][CheckPointText],SpielerName(playerid),MAX_BUS_PRICE);
 			UpdateDynamic3DTextLabelText(buspriceinfo[GetPlayerVehicleID(playerid)],BUSuTAXIDUTYFARBE,string);
-			TogglePlayerControllable(playerid,1);
+			TogglePlayerControllable(playerid,true);
 		    return 1;
 		}
 		case 8:
@@ -76303,7 +76306,7 @@ public BushalteStelle(playerid,fahrt,nextbusstop)
 			}
 			format(string,sizeof(string),"Linie %i\nNächster Halt: %s\nBusfahrer: %s\nKosten: %i$",buslinieninfo[playerid],buslinie8[nextbusstop][CheckPointText],SpielerName(playerid),MAX_BUS_PRICE);
 			UpdateDynamic3DTextLabelText(buspriceinfo[GetPlayerVehicleID(playerid)],BUSuTAXIDUTYFARBE,string);
-			TogglePlayerControllable(playerid,1);
+			TogglePlayerControllable(playerid,true);
 		    return 1;
 		}
 	}
@@ -76350,7 +76353,7 @@ public PersonRetten(playerid, zielid)
 	PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 	StopLoopingAnim(playerid);
 	SetCameraBehindPlayer(zielid);
-	TogglePlayerControllable(zielid,1);
+	TogglePlayerControllable(zielid,true);
 	return 1;
 }
 
@@ -76362,7 +76365,7 @@ public Repaired(playerid)
 	MotorDown[vehicleid] = 0;
 	RepairVehicle(vehicleid);
 	SCM(playerid,0x4BB400FF,"Fahrzeug wurde gewartet.");
-	TogglePlayerControllable(playerid,1);
+	TogglePlayerControllable(playerid,true);
 	KillTimer(reptimer[playerid]);
 	return 1;
 }
@@ -76406,8 +76409,8 @@ public SetPlayerBurn(playerid)
 	PlayerOnFire[playerid] = 1;
 	KillTimer(PlayerOnFireTimer[playerid]);
 	KillTimer(PlayerOnFireTimer2[playerid]);
-	PlayerOnFireTimer[playerid] = SetTimerEx("BurningTimer",91,1,"d",playerid);
-	PlayerOnFireTimer2[playerid] = SetTimerEx("StopPlayerBurning",7000,0,"d",playerid);
+	PlayerOnFireTimer[playerid] = SetTimerEx("BurningTimer",91,true,"d",playerid);
+	PlayerOnFireTimer2[playerid] = SetTimerEx("StopPlayerBurning",7000,false,"d",playerid);
 	return 1;
 }
 
@@ -76477,9 +76480,9 @@ public OnFireUpdate()
 						Flame[value][Smoke][2] = CreateDynamicObject(18727,x-1,y,z,0.0,0.0,0.0,Flame[value][Flame_world]);
 						Flame[value][Smoke][3] = CreateDynamicObject(18727,x,y+1,z,0.0,0.0,0.0,Flame[value][Flame_world]);
 						Flame[value][Smoke][4] = CreateDynamicObject(18727,x,y-1,z,0.0,0.0,0.0,Flame[value][Flame_world]);
-						SetTimerEx("DestroyTheSmokeFromFlame",time,0,"d",value);
+						SetTimerEx("DestroyTheSmokeFromFlame",time,false,"d",value);
 					}
-					ExtTimer[playerid] = SetTimerEx("FireTimer",time,0,"dd",playerid,value);
+					ExtTimer[playerid] = SetTimerEx("FireTimer",time,false,"dd",playerid,value);
 				}
 			}
 			if(CanPlayerBurn(playerid) && IsAtFlame(playerid) && (GetPlayerSkin(playerid) != 277 && GetPlayerSkin(playerid) != 278 && GetPlayerSkin(playerid) != 279)) { SetPlayerBurn(playerid); }
@@ -76728,7 +76731,7 @@ public DriveIn(playerid)
 			case 1:
 			{
 				SCM(playerid,WEISS,"Guten Appetit!");
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				Spieler[playerid][pWaitEatingMenu] = 0;
 				Spieler[playerid][pWaitEating] = 0;
 				if((floatadd(GetPlayerACHealth(playerid), 5)) > 100)return SetPlayerACHealth(playerid,100);
@@ -76737,7 +76740,7 @@ public DriveIn(playerid)
 			case 2:
 			{
 				SCM(playerid,WEISS,"Guten Appetit!");
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				Spieler[playerid][pWaitEatingMenu] = 0;
 				Spieler[playerid][pWaitEating] = 0;
 			    if((floatadd(GetPlayerACHealth(playerid), 10)) > 100)return SetPlayerACHealth(playerid,100);
@@ -76746,7 +76749,7 @@ public DriveIn(playerid)
 			case 3:
 			{
 				SCM(playerid,WEISS,"Guten Appetit!");
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				Spieler[playerid][pWaitEatingMenu] = 0;
 				Spieler[playerid][pWaitEating] = 0;
 				if((floatadd(GetPlayerACHealth(playerid), 15)) > 100)return SetPlayerACHealth(playerid,100);
@@ -76755,7 +76758,7 @@ public DriveIn(playerid)
 			case 4:
 			{
 				SCM(playerid,WEISS,"Guten Appetit!");
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				Spieler[playerid][pWaitEatingMenu] = 0;
 				Spieler[playerid][pWaitEating] = 0;
 				if((floatadd(GetPlayerACHealth(playerid), 20)) > 100)return SetPlayerACHealth(playerid,100);
@@ -76764,7 +76767,7 @@ public DriveIn(playerid)
 			case 5:
 			{
 				SCM(playerid,WEISS,"Guten Appetit!");
-				TogglePlayerControllable(playerid,1);
+				TogglePlayerControllable(playerid,true);
 				Spieler[playerid][pWaitEatingMenu] = 0;
 				Spieler[playerid][pWaitEating] = 0;
 				if((floatadd(GetPlayerACHealth(playerid), 35)) > 100)return SetPlayerACHealth(playerid,100);
@@ -76802,7 +76805,7 @@ public OnGangwarUpdate1()
 				{
 					case 1:
 					{
-						SCM(GangwarZones[gw][War_CaptureHero][0],WEISS,"Noch 30 Sekunden bis zur Flaggeneroberung!"),TextDrawBackgroundColor(GangwarZones[gw][WARdraw][4],ROT),TextDrawColor(GangwarZones[gw][WARdraw][4],ROT),TextDrawSetString(GangwarZones[gw][WARdraw][4],".");
+						SCM(GangwarZones[gw][War_CaptureHero][0],WEISS,"Noch 30 Sekunden bis zur Flaggeneroberung!"),TextDrawBackgroundColour(GangwarZones[gw][WARdraw][4],ROT),TextDrawColour(GangwarZones[gw][WARdraw][4],ROT),TextDrawSetString(GangwarZones[gw][WARdraw][4],".");
 					    ForEachPlayer(i)
 						{
 						    if(IsPlayerConnected(i) && !IsPlayerNPC(i))
@@ -76823,7 +76826,7 @@ public OnGangwarUpdate1()
 					case 29:SCM(GangwarZones[gw][War_CaptureHero][0],WEISS,"Noch 1 Sekunden bis zur Flaggeneroberung!"),TextDrawSetString(GangwarZones[gw][WARdraw][4],"..............");
 					case 30:
 					{
-					TextDrawBackgroundColor(GangwarZones[gw][WARdraw][4],GRUEN),TextDrawColor(GangwarZones[gw][WARdraw][4],GRUEN),TextDrawSetString(GangwarZones[gw][WARdraw][4],"..............");
+					TextDrawBackgroundColour(GangwarZones[gw][WARdraw][4],GRUEN),TextDrawColour(GangwarZones[gw][WARdraw][4],GRUEN),TextDrawSetString(GangwarZones[gw][WARdraw][4],"..............");
 				    format(string,sizeof(string),"Gangwar: %s hat es geschafft die Flagge einzunehmen!",SpielerName(GangwarZones[gw][War_CaptureHero][0]));
 					ForEachPlayer(i)
 					{
@@ -76868,7 +76871,7 @@ public OnGangwarUpdate1()
 				}
 				else
 				{
-			    TextDrawBackgroundColor(GangwarZones[gw][WARdraw][4],GRUEN),TextDrawColor(GangwarZones[gw][WARdraw][4],GRUEN),TextDrawSetString(GangwarZones[gw][WARdraw][4],"..............");
+			    TextDrawBackgroundColour(GangwarZones[gw][WARdraw][4],GRUEN),TextDrawColour(GangwarZones[gw][WARdraw][4],GRUEN),TextDrawSetString(GangwarZones[gw][WARdraw][4],"..............");
 			    ForEachPlayer(i)
 				{
 				    if(IsPlayerConnected(i) && !IsPlayerNPC(i))
@@ -76889,7 +76892,7 @@ public OnGangwarUpdate1()
 				{
 					case 1:
 					{
-						SCM(GangwarZones[gw][War_CaptureHero][1],WEISS,"Noch 30 Sekunden bis zur Flaggeneroberung!"),TextDrawBackgroundColor(GangwarZones[gw][WARdraw][6],ROT),TextDrawColor(GangwarZones[gw][WARdraw][6],ROT),TextDrawSetString(GangwarZones[gw][WARdraw][6],".");
+						SCM(GangwarZones[gw][War_CaptureHero][1],WEISS,"Noch 30 Sekunden bis zur Flaggeneroberung!"),TextDrawBackgroundColour(GangwarZones[gw][WARdraw][6],ROT),TextDrawColour(GangwarZones[gw][WARdraw][6],ROT),TextDrawSetString(GangwarZones[gw][WARdraw][6],".");
 					    ForEachPlayer(i)
 						{
 						    if(IsPlayerConnected(i) && !IsPlayerNPC(i))
@@ -76910,7 +76913,7 @@ public OnGangwarUpdate1()
 					case 29:SCM(GangwarZones[gw][War_CaptureHero][1],WEISS,"Noch 1 Sekunden bis zur Flaggeneroberung!"),TextDrawSetString(GangwarZones[gw][WARdraw][6],"..............");
 					case 30:
 					{
-					TextDrawBackgroundColor(GangwarZones[gw][WARdraw][6],GRUEN),TextDrawColor(GangwarZones[gw][WARdraw][6],GRUEN),TextDrawSetString(GangwarZones[gw][WARdraw][6],"..............");
+					TextDrawBackgroundColour(GangwarZones[gw][WARdraw][6],GRUEN),TextDrawColour(GangwarZones[gw][WARdraw][6],GRUEN),TextDrawSetString(GangwarZones[gw][WARdraw][6],"..............");
 				    format(string,sizeof(string),"Gangwar: %s hat es geschafft die Flagge einzunehmen!",SpielerName(GangwarZones[gw][War_CaptureHero][1]));
 					ForEachPlayer(i)
 					{
@@ -76955,7 +76958,7 @@ public OnGangwarUpdate1()
 			}
 			else
 			{
-			    TextDrawBackgroundColor(GangwarZones[gw][WARdraw][6],GRUEN),TextDrawColor(GangwarZones[gw][WARdraw][6],GRUEN),TextDrawSetString(GangwarZones[gw][WARdraw][6],"..............");
+			    TextDrawBackgroundColour(GangwarZones[gw][WARdraw][6],GRUEN),TextDrawColour(GangwarZones[gw][WARdraw][6],GRUEN),TextDrawSetString(GangwarZones[gw][WARdraw][6],"..............");
 			    ForEachPlayer(i)
 				{
 				    if(IsPlayerConnected(i) && !IsPlayerNPC(i))
@@ -76976,7 +76979,7 @@ public OnGangwarUpdate1()
 				{
 					case 1:
 					{
-						SCM(GangwarZones[gw][War_CaptureHero][2],WEISS,"Noch 30 Sekunden bis zur Flaggeneroberung!"),TextDrawBackgroundColor(GangwarZones[gw][WARdraw][8],ROT),TextDrawColor(GangwarZones[gw][WARdraw][8],ROT),TextDrawSetString(GangwarZones[gw][WARdraw][8],".");
+						SCM(GangwarZones[gw][War_CaptureHero][2],WEISS,"Noch 30 Sekunden bis zur Flaggeneroberung!"),TextDrawBackgroundColour(GangwarZones[gw][WARdraw][8],ROT),TextDrawColour(GangwarZones[gw][WARdraw][8],ROT),TextDrawSetString(GangwarZones[gw][WARdraw][8],".");
 					    ForEachPlayer(i)
 						{
 						    if(IsPlayerConnected(i) && !IsPlayerNPC(i))
@@ -76997,7 +77000,7 @@ public OnGangwarUpdate1()
 					case 29:SCM(GangwarZones[gw][War_CaptureHero][2],WEISS,"Noch 1 Sekunden bis zur Flaggeneroberung!"),TextDrawSetString(GangwarZones[gw][WARdraw][8],"..............");
 					case 30:
 					{
-					TextDrawBackgroundColor(GangwarZones[gw][WARdraw][8],GRUEN),TextDrawColor(GangwarZones[gw][WARdraw][8],GRUEN),TextDrawSetString(GangwarZones[gw][WARdraw][8],"..............");
+					TextDrawBackgroundColour(GangwarZones[gw][WARdraw][8],GRUEN),TextDrawColour(GangwarZones[gw][WARdraw][8],GRUEN),TextDrawSetString(GangwarZones[gw][WARdraw][8],"..............");
 				    format(string,sizeof(string),"Gangwar: %s hat es geschafft die Flagge einzunehmen!",SpielerName(GangwarZones[gw][War_CaptureHero][2]));
 					ForEachPlayer(i)
 					{
@@ -77042,7 +77045,7 @@ public OnGangwarUpdate1()
 			}
 			else
 			{
-   				TextDrawBackgroundColor(GangwarZones[gw][WARdraw][8],GRUEN),TextDrawColor(GangwarZones[gw][WARdraw][8],GRUEN),TextDrawSetString(GangwarZones[gw][WARdraw][8],"..............");
+   				TextDrawBackgroundColour(GangwarZones[gw][WARdraw][8],GRUEN),TextDrawColour(GangwarZones[gw][WARdraw][8],GRUEN),TextDrawSetString(GangwarZones[gw][WARdraw][8],"..............");
 			    ForEachPlayer(i)
 				{
     				if(IsPlayerConnected(i) && !IsPlayerNPC(i))
@@ -77767,8 +77770,8 @@ public l_script_account(playerid,pass[],passwortstate)
 		        SCM(playerid,SAMP_WEISS,""ACINFO" Zu viele fehlgeschlagene Login-Versuche! Du wirst vom Server geworfen.");
 		        format(loginlog,sizeof(loginlog),"KICK nach %d Fehlversuchen - Spieler: %s | IP: %s",MAX_LOGIN_VERSUCHE,SpielerName(playerid),SpielerIP(playerid));
 		        Log("Login_Fehlversuche.txt",loginlog);
-		        TogglePlayerControllable(playerid,0);
-		        SetTimerEx("KickDenSpieler",2000,0,"i",playerid);
+		        TogglePlayerControllable(playerid,false);
+		        SetTimerEx("KickDenSpieler",2000,false,"i",playerid);
 		        return 1;
 		    }
 		    format(loginlog,sizeof(loginlog),""#ERROR" Falsches Passwort! Versuch %d von %d.",LoginFehlversuche[playerid],MAX_LOGIN_VERSUCHE);
@@ -78198,7 +78201,7 @@ public l_script_account(playerid,pass[],passwortstate)
 			{
 				ShowHandyDraw(playerid);
 			   	HandyAkku(playerid);
-				AkkuTimer[playerid] = SetTimerEx("HandyAkku",120000,1,"i",playerid);
+				AkkuTimer[playerid] = SetTimerEx("HandyAkku",120000,true,"i",playerid);
 			}
 		}/*
 	    if(Spieler[playerid][pFraktion] != 0)
@@ -78207,8 +78210,8 @@ public l_script_account(playerid,pass[],passwortstate)
 		    SendFraktionsMessage(Spieler[playerid][pFraktion],SAMP_WEISS,stringlogin);
 		}*/
 		if(Spieler[playerid][pViewTutorial] == 0)return ImTutorial[playerid] = 1;
-		TogglePlayerControllable(playerid,1);
-	    TogglePlayerSpectating(playerid,0);
+		TogglePlayerControllable(playerid,true);
+	    TogglePlayerSpectating(playerid,false);
 		SpawnPlayerEx(playerid);
 		StopAudioStreamForPlayer(playerid);
 	 	MakeRace[playerid] = -1;
@@ -79097,81 +79100,81 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 				strdel(result,0,sizeof(result));
 
 				GangwarZones[gw][WARdraw][0] = TextDrawCreate(8,260,"_");//stand 1
-			    TextDrawFont(GangwarZones[gw][WARdraw][0],1);
-			    TextDrawAlignment(GangwarZones[gw][WARdraw][0],0);
+			    TextDrawFont(GangwarZones[gw][WARdraw][0],TEXT_DRAW_FONT_1);
+			    TextDrawAlignment(GangwarZones[gw][WARdraw][0],TEXT_DRAW_ALIGN:0);
 				TextDrawLetterSize(GangwarZones[gw][WARdraw][0],0.450000,0.999990);
-				TextDrawColor(GangwarZones[gw][WARdraw][0],0xFEFEFEFF);
-				TextDrawSetProportional(GangwarZones[gw][WARdraw][0],1);
+				TextDrawColour(GangwarZones[gw][WARdraw][0],0xFEFEFEFF);
+				TextDrawSetProportional(GangwarZones[gw][WARdraw][0],true);
 				TextDrawSetShadow(GangwarZones[gw][WARdraw][0],2);
 
 				GangwarZones[gw][WARdraw][1] = TextDrawCreate(8,270,"_");//stand 2
-			    TextDrawFont(GangwarZones[gw][WARdraw][1],1);
-			    TextDrawAlignment(GangwarZones[gw][WARdraw][1],0);
+			    TextDrawFont(GangwarZones[gw][WARdraw][1],TEXT_DRAW_FONT_1);
+			    TextDrawAlignment(GangwarZones[gw][WARdraw][1],TEXT_DRAW_ALIGN:0);
 				TextDrawLetterSize(GangwarZones[gw][WARdraw][1],0.450000,0.999990);
-				TextDrawColor(GangwarZones[gw][WARdraw][1],0xFEFEFEFF);
-				TextDrawSetProportional(GangwarZones[gw][WARdraw][1],1);
+				TextDrawColour(GangwarZones[gw][WARdraw][1],0xFEFEFEFF);
+				TextDrawSetProportional(GangwarZones[gw][WARdraw][1],true);
 				TextDrawSetShadow(GangwarZones[gw][WARdraw][1],2);
 
 				GangwarZones[gw][WARdraw][2] = TextDrawCreate(8,250,"_");//zeit
-			    TextDrawFont(GangwarZones[gw][WARdraw][2],1);
-			    TextDrawAlignment(GangwarZones[gw][WARdraw][2],0);
+			    TextDrawFont(GangwarZones[gw][WARdraw][2],TEXT_DRAW_FONT_1);
+			    TextDrawAlignment(GangwarZones[gw][WARdraw][2],TEXT_DRAW_ALIGN:0);
 				TextDrawLetterSize(GangwarZones[gw][WARdraw][2],0.450000,0.999990);
-				TextDrawColor(GangwarZones[gw][WARdraw][2],0xFEFEFEFF);
-				TextDrawSetProportional(GangwarZones[gw][WARdraw][2],1);
+				TextDrawColour(GangwarZones[gw][WARdraw][2],0xFEFEFEFF);
+				TextDrawSetProportional(GangwarZones[gw][WARdraw][2],true);
 				TextDrawSetShadow(GangwarZones[gw][WARdraw][2],2);
 
 				GangwarZones[gw][WARdraw][3] = TextDrawCreate(8,280,"FLAGGE");//Flagge 1
-			    TextDrawFont(GangwarZones[gw][WARdraw][3],1);
-			    TextDrawAlignment(GangwarZones[gw][WARdraw][3],0);
+			    TextDrawFont(GangwarZones[gw][WARdraw][3],TEXT_DRAW_FONT_1);
+			    TextDrawAlignment(GangwarZones[gw][WARdraw][3],TEXT_DRAW_ALIGN:0);
 				TextDrawLetterSize(GangwarZones[gw][WARdraw][3],0.350000,0.499990);
-				TextDrawColor(GangwarZones[gw][WARdraw][3],0xFEFEFEFF);
-				TextDrawSetProportional(GangwarZones[gw][WARdraw][3],1);
+				TextDrawColour(GangwarZones[gw][WARdraw][3],0xFEFEFEFF);
+				TextDrawSetProportional(GangwarZones[gw][WARdraw][3],true);
 				TextDrawSetShadow(GangwarZones[gw][WARdraw][3],1);
 
 				GangwarZones[gw][WARdraw][4] = TextDrawCreate(8,270,"..............");//Flagge 1
-		        TextDrawAlignment(GangwarZones[gw][WARdraw][4],1);
-		        TextDrawBackgroundColor(GangwarZones[gw][WARdraw][4],ROT);
-		        TextDrawFont(GangwarZones[gw][WARdraw][4],3);
+		        TextDrawAlignment(GangwarZones[gw][WARdraw][4],TEXT_DRAW_ALIGN_LEFT);
+		        TextDrawBackgroundColour(GangwarZones[gw][WARdraw][4],ROT);
+		        TextDrawFont(GangwarZones[gw][WARdraw][4],TEXT_DRAW_FONT_3);
 		        TextDrawLetterSize(GangwarZones[gw][WARdraw][4],0.369999,2.549999);
-		        TextDrawColor(GangwarZones[gw][WARdraw][4],ROT);
+		        TextDrawColour(GangwarZones[gw][WARdraw][4],ROT);
 		        TextDrawSetOutline(GangwarZones[gw][WARdraw][4],1);
-		        TextDrawSetProportional(GangwarZones[gw][WARdraw][4],1);
+		        TextDrawSetProportional(GangwarZones[gw][WARdraw][4],true);
 		        TextDrawSetShadow(GangwarZones[gw][WARdraw][4],1);
 
 		        GangwarZones[gw][WARdraw][5] = TextDrawCreate(108,280,"FLAGGE");//Flagge 2
-			    TextDrawFont(GangwarZones[gw][WARdraw][5],1);
-			    TextDrawAlignment(GangwarZones[gw][WARdraw][5],0);
+			    TextDrawFont(GangwarZones[gw][WARdraw][5],TEXT_DRAW_FONT_1);
+			    TextDrawAlignment(GangwarZones[gw][WARdraw][5],TEXT_DRAW_ALIGN:0);
 				TextDrawLetterSize(GangwarZones[gw][WARdraw][5],0.350000,0.499990);
-				TextDrawColor(GangwarZones[gw][WARdraw][5],0xFEFEFEFF);
-				TextDrawSetProportional(GangwarZones[gw][WARdraw][5],1);
+				TextDrawColour(GangwarZones[gw][WARdraw][5],0xFEFEFEFF);
+				TextDrawSetProportional(GangwarZones[gw][WARdraw][5],true);
 				TextDrawSetShadow(GangwarZones[gw][WARdraw][5],1);
 
 				GangwarZones[gw][WARdraw][6] = TextDrawCreate(108,270,"..............");//Flagge 2
-		        TextDrawAlignment(GangwarZones[gw][WARdraw][6],1);
-		        TextDrawBackgroundColor(GangwarZones[gw][WARdraw][6],ROT);
-		        TextDrawFont(GangwarZones[gw][WARdraw][6],3);
+		        TextDrawAlignment(GangwarZones[gw][WARdraw][6],TEXT_DRAW_ALIGN_LEFT);
+		        TextDrawBackgroundColour(GangwarZones[gw][WARdraw][6],ROT);
+		        TextDrawFont(GangwarZones[gw][WARdraw][6],TEXT_DRAW_FONT_3);
 		        TextDrawLetterSize(GangwarZones[gw][WARdraw][6],0.369999,2.549999);
-		        TextDrawColor(GangwarZones[gw][WARdraw][6],ROT);
+		        TextDrawColour(GangwarZones[gw][WARdraw][6],ROT);
 		        TextDrawSetOutline(GangwarZones[gw][WARdraw][6],1);
-		        TextDrawSetProportional(GangwarZones[gw][WARdraw][6],1);
+		        TextDrawSetProportional(GangwarZones[gw][WARdraw][6],true);
 		        TextDrawSetShadow(GangwarZones[gw][WARdraw][6],1);
 
 		        GangwarZones[gw][WARdraw][7] = TextDrawCreate(208,280,"FLAGGE");//Flagge 3
-			    TextDrawFont(GangwarZones[gw][WARdraw][7],1);
-			    TextDrawAlignment(GangwarZones[gw][WARdraw][7],0);
+			    TextDrawFont(GangwarZones[gw][WARdraw][7],TEXT_DRAW_FONT_1);
+			    TextDrawAlignment(GangwarZones[gw][WARdraw][7],TEXT_DRAW_ALIGN:0);
 				TextDrawLetterSize(GangwarZones[gw][WARdraw][7],0.350000,0.499990);
-				TextDrawColor(GangwarZones[gw][WARdraw][7],0xFEFEFEFF);
-				TextDrawSetProportional(GangwarZones[gw][WARdraw][7],1);
+				TextDrawColour(GangwarZones[gw][WARdraw][7],0xFEFEFEFF);
+				TextDrawSetProportional(GangwarZones[gw][WARdraw][7],true);
 				TextDrawSetShadow(GangwarZones[gw][WARdraw][7],1);
 
 				GangwarZones[gw][WARdraw][8] = TextDrawCreate(208,270,"..............");//Flagge 3
-		        TextDrawAlignment(GangwarZones[gw][WARdraw][8],1);
-		        TextDrawBackgroundColor(GangwarZones[gw][WARdraw][8],ROT);
-		        TextDrawFont(GangwarZones[gw][WARdraw][8],3);
+		        TextDrawAlignment(GangwarZones[gw][WARdraw][8],TEXT_DRAW_ALIGN_LEFT);
+		        TextDrawBackgroundColour(GangwarZones[gw][WARdraw][8],ROT);
+		        TextDrawFont(GangwarZones[gw][WARdraw][8],TEXT_DRAW_FONT_3);
 		        TextDrawLetterSize(GangwarZones[gw][WARdraw][8],0.369999,2.549999);
-		        TextDrawColor(GangwarZones[gw][WARdraw][8],ROT);
+		        TextDrawColour(GangwarZones[gw][WARdraw][8],ROT);
 		        TextDrawSetOutline(GangwarZones[gw][WARdraw][8],1);
-		        TextDrawSetProportional(GangwarZones[gw][WARdraw][8],1);
+		        TextDrawSetProportional(GangwarZones[gw][WARdraw][8],true);
 		        TextDrawSetShadow(GangwarZones[gw][WARdraw][8],1);
 
 				GangwarZones[gw][War_ZoneID] = GangZoneCreate(GangwarZones[gw][War_Zone_MinX],GangwarZones[gw][War_Zone_MinY],GangwarZones[gw][War_Zone_MaxX],GangwarZones[gw][War_Zone_MaxY]);
@@ -79222,8 +79225,8 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 				gw++;
 			}
 		}
-		SetTimer("OnGangwarUpdate1",1000,1);
-		SetTimer("OnGangwarUpdate2",60000,1);
+		SetTimer("OnGangwarUpdate1",1000,true);
+		SetTimer("OnGangwarUpdate2",60000,true);
 	    return 1;
 	}
 	case l_script_blitzer:
@@ -79385,7 +79388,7 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 				drg++;
 			}
 		}
-		SetTimer("OnDrugVeganceUpdate",60000,1);
+		SetTimer("OnDrugVeganceUpdate",60000,true);
 	    return 1;
 	}
 	case l_script_tmast:
@@ -79589,7 +79592,7 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 			    sm++;
 			}
 		}
-		SetTimer("OnSmarkFightUpdate",1026,1);
+		SetTimer("OnSmarkFightUpdate",1026,true);
 	    return 1;
 	}
 	case s_script_stuff:
@@ -80634,8 +80637,8 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 			zeit = strval(result);
 		    if(zeit == -1)
 		    {
-				for(new t=0;t<MAX_TEXT_DRAWS;t++){ if(t != INVALID_TEXT_DRAW) TextDrawHideForPlayer(extraid,Text:t); }
-				for(new t=0;t<MAX_PLAYER_TEXT_DRAWS;t++){ if(t != INVALID_TEXT_DRAW) PlayerTextDrawHide(extraid,PlayerText:t); }
+				for(new t=0;t<MAX_TEXT_DRAWS;t++){ if(Text:t != INVALID_TEXT_DRAW) TextDrawHideForPlayer(extraid,Text:t); }
+				for(new t=0;t<MAX_PLAYER_TEXT_DRAWS;t++){ if(Text:t != INVALID_TEXT_DRAW) PlayerTextDrawHide(extraid,PlayerText:t); }
 				SCM(extraid,SAMP_WEISS,"Verbindung unterbrochen...");
 				format(query,sizeof(query),"%s du wurdest vom Server gebannt.\nFalls du zu unrecht gebannt wurdest,\nmelde dich im Teamspeak³ oder schreibe uns im Forum.\n\nDauer: unbegrenzt\nGrund: %s\nAdmin: %s\n\n"#HTML_BLAU""#SERVERNAME"{FFFFFF} Adminteam",SpielerName(extraid),reason,admin);
 				ShowPlayerDialog(extraid,DIALOG_4ALL_SONSTIGES,DIALOG_STYLE_MSGBOX,""ClanTagDialoge" Bann",query,"Verlassen","");
@@ -80646,7 +80649,7 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 				PlayerTextDrawShow(extraid,INFOdraw[extraid][2]);
 				StopAudioStreamForPlayer(extraid);
 				PlayAudioStreamForPlayer(extraid,ServerSounds[13],0.0,0.0,0.0);
-				TogglePlayerControllable(extraid,0);
+				TogglePlayerControllable(extraid,false);
 				Kick(extraid);
 				return 1;
 			}
@@ -80655,8 +80658,8 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 			    if(gettime() < zeit)
 			 	{
 					new timebanned = zeit-gettime();
-                	for(new t=0;t<MAX_TEXT_DRAWS;t++){ if(t != INVALID_TEXT_DRAW) TextDrawHideForPlayer(extraid,Text:t); }
-					for(new t=0;t<MAX_PLAYER_TEXT_DRAWS;t++){ if(t != INVALID_TEXT_DRAW) PlayerTextDrawHide(extraid,PlayerText:t); }
+                	for(new t=0;t<MAX_TEXT_DRAWS;t++){ if(Text:t != INVALID_TEXT_DRAW) TextDrawHideForPlayer(extraid,Text:t); }
+					for(new t=0;t<MAX_PLAYER_TEXT_DRAWS;t++){ if(Text:t != INVALID_TEXT_DRAW) PlayerTextDrawHide(extraid,PlayerText:t); }
 					SCM(extraid,SAMP_WEISS,"Verbindung unterbrochen...");
 				 	if(floatround(timebanned/86400) > 0)//tage
 				 	{
@@ -80678,7 +80681,7 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 					PlayerTextDrawShow(extraid,INFOdraw[extraid][2]);
 					StopAudioStreamForPlayer(extraid);
 					PlayAudioStreamForPlayer(extraid,ServerSounds[13],0.0,0.0,0.0);
-					TogglePlayerControllable(extraid,0);
+					TogglePlayerControllable(extraid,false);
 					Kick(extraid);
 			 	}
 				else
@@ -82063,7 +82066,7 @@ stock IsVehicleInRangeOfPoint(vehicleid,Float:radi,Float:x,Float:y,Float:z)
     return 1;
 }
 
-stock GetVehicleDriver(vehicleid)
+stock Script_GetVehicleDriver(vehicleid)
 {
 	ForEachPlayer(i)
 	{
@@ -82288,7 +82291,7 @@ stock SetDrunkLevel(playerid,drunklevel)
 
 stock GiveWeapon(playerid,waffe,munition,bool:saveguns)
 {
-    new slot = GetWeaponSlot(waffe);
+    new slot = Script_GetWeaponSlot(waffe);
     if(slot<0||slot>12)return 1;
     Spieler[playerid][pAcPause][AC_WEAPONPAUSE] = gettime() + 10;
 	Spieler[playerid][pAnticheatWeap][slot] = waffe,Spieler[playerid][pAnticheatWeapAmmo][slot] += munition,GivePlayerWeapon(playerid,waffe,munition);
@@ -82320,14 +82323,14 @@ stock ResetWeapons(playerid,bool:saveguns)
     return 1;
 }
 
-stock RemovePlayerWeapon(playerid,weaponid)
+stock Script_RemovePlayerWeapon(playerid,weaponid)
 {
 	new plyWeapons[13] = 0,plyAmmo[13] = 0;
 	for(new sslot=0;sslot<13;sslot++)
 	{
 		new wep,ammo;
-		GetPlayerWeaponData(playerid,sslot,wep,ammo);
-		if(wep != weaponid && ammo != 0) GetPlayerWeaponData(playerid,sslot,plyWeapons[sslot],plyAmmo[sslot]);
+		GetPlayerWeaponData(playerid,WEAPON_SLOT:sslot,wep,ammo);
+		if(wep != weaponid && ammo != 0) GetPlayerWeaponData(playerid,WEAPON_SLOT:sslot,plyWeapons[sslot],plyAmmo[sslot]);
 	}
 	ResetWeapons(playerid,true);
 	for(new sslot=0;sslot<13;sslot++) if(plyAmmo[sslot] != 0) GiveWeapon(playerid,plyWeapons[sslot],plyAmmo[sslot],true);
@@ -82339,7 +82342,7 @@ stock CreateDroppedGun(playerid,GunID,GunAmmo,Float:gPosX,Float:gPosY,Float:gPos
 	new f = MAX_WAFFENDROP+1;
 	if(IsWeaponEnable(GunID) == 1 && GunID != 0 && GetPlayerState(playerid) == PLAYER_STATE_SPAWNED)
 	{
-		RemovePlayerWeapon(playerid,GunID);
+		Script_RemovePlayerWeapon(playerid,GunID);
 		return SCM(playerid,SAMP_WEISS,""ACINFO" Eine von deinen Waffen wird vom System als unangemessen empfunden!");
  	}
     for(new a=0;a<MAX_WAFFENDROP;a++)
@@ -82414,20 +82417,20 @@ stock DeleteOfflineInfo(oi)
 stock OnePlayAnim(playerid,animlib[],animname[],Float:Speed,looping,lockx,locky,lock,lp)
 {
     gPlayerUsingLoopingAnim[playerid] = true;
-	ApplyAnimation(playerid,animlib,animname,Speed,looping,lockx,locky,lock,lp,1);
+	ApplyAnimation(playerid,animlib,animname,Speed,looping,lockx,locky,lock,lp,SYNC_ALL);
 	return 1;
 }
 
 stock LoopingAnim(playerid,animlib[],animname[],Float:Speed,looping,lockx,locky,lock,lp)
 {
     gPlayerUsingLoopingAnim[playerid] = true;
-    ApplyAnimation(playerid,animlib,animname,Speed,looping,lockx,locky,lock,lp,1);
+    ApplyAnimation(playerid,animlib,animname,Speed,looping,lockx,locky,lock,lp,SYNC_ALL);
     return 1;
 }
 
 stock PreloadAnimLib(playerid,animlib[])
 {
-	ApplyAnimation(playerid,animlib,"null",0.0,0,0,0,0,0);
+	ApplyAnimation(playerid,animlib,"null",0.0,false,false,false,false,0);
 	return 1;
 }
 
@@ -82436,7 +82439,7 @@ stock StopLoopingAnim(playerid)
 	gPlayerUsingLoopingAnim[playerid] = false;
 	HandsUpPerson[playerid] = false;
 	animak[playerid] = false;
-	ApplyAnimation(playerid,"CARRY","crry_prtial",4.0,0,0,0,0,0);
+	ApplyAnimation(playerid,"CARRY","crry_prtial",4.0,false,false,false,false,0);
 	SetPlayerSpecialAction(playerid,SPECIAL_ACTION_NONE);
     return 1;
 }
@@ -82444,6 +82447,17 @@ stock StopLoopingAnim(playerid)
 stock SPD_Safe(playerid,dialogid,style,const caption[],const info[],const button1[],const button2[])
 {
 	SetPVarInt(playerid,DIALOG_PVAR_NAME,dialogid + DIALOG_PVAR_OFFSET);
+	// open.mp verwirft einen Dialogtext ab 8192 Zeichen VOLLSTAENDIG, waehrend
+	// SA-MP ihn durchreichte und der Client ihn abschnitt. Ein paar Dialoge des
+	// Scripts befuellen Puffer von 8500 bis 9500 Zeichen (Unternehmensliste,
+	// Bankautomatenliste). Ohne diese Kappung kaemen sie unter open.mp LEER an.
+	// 4000 liegt sicher unter dem clientseitigen Dialoglimit von 4096.
+	if(strlen(info) > 4000)
+	{
+		new gekuerzt[4001];
+		strmid(gekuerzt,info,0,4000,sizeof(gekuerzt));
+		return SPD_Native(playerid,dialogid,style,caption,gekuerzt,button1,button2);
+	}
 	return SPD_Native(playerid,dialogid,style,caption,info,button1,button2);
 }
 stock SetAccountPasswortHash(playerid,klartext[])
@@ -82887,7 +82901,8 @@ stock ShowOldStatiks(playerid,showplayerid)
 		case 6:{fstyle="Kungfu";}
 		case 7:{fstyle="Kneehead";}
 		case 15:{fstyle="Grabkick";}
-		case 26:{fstyle="Elbow";}
+		case 16:{fstyle="Elbow";}
+		default:{fstyle="ERROR";}
 	}
 	new spawn[20];
 	switch(Spieler[playerid][pSpawn])
@@ -83015,104 +83030,104 @@ stock ShowStatiks(playerid,showplayerid)
 	gettime(stunde,minute,sekunde);
 	Spieler[showplayerid][pViewStats] = true;
 	STATSdraw[showplayerid][0] = CreatePlayerTextDraw(showplayerid,180.0,140.0,"~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~");
-    PlayerTextDrawUseBox(showplayerid,STATSdraw[showplayerid][0],1);
-    PlayerTextDrawBoxColor(showplayerid,STATSdraw[showplayerid][0],0x00000067);
-	PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][0],0);
+    PlayerTextDrawUseBox(showplayerid,STATSdraw[showplayerid][0],true);
+    PlayerTextDrawBoxColour(showplayerid,STATSdraw[showplayerid][0],0x00000067);
+	PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][0],TEXT_DRAW_FONT_0);
 	PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][0],0);
     PlayerTextDrawSetOutline(showplayerid,STATSdraw[showplayerid][0],0);
     PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][0],460.0,480.0);
 
     STATSdraw[showplayerid][1] = CreatePlayerTextDraw(showplayerid,180.0,125.0,"_");
-    PlayerTextDrawUseBox(showplayerid,STATSdraw[showplayerid][1],0);
+    PlayerTextDrawUseBox(showplayerid,STATSdraw[showplayerid][1],false);
 	PlayerTextDrawLetterSize(showplayerid,STATSdraw[showplayerid][1],0.399990,1.199990);
-	PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][1],1);
+	PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][1],TEXT_DRAW_FONT_1);
 	PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][1],0);
     PlayerTextDrawSetOutline(showplayerid,STATSdraw[showplayerid][1],0);
-    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][1],0x00000067);
+    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][1],0x00000067);
 
     STATSdraw[showplayerid][2] = CreatePlayerTextDraw(showplayerid,180.0,125.0,"_");
-    PlayerTextDrawUseBox(showplayerid,STATSdraw[showplayerid][2],1);
-    PlayerTextDrawBoxColor(showplayerid,STATSdraw[showplayerid][2],SERVERFARBEHEX);
-	PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][2],0);
+    PlayerTextDrawUseBox(showplayerid,STATSdraw[showplayerid][2],true);
+    PlayerTextDrawBoxColour(showplayerid,STATSdraw[showplayerid][2],SERVERFARBEHEX);
+	PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][2],TEXT_DRAW_FONT_0);
 	PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][2],0);
     PlayerTextDrawSetOutline(showplayerid,STATSdraw[showplayerid][2],0);
     PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][2],460.0,140.0);
 
     STATSdraw[showplayerid][3] = CreatePlayerTextDraw(showplayerid,185.0,140.0,"_");
     PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][3],TEXT_DRAW_FONT_MODEL_PREVIEW);
-    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][3],0xFFFFFFFF);
+    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][3],0xFFFFFFFF);
     PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][3],80.0,80.0);
     PlayerTextDrawSetPreviewModel(showplayerid,STATSdraw[showplayerid][3],GetPlayerSkin(playerid));
 
     STATSdraw[showplayerid][4] = CreatePlayerTextDraw(showplayerid,185.0,220.0,"_");
-    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][4],1);
-    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][4],WEISS);
-    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][4],0);
+    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][4],TEXT_DRAW_FONT_1);
+    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][4],WEISS);
+    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][4],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(showplayerid,STATSdraw[showplayerid][4],0.25,0.59);
-	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][4],1);
+	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][4],true);
 	PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][4],0);
 
 	STATSdraw[showplayerid][5] = CreatePlayerTextDraw(showplayerid,185.0,237.0,"_");
-    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][5],1);
-    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][5],WEISS);
-    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][5],0);
+    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][5],TEXT_DRAW_FONT_1);
+    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][5],WEISS);
+    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][5],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(showplayerid,STATSdraw[showplayerid][5],0.25,0.59);
-	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][5],1);
+	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][5],true);
 	PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][5],0);
 
 	STATSdraw[showplayerid][6] = CreatePlayerTextDraw(showplayerid,185.0,260.0,"_");
-    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][6],1);
-    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][6],WEISS);
-    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][6],0);
+    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][6],TEXT_DRAW_FONT_1);
+    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][6],WEISS);
+    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][6],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(showplayerid,STATSdraw[showplayerid][6],0.25,0.59);
-	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][6],1);
+	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][6],true);
 	PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][6],0);
 
 	STATSdraw[showplayerid][7] = CreatePlayerTextDraw(showplayerid,185.0,280.0,"_");
-    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][7],1);
-    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][7],WEISS);
-    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][7],0);
+    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][7],TEXT_DRAW_FONT_1);
+    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][7],WEISS);
+    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][7],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(showplayerid,STATSdraw[showplayerid][7],0.25,0.59);
-	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][7],1);
+	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][7],true);
 	PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][7],0);
 
 	STATSdraw[showplayerid][8] = CreatePlayerTextDraw(showplayerid,185.0,305.0,"_");
-    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][8],1);
-    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][8],WEISS);
-    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][8],0);
+    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][8],TEXT_DRAW_FONT_1);
+    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][8],WEISS);
+    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][8],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(showplayerid,STATSdraw[showplayerid][8],0.25,0.59);
-	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][8],1);
+	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][8],true);
 	PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][8],0);
 
 	STATSdraw[showplayerid][9] = CreatePlayerTextDraw(showplayerid,185.0,330.0,"_");
-    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][9],1);
-    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][9],WEISS);
-    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][9],0);
+    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][9],TEXT_DRAW_FONT_1);
+    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][9],WEISS);
+    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][9],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(showplayerid,STATSdraw[showplayerid][9],0.25,0.59);
-	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][9],1);
+	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][9],true);
 	PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][9],0);
 
 	STATSdraw[showplayerid][10] = CreatePlayerTextDraw(showplayerid,185.0,355.0,"_");
-    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][10],1);
-    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][10],WEISS);
-    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][10],0);
+    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][10],TEXT_DRAW_FONT_1);
+    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][10],WEISS);
+    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][10],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(showplayerid,STATSdraw[showplayerid][10],0.25,0.59);
-	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][10],1);
+	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][10],true);
 	PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][10],0);
 
 	STATSdraw[showplayerid][11] = CreatePlayerTextDraw(showplayerid,185.0,380.0,"_");
-    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][11],1);
-    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][11],WEISS);
-    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][11],0);
+    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][11],TEXT_DRAW_FONT_1);
+    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][11],WEISS);
+    PlayerTextDrawAlignment(showplayerid,STATSdraw[showplayerid][11],TEXT_DRAW_ALIGN:0);
 	PlayerTextDrawLetterSize(showplayerid,STATSdraw[showplayerid][11],0.25,0.59);
-	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][11],1);
+	PlayerTextDrawSetProportional(showplayerid,STATSdraw[showplayerid][11],true);
 	PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][11],0);
 
 	if(Spieler[playerid][pBuyClothes] != -1)
 	{
 	    STATSdraw[showplayerid][12] = CreatePlayerTextDraw(showplayerid,270.0,140.0,"_");
 	    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][12],TEXT_DRAW_FONT_MODEL_PREVIEW);
-	    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][12],0xFFFFFFFF);
+	    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][12],0xFFFFFFFF);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][12],30.0,30.0);
     	PlayerTextDrawSetPreviewModel(showplayerid,STATSdraw[showplayerid][12],ClothesInfo[Spieler[playerid][pBuyClothes]][cobjectid]);
     	PlayerTextDrawSetPreviewRot(showplayerid,STATSdraw[showplayerid][12],-15.0,0.0,-20.0,0.8);
@@ -83120,8 +83135,8 @@ stock ShowStatiks(playerid,showplayerid)
 	else
 	{
 	    STATSdraw[showplayerid][12] = CreatePlayerTextDraw(showplayerid,270.0,140.0,"N");
-	    PlayerTextDrawBoxColor(showplayerid,STATSdraw[showplayerid][12],SERVERFARBEHEX);
-		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][12],1);
+	    PlayerTextDrawBoxColour(showplayerid,STATSdraw[showplayerid][12],SERVERFARBEHEX);
+		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][12],TEXT_DRAW_FONT_1);
 		PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][12],0);
 	    PlayerTextDrawSetOutline(showplayerid,STATSdraw[showplayerid][12],0);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][12],300.0,170.0);
@@ -83131,7 +83146,7 @@ stock ShowStatiks(playerid,showplayerid)
 	{
 	    STATSdraw[showplayerid][13] = CreatePlayerTextDraw(showplayerid,270.0,180.0,"_");
 	    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][13],TEXT_DRAW_FONT_MODEL_PREVIEW);
-	    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][13],0xFFFFFFFF);
+	    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][13],0xFFFFFFFF);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][13],30.0,30.0);
     	switch(Spieler[playerid][pMotorradhelm])
 		{	
@@ -83145,8 +83160,8 @@ stock ShowStatiks(playerid,showplayerid)
 	else
 	{
 	    STATSdraw[showplayerid][13] = CreatePlayerTextDraw(showplayerid,270.0,180.0,"N");
-	    PlayerTextDrawBoxColor(showplayerid,STATSdraw[showplayerid][13],SERVERFARBEHEX);
-		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][13],1);
+	    PlayerTextDrawBoxColour(showplayerid,STATSdraw[showplayerid][13],SERVERFARBEHEX);
+		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][13],TEXT_DRAW_FONT_1);
 		PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][13],0);
 	    PlayerTextDrawSetOutline(showplayerid,STATSdraw[showplayerid][13],0);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][13],300.0,210.0);
@@ -83156,7 +83171,7 @@ stock ShowStatiks(playerid,showplayerid)
 	{
 	    STATSdraw[showplayerid][14] = CreatePlayerTextDraw(showplayerid,315.0,140.0,"_");
 	    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][14],TEXT_DRAW_FONT_MODEL_PREVIEW);
-	    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][14],0xFFFFFFFF);
+	    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][14],0xFFFFFFFF);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][14],30.0,30.0);
     	switch(Spieler[playerid][pHandy])
 		{
@@ -83170,8 +83185,8 @@ stock ShowStatiks(playerid,showplayerid)
 	else
 	{
 	    STATSdraw[showplayerid][14] = CreatePlayerTextDraw(showplayerid,315.0,140.0,"N");
-	    PlayerTextDrawBoxColor(showplayerid,STATSdraw[showplayerid][14],SERVERFARBEHEX);
-		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][14],1);
+	    PlayerTextDrawBoxColour(showplayerid,STATSdraw[showplayerid][14],SERVERFARBEHEX);
+		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][14],TEXT_DRAW_FONT_1);
 		PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][14],0);
 	    PlayerTextDrawSetOutline(showplayerid,STATSdraw[showplayerid][14],0);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][14],345.0,170.0);
@@ -83180,7 +83195,7 @@ stock ShowStatiks(playerid,showplayerid)
 	{
 	    STATSdraw[showplayerid][15] = CreatePlayerTextDraw(showplayerid,315.0,180.0,"_");
 	    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][15],TEXT_DRAW_FONT_MODEL_PREVIEW);
-	    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][15],0xFFFFFFFF);
+	    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][15],0xFFFFFFFF);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][15],30.0,30.0);
     	PlayerTextDrawSetPreviewModel(showplayerid,STATSdraw[showplayerid][15],1210);
     	PlayerTextDrawSetPreviewRot(showplayerid,STATSdraw[showplayerid][15],-15.0,0.0,-20.0,0.8);
@@ -83188,8 +83203,8 @@ stock ShowStatiks(playerid,showplayerid)
 	else
 	{
 	    STATSdraw[showplayerid][15] = CreatePlayerTextDraw(showplayerid,315.0,180.0,"N");
-	    PlayerTextDrawBoxColor(showplayerid,STATSdraw[showplayerid][15],SERVERFARBEHEX);
-		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][15],1);
+	    PlayerTextDrawBoxColour(showplayerid,STATSdraw[showplayerid][15],SERVERFARBEHEX);
+		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][15],TEXT_DRAW_FONT_1);
 		PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][15],0);
 	    PlayerTextDrawSetOutline(showplayerid,STATSdraw[showplayerid][15],0);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][15],345.0,210.0);
@@ -83198,7 +83213,7 @@ stock ShowStatiks(playerid,showplayerid)
 	{
 	    STATSdraw[showplayerid][16] = CreatePlayerTextDraw(showplayerid,360.0,140.0,"_");
 	    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][16],TEXT_DRAW_FONT_MODEL_PREVIEW);
-	    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][16],0xFFFFFFFF);
+	    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][16],0xFFFFFFFF);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][16],30.0,30.0);
     	PlayerTextDrawSetPreviewModel(showplayerid,STATSdraw[showplayerid][16],18637);
 		PlayerTextDrawSetPreviewRot(showplayerid,STATSdraw[showplayerid][16],15.0,90.0,0.0,0.8);
@@ -83206,8 +83221,8 @@ stock ShowStatiks(playerid,showplayerid)
 	else
 	{
 	    STATSdraw[showplayerid][16] = CreatePlayerTextDraw(showplayerid,360.0,140.0,"N");
-	    PlayerTextDrawBoxColor(showplayerid,STATSdraw[showplayerid][16],SERVERFARBEHEX);
-		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][16],1);
+	    PlayerTextDrawBoxColour(showplayerid,STATSdraw[showplayerid][16],SERVERFARBEHEX);
+		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][16],TEXT_DRAW_FONT_1);
 		PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][16],0);
 	    PlayerTextDrawSetOutline(showplayerid,STATSdraw[showplayerid][16],0);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][16],405.0,170.0);
@@ -83217,7 +83232,7 @@ stock ShowStatiks(playerid,showplayerid)
 	{
 	    STATSdraw[showplayerid][17] = CreatePlayerTextDraw(showplayerid,360.0,180.0,"_");
 	    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][17],TEXT_DRAW_FONT_MODEL_PREVIEW);
-	    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][17],0xFFFFFFFF);
+	    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][17],0xFFFFFFFF);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][17],30.0,30.0);
     	PlayerTextDrawSetPreviewModel(showplayerid,STATSdraw[showplayerid][17],18642);
     	PlayerTextDrawSetPreviewRot(showplayerid,STATSdraw[showplayerid][17],15.0,15.0,0.0,0.7);
@@ -83225,8 +83240,8 @@ stock ShowStatiks(playerid,showplayerid)
 	else
 	{
 	    STATSdraw[showplayerid][17] = CreatePlayerTextDraw(showplayerid,360.0,180.0,"N");
-	    PlayerTextDrawBoxColor(showplayerid,STATSdraw[showplayerid][17],SERVERFARBEHEX);
-		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][17],1);
+	    PlayerTextDrawBoxColour(showplayerid,STATSdraw[showplayerid][17],SERVERFARBEHEX);
+		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][17],TEXT_DRAW_FONT_1);
 		PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][17],0);
 	    PlayerTextDrawSetOutline(showplayerid,STATSdraw[showplayerid][17],0);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][17],390.0,210.0);
@@ -83235,7 +83250,7 @@ stock ShowStatiks(playerid,showplayerid)
 	{
 	    STATSdraw[showplayerid][18] = CreatePlayerTextDraw(showplayerid,405.0,140.0,"_");
 	    PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][18],TEXT_DRAW_FONT_MODEL_PREVIEW);
-	    PlayerTextDrawColor(showplayerid,STATSdraw[showplayerid][18],0xFFFFFFFF);
+	    PlayerTextDrawColour(showplayerid,STATSdraw[showplayerid][18],0xFFFFFFFF);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][18],30.0,30.0);
     	PlayerTextDrawSetPreviewModel(showplayerid,STATSdraw[showplayerid][18],18632);
     	PlayerTextDrawSetPreviewRot(showplayerid,STATSdraw[showplayerid][18],-15.0,0.0,0.0,0.6);
@@ -83243,8 +83258,8 @@ stock ShowStatiks(playerid,showplayerid)
 	else
 	{
 	    STATSdraw[showplayerid][18] = CreatePlayerTextDraw(showplayerid,405.0,140.0,"N");
-	    PlayerTextDrawBoxColor(showplayerid,STATSdraw[showplayerid][18],SERVERFARBEHEX);
-		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][18],1);
+	    PlayerTextDrawBoxColour(showplayerid,STATSdraw[showplayerid][18],SERVERFARBEHEX);
+		PlayerTextDrawFont(showplayerid,STATSdraw[showplayerid][18],TEXT_DRAW_FONT_1);
 		PlayerTextDrawSetShadow(showplayerid,STATSdraw[showplayerid][18],0);
 	    PlayerTextDrawSetOutline(showplayerid,STATSdraw[showplayerid][18],0);
 	    PlayerTextDrawTextSize(showplayerid,STATSdraw[showplayerid][18],435.0,170.0);
@@ -83292,7 +83307,7 @@ stock ShowStatiks(playerid,showplayerid)
 		case 6:{fstyle="Kungfu";}
 		case 7:{fstyle="Kneehead";}
 		case 15:{fstyle="Grabkick";}
-		case 26:{fstyle="Elbow";}
+		case 16:{fstyle="Elbow";}
 		default:{fstyle="ERROR";}
 	}
 	new spawn[20];
@@ -84413,7 +84428,7 @@ stock CreatePartei(parteis[],playerid)
 		    PlayerTextDrawSetString(playerid,INFOdraw[playerid][2],"~g~Partei erstellt.");
 			PlayerTextDrawShow(playerid,INFOdraw[playerid][2]);
 			StopAudioStreamForPlayer(playerid);
-		 	SetTimerEx("HideInfoBox",3000,0,"i",playerid);
+		 	SetTimerEx("HideInfoBox",3000,false,"i",playerid);
 			format(query,sizeof(query),""IINFO" du hast die Partei "IINFO2"%s"#HTML_WEISS" erfolgreich erstellt.",parteis);
 			SCM(playerid,SAMP_WEISS,query);
 			SCM(playerid,SAMP_WEISS,"Partei Befehle:");
@@ -84834,10 +84849,10 @@ stock UpdatePlayer(playerid)
 	if(Spieler[playerid][pInHospital] != 0)
 	{
 		Spieler[playerid][pInHospital]--;
-		ApplyAnimation(playerid,"CRACK","crckdeth2",4.0,1,1,1,0,0,1);
+		ApplyAnimation(playerid,"CRACK","crckdeth2",4.0,true,true,true,false,0,SYNC_ALL);
 		if(Spieler[playerid][pInHospital] <= 0) Spieler[playerid][pInHospital] = 0,SpawnPlayerEx(playerid);
 	}
-	if(Spieler[playerid][pRevived] == 1) ApplyAnimation(playerid,"CRACK","crckdeth2",4.0,1,1,1,0,0,1);
+	if(Spieler[playerid][pRevived] == 1) ApplyAnimation(playerid,"CRACK","crckdeth2",4.0,true,true,true,false,0,SYNC_ALL);
 	if(gettime() > Spieler[playerid][pNextDeath] && Spieler[playerid][pDeath] != 0 && Spieler[playerid][pNextDeath] != 0)
 	{
 		SCM(playerid,WANTEDDEATHERROT,""IINFO" du bist gestorben da dein Zustand sich enorm verschlechtert hat.");
@@ -84855,7 +84870,7 @@ stock UpdatePlayer(playerid)
 	if(Spieler[playerid][pDeath] != 0 && Spieler[playerid][pInPrison] == 0 && Spieler[playerid][pRevived] == 0)
 	{
 		Spieler[playerid][pDeathTime]++;
-		ApplyAnimation(playerid,"CRACK","crckdeth2",4.0,1,1,1,0,0,1);
+		ApplyAnimation(playerid,"CRACK","crckdeth2",4.0,true,true,true,false,0,SYNC_ALL);
 		//GameTextForPlayer(playerid,"~r~~n~~n~~n~Du bist verletzt.",1000,3);
 		if(Spieler[playerid][pDeathTime] >= DEAHTIME)
 		{
@@ -84962,7 +84977,7 @@ stock UpdatePlayer(playerid)
 			Spieler[playerid][PprobefahrtVehID] = -1;
 			TextDrawShowForPlayer(playerid,Introdraw[0]);
 		    TextDrawShowForPlayer(playerid,Introdraw[1]);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 		    ShowPlayerDialog(playerid,DIALOG_AutoKaufen_Liste,DIALOG_STYLE_LIST,""ClanTagDialoge" Auothaus - Hauptmenü",""#HTML_BLAU"1."#HTML_WEISS" Auto Kaufen\n"#HTML_BLAU"2."#HTML_WEISS" Probefahrt\n"#HTML_BLAU"3."#HTML_WEISS" Fahrzeug Papiere","Nehmen","Abbrechen");
 		}
 		if(GetVehicleModel(vehicleid) == GetVehicleModel(Fvehicles[Spieler[playerid][PprobefahrtVehID]]))
@@ -84974,7 +84989,7 @@ stock UpdatePlayer(playerid)
 			Spieler[playerid][PprobefahrtVehID] = -1;
 			TextDrawShowForPlayer(playerid,Introdraw[0]);
 		    TextDrawShowForPlayer(playerid,Introdraw[1]);
-			TogglePlayerControllable(playerid,0);
+			TogglePlayerControllable(playerid,false);
 			ShowPlayerDialog(playerid,DIALOG_AutoKaufen_Liste,DIALOG_STYLE_LIST,""ClanTagDialoge" Auothaus - Hauptmenü",""#HTML_BLAU"1."#HTML_WEISS" Auto Kaufen\n"#HTML_BLAU"2."#HTML_WEISS" Probefahrt\n"#HTML_BLAU"3."#HTML_WEISS" Fahrzeug Papiere","Nehmen","Abbrechen");
 		}
 	}
@@ -85098,7 +85113,7 @@ stock UpdatePlayer(playerid)
 				    	GetVehicleParamsEx(vehicleid,engine,lights,alarm,doors,bonnet,boot,objective);
 						SetVehicleParamsEx(vehicleid,VEHICLE_PARAMS_OFF,lights,alarm,doors,bonnet,boot,objective);
 						Motor[vehicleid] = false;
-						TogglePlayerControllable(playerid, 0);
+						TogglePlayerControllable(playerid, false);
 						InterpolateCameraPos(playerid,vCords[0],vCords[1],vCords[2],vCords[0]+1,vCords[1]+2,vCords[2]+1,3500,CAMERA_MOVE);
 						InterpolateCameraLookAt(playerid,vCords[0],vCords[1],vCords[2],vCords[0]+1,vCords[1],vCords[2]+1,3500,CAMERA_MOVE);
 					    PlayerPlaySound(playerid,8002,0.0,0.0,0.0);
@@ -85212,7 +85227,7 @@ stock UpdateAntiCheat(playerid)
     Float:antiarm,
     weaponid = GetPlayerWeapon(playerid),
     weaponammo = GetPlayerAmmo(playerid),
-	slot = GetWeaponSlot(weaponid),
+	slot = Script_GetWeaponSlot(weaponid),
 	vehicleid = GetPlayerVehicleID(playerid);
     GetPlayerHealth(playerid,antihp);
 	GetPlayerArmour(playerid,antiarm);
@@ -85363,7 +85378,7 @@ stock UpdateAntiCheat(playerid)
 /*stock UpdateAntiCheat(playerid)
 {
     new string[185],Float:Pos[3],vehicleid = GetPlayerVehicleID(playerid),Float:antiarm,ud,lr,
-	weaponid = GetPlayerWeapon(playerid),weaponammo = GetPlayerAmmo(playerid),slot = GetWeaponSlot(weaponid);
+	weaponid = GetPlayerWeapon(playerid),weaponammo = GetPlayerAmmo(playerid),slot = Script_GetWeaponSlot(weaponid);
 	GetPlayerArmour(playerid,antiarm);
 	if(GetPlayerSpecialAction(playerid) == SPECIAL_ACTION_USEJETPACK)
 	{
@@ -85424,7 +85439,7 @@ stock UpdateAntiCheat(playerid)
 	{
 		format(string,sizeof(string),"%s wurde vom High-Ping System gekickt. (>"#MAX_PINGPERPLAYER"ms)",SpielerName(playerid));
 		SendClientMessageToAll(ROT,string);
-		SetTimerEx("CloseConnection", 100, 0, "i", playerid);
+		SetTimerEx("CloseConnection", 100, false, "i", playerid);
 	}
 
 	if((ud != 128 && ud != 0 && ud != -128) || (lr != 128 && lr != 0 && lr != -128))
@@ -85432,7 +85447,7 @@ stock UpdateAntiCheat(playerid)
 		if(isPlayerAnAdmin(playerid,4))return 1;
 		format(string,sizeof(string),"%s wurde vom Anti-Joypad System gekickt.",SpielerName(playerid));
 		SendClientMessageToAll(ROT,string);
-        SetTimerEx("CloseConnection", 100, 0, "i", playerid);
+        SetTimerEx("CloseConnection", 100, false, "i", playerid);
 	}
 
     if(IsPlayerInAnyVehicle(playerid))
@@ -85559,13 +85574,13 @@ stock UpdateAntiCheat2(playerid)
 		Spieler[playerid][pAFKKeyStates] = 0;
 		Spieler[playerid][pAFKAwayTime] = 0;
 		Spieler[playerid][pAWAYFROMKEYBOARD] = 1;
-		TogglePlayerControllable(playerid,0);
+		TogglePlayerControllable(playerid,false);
 		SCM(playerid,SAMP_WEISS,""IINFO" du wurdes automatisch in dem AFK Modus versetzt. "IINFO2"/back");
 		//format(string,sizeof(string),"AFK seit\n%02d:%02d Uhr",stunde,minute);
 		//AFKLabel[playerid] = Create3DTextLabel(string,REPORTANDAFKCOLOR,30.0,40.0,50.0,MAX_STREAM_NAME_DISTANCE,0,1);
 		//Attach3DTextLabelToPlayer(AFKLabel[playerid],playerid,0.0,0.0,-0.2);
 		//ShowAfkModus(playerid);
-		//UpdateAFK[playerid] = SetTimerEx("AFKzeit",1000,1,"i",playerid);
+		//UpdateAFK[playerid] = SetTimerEx("AFKzeit",1000,true,"i",playerid);
 		if(gwzone != -1)
 		{
 			if(GangwarZones[gwzone][War_Started] == 1)
@@ -85658,7 +85673,7 @@ stock VehicleTuning(playerid,slot)
 	}
 	else SetVehicleParamsEx(Pfahrzeug[slot][playerid][Vehicle],engine,lights,alarm,VEHICLE_PARAMS_OFF,bonnet,boot,objective);
 	if(Pfahrzeug[slot][playerid][Paintjob] >= 0) ChangeVehiclePaintjob(Pfahrzeug[slot][playerid][Vehicle],Pfahrzeug[slot][playerid][Paintjob]);
-	if(Pfahrzeug[slot][playerid][Colour1] >= 0 || Pfahrzeug[slot][playerid][Colour2] >= 0) ChangeVehicleColor(Pfahrzeug[slot][playerid][Vehicle],Pfahrzeug[slot][playerid][Colour1],Pfahrzeug[slot][playerid][Colour2]);
+	if(Pfahrzeug[slot][playerid][Colour1] >= 0 || Pfahrzeug[slot][playerid][Colour2] >= 0) ChangeVehicleColours(Pfahrzeug[slot][playerid][Vehicle],Pfahrzeug[slot][playerid][Colour1],Pfahrzeug[slot][playerid][Colour2]);
 	if(Pfahrzeug[slot][playerid][Spoiler] >= 1000) { AddVehicleComponent(Pfahrzeug[slot][playerid][Vehicle],Pfahrzeug[slot][playerid][Spoiler]); }
 	if(Pfahrzeug[slot][playerid][Hood] >= 1000) { AddVehicleComponent(Pfahrzeug[slot][playerid][Vehicle],Pfahrzeug[slot][playerid][Hood]); }
 	if(Pfahrzeug[slot][playerid][Roof] >= 1000) { AddVehicleComponent(Pfahrzeug[slot][playerid][Vehicle],Pfahrzeug[slot][playerid][Roof]); }
@@ -85785,7 +85800,7 @@ stock FVehicleTuning(vehicleid)
 		}
 		else SetVehicleParamsEx(Fahrzeug[vehicleid][Vehicle],engine,lights,alarm,VEHICLE_PARAMS_OFF,bonnet,boot,objective);
 		if(Fahrzeug[vehicleid][Paintjob] >= 0) ChangeVehiclePaintjob(Fahrzeug[vehicleid][Vehicle],Fahrzeug[vehicleid][Paintjob]);
-		if(Fahrzeug[vehicleid][Colour1] >= 0 || Fahrzeug[vehicleid][Colour2] >= 0) ChangeVehicleColor(Fahrzeug[vehicleid][Vehicle],Fahrzeug[vehicleid][Colour1],Fahrzeug[vehicleid][Colour2]);
+		if(Fahrzeug[vehicleid][Colour1] >= 0 || Fahrzeug[vehicleid][Colour2] >= 0) ChangeVehicleColours(Fahrzeug[vehicleid][Vehicle],Fahrzeug[vehicleid][Colour1],Fahrzeug[vehicleid][Colour2]);
 		if(Fahrzeug[vehicleid][Spoiler] >= 1000) { AddVehicleComponent(Fahrzeug[vehicleid][Vehicle],Fahrzeug[vehicleid][Spoiler]); }
 		if(Fahrzeug[vehicleid][Hood] >= 1000) { AddVehicleComponent(Fahrzeug[vehicleid][Vehicle],Fahrzeug[vehicleid][Hood]); }
 		if(Fahrzeug[vehicleid][Roof] >= 1000) { AddVehicleComponent(Fahrzeug[vehicleid][Vehicle],Fahrzeug[vehicleid][Roof]); }
@@ -86008,12 +86023,12 @@ stock CreateDrugVegancy(playerid,drugart,samen)
 			    default: printf("Script: CreateDrugVegancy (%i,%i) stock nicht erkannt!",playerid,drugart);
 		    }
 			//Spieler[playerid][pTutTime4All] = 0;
-		    //TogglePlayerControllable(playerid,0);
+		    //TogglePlayerControllable(playerid,false);
 			//TextDrawShowForPlayer(playerid,Introdraw[0]);
 		    //TextDrawShowForPlayer(playerid,Introdraw[1]);
 			//InterpolateCameraPos(playerid,DrugInfo[drg][drgXpos]-5,DrugInfo[drg][drgYpos],DrugInfo[drg][drgZpos],DrugInfo[drg][drgXpos],DrugInfo[drg][drgYpos],DrugInfo[drg][drgZpos],2000,CAMERA_MOVE);
 			//InterpolateCameraLookAt(playerid,DrugInfo[drg][drgXpos],DrugInfo[drg][drgYpos]+5,DrugInfo[drg][drgZpos],DrugInfo[drg][drgXpos],DrugInfo[drg][drgYpos],DrugInfo[drg][drgZpos],2000,CAMERA_MOVE);
-			//Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",1000,1,"ii",playerid,3);
+			//Spieler[playerid][pTutTimer4All] = SetTimerEx("Tutorial4All",1000,true,"ii",playerid,3);
 			SetCameraBehindPlayer(playerid);
 			return 1;
 		}
@@ -86529,7 +86544,7 @@ stock PlayerHearMusicInRange(Float:x,Float:y,Float:z,musicid,Float:radius,Takeco
 					PlayerPlaySound(i,musicid,0.0,0.0,0.0);
 					if(Takecount == 1)
 					{
-						SetTimerEx("StopPlayerPlaySound",Stopmusictime,0,"i",i);
+						SetTimerEx("StopPlayerPlaySound",Stopmusictime,false,"i",i);
 					}
 				}
 			}
@@ -86815,15 +86830,15 @@ stock ServiceCall(playerid,service)//service 1 = sapd,2 = medic,3 = feuerwehr,4 
 		    SCM(playerid,SAMP_WEISS,""#HTML_WEISS"["#HTML_BLAU"Die Zentrale"#HTML_WEISS"]: Falls Sie doch keine Hilfe mehr benötigen benutzen Sie '/cancel'.");
 			if((x > -992.5172 && x < 4000.0000) && (y < 528.0000 && y > -4000.0000))//Los Santos
 			{
-		    	format(string,sizeof(string),"%s braucht eine Elektroniker in Los Santos - %s.(/accept elektriker)",SpielerName(playerid));
+		    	format(string,sizeof(string),"%s braucht eine Elektroniker in Los Santos.(/accept elektriker)",SpielerName(playerid));
 		    }
 			if((x > -4000.0000 && x < -992.5172) && (y < 4000.0000 && y > -4000.0000))//San Fierro
 			{
-				format(string,sizeof(string),"%s braucht eine Elektroniker in San Fierro - %s.(/accept elektriker)",SpielerName(playerid));
+				format(string,sizeof(string),"%s braucht eine Elektroniker in San Fierro.(/accept elektriker)",SpielerName(playerid));
 		    }
 			if((x > -992.5172 && x < 4000.0000) && (y < 4000.0000 && y > 528.0000))//Las Venturas
 			{
-		   		format(string,sizeof(string),"%s braucht eine Elektroniker in Las Venturas - %s.(/accept elektriker)",SpielerName(playerid));
+		   		format(string,sizeof(string),"%s braucht eine Elektroniker in Las Venturas.(/accept elektriker)",SpielerName(playerid));
 		    }
 		    ForEachPlayer(i)
 			{
@@ -86846,15 +86861,15 @@ stock ServiceCall(playerid,service)//service 1 = sapd,2 = medic,3 = feuerwehr,4 
 		    SCM(playerid,SAMP_WEISS,"{FF6666}Unternehmen:{FFFFFF} Falls Sie doch keine Hilfe mehr benötigen benutzen Sie '/cancel'.");
 			if((x > -992.5172 && x < 4000.0000) && (y < 528.0000 && y > -4000.0000))//Los Santos
 			{
-		    	format(string,sizeof(string),"%s braucht ein Taxi in Los Santos - %s.(/accept taxi)",SpielerName(playerid));
+		    	format(string,sizeof(string),"%s braucht ein Taxi in Los Santos.(/accept taxi)",SpielerName(playerid));
 		    }
 			if((x > -4000.0000 && x < -992.5172) && (y < 4000.0000 && y > -4000.0000))//San Fierro
 			{
-		    	format(string,sizeof(string),"%s braucht ein Taxi in San Fierro - %s.(/accept taxi)",SpielerName(playerid));
+		    	format(string,sizeof(string),"%s braucht ein Taxi in San Fierro.(/accept taxi)",SpielerName(playerid));
 			}
 			if((x > -992.5172 && x < 4000.0000) && (y < 4000.0000 && y > 528.0000))//Las Venturas
 			{
-		    	format(string,sizeof(string),"%s braucht ein Taxi in Las Venturas - %s.(/accept taxi)",SpielerName(playerid));
+		    	format(string,sizeof(string),"%s braucht ein Taxi in Las Venturas.(/accept taxi)",SpielerName(playerid));
 		    }
 		    ForEachPlayer(i)
 		    {
@@ -86966,7 +86981,7 @@ stock BincoSystem(playerid)
 {
 	new query[128];
     Spieler[playerid][AmUmkleiden] = 1;
-	TogglePlayerControllable(playerid,0);
+	TogglePlayerControllable(playerid,false);
     SetPlayerVirtualWorld(playerid,120+playerid);
   	SCM(playerid,SAMP_WEISS,"Wähle dir nun ein Skin aus.");
 	ShowBinco(playerid);
@@ -87610,7 +87625,7 @@ stock DestroyBuildings(playerid)
 	RemoveBuildingForPlayer(playerid, 1226, 753.0313, -1323.6563, 16.3125, 0.25);
 	return 1;
 }
-stock GetWeaponSlot(waffe)
+stock Script_GetWeaponSlot(waffe)
 {
     new id;
     switch(waffe)
@@ -88160,7 +88175,7 @@ stock Elevator_MoveToFloor(floorid)
     MoveDynamicObject(Obj_ElevatorDoors[0],X_DOOR_CLOSED,-1303.459472,GROUND_Z_COORD + FloorZOffsets[floorid],0.25);
     MoveDynamicObject(Obj_ElevatorDoors[1],X_DOOR_CLOSED,-1303.459472,GROUND_Z_COORD + FloorZOffsets[floorid],0.25);
     DestroyDynamic3DTextLabel(Label_Elevator);
-	ElevatorBoostTimer = SetTimerEx("Elevator_Boost",2000,0,"i",floorid);
+	ElevatorBoostTimer = SetTimerEx("Elevator_Boost",2000,false,"i",floorid);
 	return 1;
 }
 
@@ -88508,10 +88523,10 @@ stock BanUser(playerid,admin[],reason[],zeit = -1)
 	format(LOGILOGI,sizeof(LOGILOGI),"["ClanTag"_AC]: %s / betreff: %s / Grund: %s / Zeit: %i",admin,Spieler[playerid][pName],reason,zeit);//LOGILOGI um einen Bug zu vermeiden
 	Log("User_Gebannt_Grund.txt",LOGILOGI);
 	SaveAccount(playerid);
-	TogglePlayerControllable(playerid,0);
+	TogglePlayerControllable(playerid,false);
 	StopAudioStreamForPlayer(playerid);
 	SetCameraBehindPlayer(playerid);
-	SetTimerEx("KickDenSpieler",5000,0,"i",playerid);
+	SetTimerEx("KickDenSpieler",5000,false,"i",playerid);
 	return 1;
 }
 forward KickDenSpieler(playerid);
@@ -88525,10 +88540,10 @@ stock KickUser(playerid, admin[], reason[])
 	new query[256];
 	format(query,sizeof(query),"["ClanTag"_AC]: %s  / betreff: %s / Grund: %s",admin,Spieler[playerid][pName],reason);
 	Log("User_Gekickt_Grund.txt",query);
-	TogglePlayerControllable(playerid,0);
+	TogglePlayerControllable(playerid,false);
 	StopAudioStreamForPlayer(playerid);
 	SetCameraBehindPlayer(playerid);
- 	SetTimerEx("KickDenSpieler",5000,0,"i",playerid);
+ 	SetTimerEx("KickDenSpieler",5000,false,"i",playerid);
 	return 1;
 }
 stock CheckBannedUser(playerid)
@@ -88897,11 +88912,11 @@ public SetRaceCheckpoint(playerid,target,next)
 	{
 		if(next == -1)
 		{
-			SetPlayerRaceCheckpoint(playerid,1,RaceInfo[r][target][0],RaceInfo[r][target][1],RaceInfo[r][target][2],0.0,0.0,0.0,RACE_CP_SIZE[r][target]);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_GROUND_FINISH,RaceInfo[r][target][0],RaceInfo[r][target][1],RaceInfo[r][target][2],0.0,0.0,0.0,RACE_CP_SIZE[r][target]);
 		}
 		else
 		{
-	 		SetPlayerRaceCheckpoint(playerid,0,RaceInfo[r][target][0],RaceInfo[r][target][1],RaceInfo[r][target][2],RaceInfo[r][next][0],RaceInfo[r][next][1],RaceInfo[r][next][2],RACE_CP_SIZE[r][next]);
+	 		SetPlayerRaceCheckpoint(playerid,CP_TYPE_GROUND_NORMAL,RaceInfo[r][target][0],RaceInfo[r][target][1],RaceInfo[r][target][2],RaceInfo[r][next][0],RaceInfo[r][next][1],RaceInfo[r][next][2],RACE_CP_SIZE[r][next]);
  		}
 	}
  	return 1;
@@ -88917,11 +88932,11 @@ public SetAirRaceCheckPoint(playerid,target,next)
     {
     	if(next == -1)
 		{
-			SetPlayerRaceCheckpoint(playerid,4,RaceInfo[r][target][0],RaceInfo[r][target][1],RaceInfo[r][target][2],0.0,0.0,0.0,RACE_CP_SIZE[r][target]);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_FINISH,RaceInfo[r][target][0],RaceInfo[r][target][1],RaceInfo[r][target][2],0.0,0.0,0.0,RACE_CP_SIZE[r][target]);
 		}
 		else
 		{
-			SetPlayerRaceCheckpoint(playerid,3,RaceInfo[r][target][0],RaceInfo[r][target][1],RaceInfo[r][target][2],RaceInfo[r][next][0],RaceInfo[r][next][1],RaceInfo[r][next][2],RACE_CP_SIZE[r][next]);
+			SetPlayerRaceCheckpoint(playerid,CP_TYPE_AIR_NORMAL,RaceInfo[r][target][0],RaceInfo[r][target][1],RaceInfo[r][target][2],RaceInfo[r][next][0],RaceInfo[r][next][1],RaceInfo[r][next][2],RACE_CP_SIZE[r][next]);
 		}
 	}
 	return 1;
@@ -90146,7 +90161,7 @@ stock HDDBan(playerid)
 {
     if(IsPlayerConnected(playerid) && GetPVarInt(playerid,"Eingeloggt") == 1 )
     {
-        new serial[45+4];
+        new serial[50];
     	gpci(playerid,serial,sizeof(serial));
     	new pIp[20+4];
 		GetPlayerIp(playerid,pIp,sizeof(pIp));
@@ -90162,7 +90177,7 @@ stock CheckHDDBan(playerid)
 {
     if(IsPlayerConnected(playerid) && GetPVarInt(playerid,"Eingeloggt") == 1 )
     {
-        new serial[45+4];
+        new serial[50];
     	gpci(playerid,serial,sizeof(serial));
     	new pIp[20+4];
 		GetPlayerIp(playerid,pIp,sizeof(pIp));
@@ -90192,7 +90207,7 @@ public OnBanCheck(playerid)
 {
 	SCM(playerid,SAMP_WEISS,""IINFO" du bist von unserem Server gebannt!");
 	TogglePlayerControllable(playerid, false);
- 	SetTimerEx("KickDenSpieler",2000,0,"i",playerid);
+ 	SetTimerEx("KickDenSpieler",2000,false,"i",playerid);
 	return 1;
 }
 forward SendLevelMessage(color, string[]);
@@ -90225,8 +90240,8 @@ ShowPlayerPhoneSound(playerid)
 forward SpielerSicherheit(playerid);
 public SpielerSicherheit(playerid)
 {
-	TogglePlayerControllable(playerid,0);
-	SetTimerEx("SpielerSicherheit2",2000,0,"i",playerid);
+	TogglePlayerControllable(playerid,false);
+	SetTimerEx("SpielerSicherheit2",2000,false,"i",playerid);
 	//SCM(playerid,SAMP_WEISS,""IINFO" Map wird aufgebaut...");
 	GameTextForPlayer(playerid,"~y~Map wird aufgebaut...",10,1);
 	return 1;
@@ -90234,7 +90249,7 @@ public SpielerSicherheit(playerid)
 forward SpielerSicherheit2(playerid);
 public SpielerSicherheit2(playerid)
 {
-    TogglePlayerControllable(playerid,1);
+    TogglePlayerControllable(playerid,true);
 	return 1;
 }
 /*stock SetVehicleAndTrailerPos(vehicleid, trailerid, Float:posxx, Float:posyy, Float:poszz)
@@ -90255,7 +90270,7 @@ stock GetXYBehindOfVehicle(vehicleid, &Float:x, &Float:y, Float:distance)
 	x += ( distance * floatsin( -a+180, degrees ));
 	y += ( distance * floatcos( -a+180, degrees ));
 }*/
-public OnPlayerEditObject(playerid,playerobject,objectid,response,Float:fX,Float:fY,Float:fZ,Float:fRotX,Float:fRotY,Float:fRotZ)
+public OnPlayerEditObject(playerid,playerobject,objectid,EDIT_RESPONSE:response,Float:fX,Float:fY,Float:fZ,Float:fRotX,Float:fRotY,Float:fRotZ)
 {
 	new string[124];
 	if(response == EDIT_RESPONSE_FINAL)
@@ -90664,7 +90679,7 @@ forward Ballong1();
 public Ballong1()
 {
 	MoveDynamicObject(map_noobi[89],591.8303,-1819.2192,5.4884,1.0);
-	SetTimer("Ballong2end",480000,0);
+	SetTimer("Ballong2end",480000,false);
 	return 1;
 }
 forward Ballong2end();
