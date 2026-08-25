@@ -1,0 +1,11 @@
+10/05/2017-13:01:30 | Angiff : Angreifer: Capitan128 * Opfer: require * Schadensverlust: 9.900000 * Waffen: Faust
+28/05/2017-00:40:28 | Angiff : Angreifer: Elezar * Opfer: require * Schadensverlust: 1.320000 * Waffen: Faust
+28/05/2017-00:40:29 | Angiff : Angreifer: Elezar * Opfer: require * Schadensverlust: 1.320000 * Waffen: Faust
+28/05/2017-00:40:30 | Angiff : Angreifer: Elezar * Opfer: require * Schadensverlust: 1.320000 * Waffen: Faust
+28/05/2017-00:40:31 | Angiff : Angreifer: Elezar * Opfer: require * Schadensverlust: 1.320000 * Waffen: Faust
+28/05/2017-00:40:32 | Angiff : Angreifer: Elezar * Opfer: require * Schadensverlust: 1.320000 * Waffen: Faust
+28/05/2017-00:40:32 | Angiff : Angreifer: Elezar * Opfer: require * Schadensverlust: 2.310000 * Waffen: Faust
+28/05/2017-00:40:33 | Angiff : Angreifer: Elezar * Opfer: require * Schadensverlust: 3.960000 * Waffen: Faust
+28/05/2017-00:40:33 | Angiff : Angreifer: Elezar * Opfer: require * Schadensverlust: 1.320000 * Waffen: Faust
+28/05/2017-00:46:40 | Angiff : Angreifer: Elezar * Opfer: require * Schadensverlust: 9.900000 * Waffen: Faust
+28/05/2017-00:46:40 | Angiff : Angreifer: Elezar * Opfer: require * Schadensverlust: 9.900000 * Waffen: Faust

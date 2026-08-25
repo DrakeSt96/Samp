@@ -1,0 +1,10 @@
+#include </Gloabe Includes/a_samp>
+#include </Gloabe Includes/a_mysql>
+#include </Gloabe Includes/a_http>
+#include </Gloabe Includes/streamer>
+#include </Gloabe Includes/sscanf2>
+#include </Gloabe Includes/md5>
+#include </Gloabe Includes/zcmd>
+#include </Gloabe Includes/AMC1>
+#include </Gloabe Includes/AlteSachenVomScript>
+#include </Gloabe Includes/CoL_Farben>
