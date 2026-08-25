@@ -5115,9 +5115,13 @@ stock Float:CheckNeRDrunkLevel(playerid)
  	return Drunk;
 }
 main(){}
+//-[Voice- und Funksystem]-//
+#include "modules/voice/voice.inc"
+
 public OnGameModeInit()
 {
 	Streamer_VisibleItems(STREAMER_TYPE_OBJECT,1000);
+	VoiceInitSystem();
 	/*
    	new Server_Bind_Str[500];
 	GetServerVarAsString("bind",Server_Bind_Str,sizeof(Server_Bind_Str));
@@ -11185,6 +11189,7 @@ public OnGameModeInit()
 }
 public OnGameModeExit()
 {
+	VoiceShutdownSystem();
     ForEachPlayer(i)
 	{
 		if(IsPlayerConnected(i) && !IsPlayerNPC(i) && GetPVarInt(i,"Eingeloggt") == 1)
@@ -11235,6 +11240,7 @@ public LoginRegisterLoginTD(playerid)
 }
 public OnPlayerConnect(playerid)
 {
+	VoiceOnPlayerConnect(playerid);
 	ShowLoad(playerid);
     mapicon(playerid);
     AddPlayer(playerid);
@@ -11690,6 +11696,7 @@ public OnPlayerConnect(playerid)
 }
 public OnPlayerDisconnect(playerid,reason)
 {
+	VoiceOnPlayerDisconnect(playerid);
  	if(Spieler[playerid][JobDuty] == 1){
 		SetPlayerSkin(playerid,Spieler[playerid][pSkin]);
 	}
@@ -12116,6 +12123,7 @@ public OnPlayerWeaponShot(playerid, WEAPON:weaponid, BULLET_HIT_TYPE:hittype, hi
 }
 public OnPlayerSpawn(playerid)
 {
+	VoiceOnPlayerSpawn(playerid);
 	SetPlayerSkillLevel(playerid,WEAPONSKILL_PISTOL,0);
     TogglePlayerSpectating(playerid,false);
 	HideLoginScreen(playerid);
@@ -13407,6 +13415,7 @@ public OnPlayerSpawn(playerid)
 }
 public OnPlayerDeath(playerid,killerid,WEAPON:reason)
 {
+    VoiceOnPlayerDeath(playerid);
     if(IsPlayerNPC(killerid))return 1;
     new Float:x,Float:y,Float:z,string[256];
     if(IsPlayerConnected(killerid) && killerid != INVALID_PLAYER_ID)
