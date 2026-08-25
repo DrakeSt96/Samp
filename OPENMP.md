@@ -80,6 +80,26 @@ Für die Umstellungsphase empfiehlt sich `-d3`: dann liefert CrashDetect bei
 Abstürzen Zeilennummern. Für den Dauerbetrieb wieder ohne — CrashDetect kostet
 spürbar Leistung und ist laut eigenem README für Live-Server nicht gedacht.
 
+### NPC-Scripts brauchen einen eigenen Include-Pfad
+
+open.mp liefert bewusst keine Includes zum Kompilieren von NPC-Scripts — die
+open.mp-Fassung von `a_npc.inc` bricht mit
+`open.mp doesn't support NPC scripts` ab. Die NPCs selbst **laufen** unter
+open.mp weiter (über die `samp-npc`-Binärdatei), nur übersetzen lassen sie sich
+nicht mit den open.mp-Includes.
+
+Dafür liegt die SA-MP-Fassung jetzt separat in `pawno/include/npc/`. Die acht
+Scripts in `npcmodes/` übersetzt du damit so:
+
+```
+pawncc "npcmodes/[BOT]Bank.pwn" -i"pawno/include/npc"
+```
+
+Die `#include`-Zeilen der NPC-Scripts wurden dafür auf `<a_npc>` vereinheitlicht;
+alle acht kompilieren fehlerfrei. Das Gamemode selbst nutzt weiterhin
+`pawno/include` und `pawno/include/Gloabe Includes` — die beiden Pfade nicht
+mischen.
+
 ---
 
 ## 4. Was am Gamemode geändert wurde
