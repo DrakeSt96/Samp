@@ -67,9 +67,12 @@
 // werden, ohne bestehende Accounts zu entwerten.
 //
 // SCRIPT_PW_COLLEN muss der echten Breite der Spalte spieler.Passwort
-// entsprechen (aktuell varchar(34)). Der Salt wird hart auf
+// entsprechen. Der Default 34 ist der Bestandswert; Datenbank/samp_server.sql
+// legt neue Installationen bereits mit varchar(64) an, dort darf
+// SCRIPT_PW_COLLEN sofort auf 64 gesetzt werden. Der Salt wird hart auf
 // SCRIPT_PW_COLLEN-32 begrenzt, damit MySQL den Hash niemals abschneidet.
-// Erst nach einem ALTER TABLE darf SCRIPT_PW_COLLEN erhoeht werden.
+// Auf einem Bestandsserver erst nach Datenbank/migration_passwort_salt.sql
+// erhoehen.
 #if !defined SCRIPT_PW_COLLEN
 	#define SCRIPT_PW_COLLEN (34)
 #endif
@@ -11241,9 +11244,6 @@ public OnPlayerConnect(playerid)
     // Ein Reconnect hebt die Bruteforce-Sperre nicht auf: solange die IP gesperrt
     // ist, bleibt der Fehlversuchszaehler auf dem Maximum stehen.
     if(LoginSperre_Aktiv(playerid) > 0) LoginFehlversuche[playerid] = MAX_LOGIN_VERSUCHE;
-    // Ein Reconnect hebt die Bruteforce-Sperre nicht auf: solange die IP gesperrt
-    // ist, bleibt der Fehlversuchszaehler auf dem Maximum stehen.
-    if(LoginSperre_Aktiv(playerid) > 0) LoginFehlversuche[playerid] = MAX_LOGIN_VERSUCHE;
     SetPlayerColor(playerid,SAMP_WEISS);
 	TogglePlayerClock(playerid,0);
 	DestroyBuildings(playerid);
@@ -14986,13 +14986,6 @@ public OnPlayerText(playerid,text[])
     format(string,sizeof(string),""#HTML_BLAU""ClanTag":"#HTML_WEISS" Der Befehl: %s gibt es hier nicht versuchs mit ((/hilfe))",cmdtext);
  	return SCM(playerid,WEISS,string);
 }*/
-// HINWEIS: zcmd.inc definiert am Ende  #define OnPlayerCommandText zcmd_OnPlayerCommandText .
-// Spielereingaben laufen deshalb NICHT durch diese Fassung, sondern durch die
-// Fassung in "pawno/include/Gloabe Includes/zcmd.inc" - dort steht die
-// Laengenpruefung fuer funcname bereits (if (pos > MAX_FUNC_NAME - 5) return 0;).
-// Diese Fassung hier wird nur noch bei internen Aufrufen der Form
-// OnPlayerCommandText(playerid,"/befehl") im Script benutzt; die Grenzpruefung
-// unten muss deshalb trotzdem stehen bleiben.
 // HINWEIS: zcmd.inc definiert am Ende  #define OnPlayerCommandText zcmd_OnPlayerCommandText .
 // Spielereingaben laufen deshalb NICHT durch diese Fassung, sondern durch die
 // Fassung in "pawno/include/Gloabe Includes/zcmd.inc" - dort steht die
@@ -31113,6 +31106,8 @@ COMMAND:immobilie(playerid,params[])
 	if(!isPlayerInJob(playerid,18))return SCM(playerid,SAMP_WEISS,"Kein Immobilienmakler.");
 	if(sscanf(params,"s[25]iuui",cmd,hausorbizid,besitzerid,kundenid,preis))return SCM(playerid,SAMP_WEISS,""IINFO" /immobilie [Haus/Business][Hausnummer/Bizid][Besitzerid/Name][Käuferid/Name][Preis]");
 	if(preis <= 0)return SCM(playerid,SAMP_WEISS,""IINFO" der Preis darf nicht unter 0$% sein!");
+	if(strcmp(cmd,"Haus",true) == 0 && (hausorbizid < 1 || hausorbizid >= MAX_HAUS))return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Hausnummer.");
+	if(strcmp(cmd,"Business",true) == 0 && (hausorbizid < 1 || hausorbizid >= MAX_BIZ))return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Bizid.");
 	if(!IsPlayerConnected(besitzerid))return SCM(playerid,SAMP_WEISS,"Besitzer nicht eingeloggt!");
 	if(!IsPlayerConnected(kundenid))return SCM(playerid,SAMP_WEISS,"Besitzer nicht eingeloggt!");
 	if(playerid == besitzerid)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst dich nicht selbst als Besitzer angeben!");
@@ -32982,6 +32977,7 @@ COMMAND:accept(playerid,params[])
    	{
 	   	if(Spieler[playerid][pAngebot] != 20)return SCM(playerid,SAMP_WEISS,""IINFO" niemand bietet dir eine Einladung in eine Partei an.");
 	    new p = Spieler[playerid][pMenge];
+	    if(p < 1 || p >= MAX_PARTEI || PartInfo[p][ParteiCreatet] != 1)return SCM(playerid,SAMP_WEISS,"Es liegt keine gueltige Parteieinladung vor.");
 		pID = Spieler[playerid][pSeller];
 		if(!IsPlayerConnected(pID))return SCM(playerid,SAMP_WEISS,"Spieler nicht eingeloggt.");
 		if(!ProxDetectorS(5.0,playerid,pID))return SCM(playerid,SAMP_WEISS,""IINFO" der angegebene Spieler ist nicht in deiner Nähe!");
@@ -33115,6 +33111,7 @@ COMMAND:accept(playerid,params[])
 				if(count >= MAX_HAUS_OWNER)return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt bereits "#MAX_HAUS_OWNER" Haus!");
 			    ReturnPropertyData(besitzerid);
 			    haus = Spieler[besitzerid][pReturnPropertyDataHaus],count = Spieler[besitzerid][pReturnPropertyDataHausCount];
+			    if(haus <= 0 || haus >= MAX_HAUS)return SCM(playerid,SAMP_WEISS,"Der Besitzer besitzt kein Haus / ihr seid nicht in der Naehe seines Hauses.");
 			    if(haus == -1)return SCM(playerid,SAMP_WEISS,""IINFO" der Besitzer besitzt kein Haus./Ihr seit nicht in der Nähe des Hauses vom Besitzer.");
 			    format(string,sizeof(string),"%s (ID:%i) hat das Haus [Hausnummer %i] von %s (ID:%i) für %i$ an dich vermarktet!",SpielerName(seller),seller,Immobilienid[playerid],SpielerName(besitzerid),besitzerid,Immobilienpreis[playerid]);
 				SCM(playerid,SAMP_WEISS,string);
@@ -35898,7 +35895,11 @@ COMMAND:repairinfo_2(playerid,params[])
 	{
 		for(new i=0;i<MAX_ATMS;i++)
 		{
-			format(string,sizeof(string),"%s\nNummer: "IINFO2"%i"#HTML_WEISS" Zustand: "IINFO2"%i %"#HTML_WEISS"\n%s",string,i,ATMInfo[i][EGmBhHp]);
+			// Genau EINE Zeile je Eintrag und kein fuehrendes \n, damit listitem
+			// dem Arrayindex entspricht und die Wache >= MAX_ATMS passt.
+			// Das freistehende '%' entfiel: es war ein ungueltiger Formatplatzhalter.
+			if(i > 0)strcat(string,"\n");
+			format(string,sizeof(string),"%sNummer: "IINFO2"%i"#HTML_WEISS" Zustand: "IINFO2"%i"#HTML_WEISS"",string,i,ATMInfo[i][EGmBhHp]);
 			ShowPlayerDialog(playerid,DIALOG_SEARCH_ATMS,DIALOG_STYLE_LIST,""ClanTagDialoge" Bankautomaten",string,"Markieren","Verlassen");
 		}
 		return 1;
@@ -44786,6 +44787,7 @@ COMMAND:sellfish(playerid,params[])
 	    format(string,sizeof(string),""IINFO" du hast einen %s für %i$ verkauft!",Fische[Spieler[playerid][pFishID][fishid]],cash);
 	    SCM(playerid,SAMP_WEISS,string);
 	    ACMoney(playerid,cash);
+	    if(BizInfo[biz][biz_geldkasse] < cash)return SCM(playerid,SAMP_WEISS,""IINFO" die Ladenkasse hat nicht genug Geld fuer den Ankauf.");
 	    BizInfo[biz][biz_geldkasse] -= cash;
 		Spieler[playerid][pFishID][fishid] = -1;
 		Spieler[playerid][pFischgewicht][fishid] = 0;
@@ -60927,17 +60929,22 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					ShowPlayerDialog(playerid,DIALOG_LOGIN,DIALOG_STYLE_PASSWORD,""#HTML_BLAU""#ClanTag":"#HTML_WEISS" Login - Panel",stringlogin,"Login","Abbrechen");
 					return 1;
 			    }
-			    format(stringlogin,sizeof(stringlogin),"SELECT * FROM spieler WHERE Name = '%s'",SpielerName(playerid));
 			    if(LoginFehlversuche[playerid] >= MAX_LOGIN_VERSUCHE)
 			    {
 			        new sperrzeit = LoginSperre_Aktiv(playerid);
 			        if(sperrzeit > 0)
 			        {
-			            format(stringlogin,sizeof(stringlogin),""#ERROR" Zu viele Fehlversuche. Bitte warte noch %i:%02d Minuten.",sperrzeit/60,sperrzeit%60);
-			            SCM(playerid,SAMP_WEISS,stringlogin);
+			            // Sperre laeuft noch: Hinweis geben UND den Dialog erneut zeigen.
+			            // Ohne erneutes Anzeigen haette der Spieler keine Eingabe mehr,
+			            // da der Dialog-Schutz die gemerkte ID vor dem switch loescht.
+			            format(stringlogin,sizeof(stringlogin),""#ERROR"Zu viele Fehlversuche.\nBitte warte noch "IINFO2"%i:%02d"#HTML_WEISS" Minuten,\nbevor du es erneut versuchst.",sperrzeit/60,sperrzeit%60);
+			            ShowPlayerDialog(playerid,DIALOG_LOGIN,DIALOG_STYLE_PASSWORD,""#HTML_BLAU""#ClanTag":"#HTML_WEISS" Login - Panel",stringlogin,"Login","Abbrechen");
+			            return 1;
 			        }
-			        return 1;
+			        // Sperre abgelaufen: Zaehler freigeben und den Versuch normal zulassen.
+			        LoginFehlversuche[playerid] = 0;
 			    }
+			    format(stringlogin,sizeof(stringlogin),"SELECT * FROM spieler WHERE Name = '%s'",SpielerName(playerid));
 			    mysql_function_query(MySQL_R394,stringlogin,true,"l_script_account","isi",playerid,inputtext,1);
 			}
 		    return 1;
@@ -62331,10 +62338,10 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			else
 			{
 			    new string[650];
+				if(listitem < 0 || listitem >= MAX_SPRUNKS)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 				format(string,sizeof(string),""IINFO" der Sprunkautomat: "IINFO2"%i"#HTML_WEISS" wurde auf deiner Karte markiert.",listitem);
 				SCM(playerid,SAMP_WEISS,string);
 				DisablePlayerCheckpoint(playerid);
-				if(listitem < 0 || listitem >= MAX_SPRUNKS)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
 				SetPlayerCheckpoint(playerid,Sprunk[listitem][_posx],Sprunk[listitem][_posy],Sprunk[listitem][_posz],3.0);
 				Spieler[playerid][pIsearch] = 1;
 				return 1;
@@ -63374,7 +63381,20 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		    }
 		    if(response == 1)
 		    {
-			    if(listitem < 0 || listitem >= sizeof(Homestore))return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
+			    // Die Liste ist nach Hselectmatch gefiltert: listitem ist die Position
+			    // in der gefilterten Liste, nicht der Homestore-Index. Ohne diese
+			    // Umrechnung wird ein fremder Innenraum besichtigt.
+			    new hsHaus = Spieler[playerid][pSelectHome],hsIdx = -1,hsZeile = 0;
+			    for(new i=0;i<sizeof(Homestore);i++)
+			    {
+			        if(HausInfo[hsHaus][haus_slots] >= Homestore[i][Hselectmatch])
+			        {
+			            if(hsZeile == listitem){ hsIdx = i; break; }
+			            hsZeile++;
+			        }
+			    }
+			    if(hsIdx == -1)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
+			    listitem = hsIdx;
 			    format(string,sizeof(string),""IINFO" du besichtigst den Innenraum '%s'",Homestore[listitem][HInnenraum]);
 				SCM(playerid,SAMP_WEISS,string);
 				SCM(playerid,SAMP_WEISS,"Mit '/exitiraum' kommen Sie zurück zum HomeStore!");
@@ -67893,6 +67913,24 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 		    }
 		    if(response == 1)
 		    {
+			    // Bereichswache muss VOR jedem Zugriff auf biz_artikel stehen, nicht
+			    // erst im letzten else-Zweig - die drei Fehleingabe-Zweige darunter
+			    // lesen biz_artikel mit demselben Index. Rueckgabe 1, damit der
+			    // Callback den Dialog weiterhin als behandelt meldet.
+			    if(Spieler[playerid][pBizProbOptionUsed] < 0 || Spieler[playerid][pBizProbOptionUsed] > 14)
+			    {
+			        Spieler[playerid][pBizProbOptionUsed] = 0;
+			        return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
+			    }
+			    // Bereichswache muss VOR jedem Zugriff auf biz_artikel stehen, nicht
+			    // erst im letzten else-Zweig - die drei Fehleingabe-Zweige darunter
+			    // lesen biz_artikel mit demselben Index. Rueckgabe 1, damit der
+			    // Callback den Dialog weiterhin als behandelt meldet.
+			    if(Spieler[playerid][pBizProbOptionUsed] < 0 || Spieler[playerid][pBizProbOptionUsed] > 14)
+			    {
+			        Spieler[playerid][pBizProbOptionUsed] = 0;
+			        return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
+			    }
 			    if(!strlen(inputtext))
 			    {
 					format(string,sizeof(string),"Gebe nun den Preis an\nMomentaner Preis bei : %i$",BizInfo[biz][biz_artikel][Spieler[playerid][pBizProbOptionUsed]]);
@@ -67913,7 +67951,6 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				}
 				else
 				{
-					if(biz == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht an deinem Business.");
 					if(Spieler[playerid][pBizProbOptionUsed] < 0 || Spieler[playerid][pBizProbOptionUsed] > 14)return Spieler[playerid][pBizProbOptionUsed] = 0;
 					BizInfo[biz][biz_artikel][Spieler[playerid][pBizProbOptionUsed]] = Menge;
 					format(string,sizeof(string),""IINFO" du hast den Preis von dem ausgewähltem Produkt auf %i$ gesetzt!",BizInfo[biz][biz_artikel][Spieler[playerid][pBizProbOptionUsed]]);
@@ -68127,7 +68164,10 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			else
 		    {
 			    if(sm == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keinem Schwarzmarkt.");
-			    if(listitem < 0 || listitem > 13)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
+			    // Die Preisliste wird mit fuehrendem \n aufgebaut: Zeile 0 ist leer,
+			    // Zeile n gehoert zu sBuyInfo[n-1] bzw. sartikel[n-1].
+			    if(listitem < 1 || listitem > sizeof(sBuyInfo))return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
+			    listitem--;
 			    Spieler[playerid][pSmarkProbOptionUsed] = listitem;
 			    format(string,sizeof(string),"Gebe nun den Preis an\nMomentaner Preis bei : %i$",SmarkInfo[sm][sartikel][listitem]);
 				ShowPlayerDialog(playerid,SMARK_MENU_PREISE_opt,DIALOG_STYLE_INPUT,"Schwarzmarkt (Preise)",string,"Ändern","Zurück");
@@ -68149,6 +68189,24 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			}
 			else
 			{
+				// Bereichswache muss VOR jedem Zugriff auf sartikel stehen, nicht erst
+				// im letzten else-Zweig - die drei Fehleingabe-Zweige darunter lesen
+				// sartikel mit demselben Index. Rueckgabe 1, damit der Callback den
+				// Dialog weiterhin als behandelt meldet.
+				if(Spieler[playerid][pSmarkProbOptionUsed] < 0 || Spieler[playerid][pSmarkProbOptionUsed] > 13)
+				{
+					Spieler[playerid][pSmarkProbOptionUsed] = 0;
+					return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
+				}
+				// Bereichswache muss VOR jedem Zugriff auf sartikel stehen, nicht erst
+				// im letzten else-Zweig - die drei Fehleingabe-Zweige darunter lesen
+				// sartikel mit demselben Index. Rueckgabe 1, damit der Callback den
+				// Dialog weiterhin als behandelt meldet.
+				if(Spieler[playerid][pSmarkProbOptionUsed] < 0 || Spieler[playerid][pSmarkProbOptionUsed] > 13)
+				{
+					Spieler[playerid][pSmarkProbOptionUsed] = 0;
+					return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
+				}
 				if(!strlen(inputtext))
 			    {
 					format(string,sizeof(string),"Gebe nun den Preis an\nMomentaner Preis bei : %i$",SmarkInfo[sm][sartikel][Spieler[playerid][pSmarkProbOptionUsed]]);
@@ -68169,7 +68227,6 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 				}
 				else
 				{
-					if(sm == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keinem Schwarzmarkt.");
 					if(Spieler[playerid][pSmarkProbOptionUsed] < 0 || Spieler[playerid][pSmarkProbOptionUsed] > 13)return Spieler[playerid][pSmarkProbOptionUsed] = 0;
 					SmarkInfo[sm][sartikel][Spieler[playerid][pSmarkProbOptionUsed]] = Menge;
 					format(string,sizeof(string),""IINFO" du hast den Preis von dem ausgewähltem Produkt auf %i$ gesetzt!",SmarkInfo[sm][sartikel][Spieler[playerid][pSmarkProbOptionUsed]]);
@@ -72785,7 +72842,11 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 			}
 			else
 			{
-				if(listitem < 0 || listitem > 29)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
+				// Die Liste wird mit fuehrendem \n aufgebaut: Zeile 0 ist leer,
+				// Zeile n zeigt ReportListitem[n-1]. Ohne diese Umrechnung wird der
+				// falsche Report angenommen und der letzte Eintrag ist gesperrt.
+				if(listitem < 1 || listitem > 30)return SCM(playerid,SAMP_WEISS,""IINFO" ungueltige Auswahl.");
+				listitem--;
 				if(!IsPlayerConnected(ReportListitem[listitem][rID][clickedlistitem]) || ReportListitem[listitem][rID][clickedlistitem] == -1)
 				{
 					for(new i=0;i<30;i++)
@@ -80866,7 +80927,7 @@ stock OnGameModeSave()
 {
     new gw = 0,
 		mainquery[3500],
-		query[1200],
+		query[2400],
 		sm = 1,
 		drg = 0,
 		fv = 0,
@@ -81152,7 +81213,7 @@ stock OnGameModeSave()
 	fsteuern[ADPreis],fsteuern[PlayerRekord],fsteuern[Lottojackpot],fsteuern[RentVehsPreis],fsteuern[TerrorSpawn],fsteuern[Lohnsteuer],fsteuern[Kirchensteuer],fsteuern[Mwst],fsteuern[Grundsteuer],fsteuern[OamtStandGebuer],fsteuern[Solidsteuer],UseBadWeather[0],UseBadWeather[1],UseBadWeather[2],fsteuern[PreisLicCar],fsteuern[PreisLicBike],fsteuern[PreisLicRoller],fsteuern[PreisLicPlane],fsteuern[PreisLicHeli],fsteuern[PreisLicBoat],fsteuern[TerrorContractRang],fsteuern[FMeldePreis]);
 	strcat(mainquery,query);
 	strdel(query,0,sizeof(query));
-    format(query,sizeof(query),"NewspaperPreis='%d',NewspaperText1='%s',NewspaperText2='%s',NewspaperText3='%s',NewspaperText4='%s',NewspaperText5='%s',NewspaperText6='%s',NewspaperText7='%s',NewspaperText8='%s',NewsPaperRealeased='%d',NewsPaperLager1='%d',NewsPaperLager2='%d',EisenLagger1='%d',EisenLagger2='%d',Kartfahrer1='%s',KartTime1='%d',FreemanPrice='%d',wHackPrice='%d',SAPDpay='%d',FBIpay='%d',SAFDpay='%d',ARMYpay='%d',OAMTpay='%d',GOVpay='%d',WorkLessMoney='%d',",
+    mysql_format(MySQL_R394,query,sizeof(query),"NewspaperPreis='%d',NewspaperText1='%e',NewspaperText2='%e',NewspaperText3='%e',NewspaperText4='%e',NewspaperText5='%e',NewspaperText6='%e',NewspaperText7='%e',NewspaperText8='%e',NewsPaperRealeased='%d',NewsPaperLager1='%d',NewsPaperLager2='%d',EisenLagger1='%d',EisenLagger2='%d',Kartfahrer1='%e',KartTime1='%d',FreemanPrice='%d',wHackPrice='%d',SAPDpay='%d',FBIpay='%d',SAFDpay='%d',ARMYpay='%d',OAMTpay='%d',GOVpay='%d',WorkLessMoney='%d',",
 	fsteuern[NewspaperPreis],fsteuern[NewspaperText1],fsteuern[NewspaperText2],fsteuern[NewspaperText3],fsteuern[NewspaperText4],fsteuern[NewspaperText5],fsteuern[NewspaperText6],fsteuern[NewspaperText7],fsteuern[NewspaperText8],fsteuern[NewsPaperRealeased],fsteuern[NewsPaperLager][0],fsteuern[NewsPaperLager][1],fsteuern[EisenLagger1],fsteuern[EisenLagger2],fsteuern[Kartfahrer1],fsteuern[KartTime1],fsteuern[FreemanPrice],
 	fsteuern[wHackPrice],fsteuern[Fgehalt][1],fsteuern[Fgehalt][2],fsteuern[Fgehalt][3],fsteuern[Fgehalt][6],fsteuern[Fgehalt][11],fsteuern[Fgehalt][16],fsteuern[WorkLessMoney]);
     strcat(mainquery,query);
@@ -82379,7 +82440,7 @@ stock StopLoopingAnim(playerid)
 	SetPlayerSpecialAction(playerid,SPECIAL_ACTION_NONE);
     return 1;
 }
-//-[ Dialog-Schutz F-08: zentraler Wrapper, Ziel des #define aus Zeile 60 ]-//
+//-[ Dialog-Schutz F-08: zentraler Wrapper, Ziel des Makros #define ShowPlayerDialog SPD_Safe ]-//
 stock SPD_Safe(playerid,dialogid,style,const caption[],const info[],const button1[],const button2[])
 {
 	SetPVarInt(playerid,DIALOG_PVAR_NAME,dialogid + DIALOG_PVAR_OFFSET);
@@ -83733,7 +83794,9 @@ stock SaveAccount(playerid)
 			if(fID > 0) strcat(mainquery,",");
 		    format(mainquery,sizeof(mainquery),"%sblacklist%i='%d'",mainquery,fID,Spieler[playerid][pBL][fID]);
 			strcat(mainquery,",");
-		    format(mainquery,sizeof(mainquery),"%sblacklistreason%i='%s'",mainquery,fID,pBLReason[playerid][fID]);
+		    new blreason[64];
+		    mysql_escape_string(pBLReason[playerid][fID],blreason,MySQL_R394);
+		    format(mainquery,sizeof(mainquery),"%sblacklistreason%i='%s'",mainquery,fID,blreason);
 		}
   		format(mainquery,sizeof(mainquery),"%s WHERE Name='%s'",mainquery,Spieler[playerid][pName]);
         mysql_function_query(MySQL_R394,mainquery,false,"","");
