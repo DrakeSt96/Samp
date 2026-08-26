@@ -12377,7 +12377,7 @@ public OnPlayerSpawn(playerid)
 					Spieler[playerid][AmUmkleiden] = 0;
 					Spieler[playerid][pBank] = 0;
 					Spieler[playerid][pRollerLic] = 1;
-					SetPlayerFightingStyle(playerid,FIGHT_STYLE:0);//BEFUND: 0 ist kein gueltiger Kampfstil (gueltig 4,5,6,7,15,16). Wert bewusst unveraendert.
+					SetPlayerFightingStyle(playerid,FIGHT_STYLE_NORMAL);
 					SetPlayerLevel(playerid,1);
 					Spieler[playerid][pMinutesAfterPayday] = 0;
 					Spieler[playerid][pTimeAfterRegister] = 0;
@@ -53076,7 +53076,7 @@ public OnPlayerClickTextDraw(playerid,Text:clickedid)
 					Spieler[playerid][AmUmkleiden] = 0;
 					Spieler[playerid][pBank] = 0;
 					Spieler[playerid][pRollerLic] = 1;
-					SetPlayerFightingStyle(playerid,FIGHT_STYLE:0);//BEFUND: 0 ist kein gueltiger Kampfstil (gueltig 4,5,6,7,15,16). Wert bewusst unveraendert.
+					SetPlayerFightingStyle(playerid,FIGHT_STYLE_NORMAL);
 					SetPlayerLevel(playerid,1);
 					Spieler[playerid][pMinutesAfterPayday] = 0;
 					Spieler[playerid][pTimeAfterRegister] = 0;
@@ -85365,7 +85365,7 @@ stock UpdateAntiCheat(playerid)
 		GetPlayerPos(playerid,Pos[0],Pos[1],Pos[2]);
 		if(gettime() > Spieler[playerid][pAntiWarning])
 		{
-			if(GetPlayerWeapon(playerid) != WEAPON_NIGHT_VISION_GOGGLES)//BEFUND: die Kommentare unten meinen den Fallschirm, der ist WEAPON_PARACHUTE (46), nicht 44. Wert bewusst unveraendert.
+			if(GetPlayerWeapon(playerid) != WEAPON_PARACHUTE)//Der Zweig unterscheidet mit/ohne Fallschirm. Stand frueher auf 44 (Nachtsichtgeraet), damit war der 105er-Zweig unerreichbar.
 			{
                 if(!isPlayerAnAdmin(playerid,5))
 				if(GetPlayerSpeed(playerid) > 170 && Pos[2] > 10 && GetPlayerSurfingVehicleID(playerid) == INVALID_VEHICLE_ID)//ohne fallschirm 170 Km/h
