@@ -32,8 +32,8 @@
 #endif
 
 
-forward OnPlayerCommandReceived(playerid, cmdtext[]); 
-forward OnPlayerCommandPerformed(playerid, cmdtext[], success); 
+forward OnPlayerCommandReceived(playerid, const cmdtext[]); 
+forward OnPlayerCommandPerformed(playerid, const cmdtext[], success); 
 
 
 static
@@ -122,4 +122,4 @@ public OnPlayerCommandText(playerid, cmdtext[])
     #define _ALS_OnPlayerCommandText
 #endif
 #define OnPlayerCommandText zcmd_OnPlayerCommandText
-forward zcmd_OnPlayerCommandText(playerid, cmdtext[]);
+forward zcmd_OnPlayerCommandText(playerid, const cmdtext[]);

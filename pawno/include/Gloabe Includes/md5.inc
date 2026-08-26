@@ -90,7 +90,7 @@ Notes:
 	hash returned.
 -*----------------------------------------------------------------------------*/
 
-stock MD5_Hash(str[], bool:lowercase = false)
+stock MD5_Hash(const str[], bool:lowercase = false)
 {
 	new
 		md5Data[E_MD5_CONTEXT],
@@ -136,7 +136,7 @@ Notes:
 	Hashes binary data, not just strings.
 -*----------------------------------------------------------------------------*/
 
-stock MD5_Data(data[], len)
+stock MD5_Data(const data[], len)
 {
 	new
 		md5Data[E_MD5_CONTEXT],
@@ -169,7 +169,7 @@ Notes:
 	Hashes the file incrementally, not in one huge chunk.
 -*----------------------------------------------------------------------------*/
 
-stock MD5_File(filename[])
+stock MD5_File(const filename[])
 {
 	
 	new
@@ -229,7 +229,7 @@ Notes:
 	Adds data to the current hash.
 -*----------------------------------------------------------------------------*/
 
-stock MD5_Update(ctx[E_MD5_CONTEXT], data[], len)
+stock MD5_Update(ctx[E_MD5_CONTEXT], const data[], len)
 {
 	new
 		t = ctx[E_MD5_CONTEXT_BITS][0],
@@ -278,7 +278,7 @@ Notes:
 	Custom strpack implementation allowing offset starts.
 -*----------------------------------------------------------------------------*/
 
-stock MD5_Copy(dest[], src[], start, len)
+stock MD5_Copy(dest[], const src[], start, len)
 {
 	new
 		i = start >>> 2,
@@ -402,7 +402,7 @@ Notes:
 	Does the hashing steps on the current data.
 -*----------------------------------------------------------------------------*/
 
-static stock MD5_Transform(buf[], in[])
+static stock MD5_Transform(buf[], const in[])
 {
 	new
 		a = buf[0],

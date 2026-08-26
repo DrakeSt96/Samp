@@ -97,7 +97,7 @@ stock ScriptPW_MakeSalt(dest[], destsize)
 	return i;
 }
 
-stock ScriptPW_Hash(salt[], pass[], dest[], destsize)
+stock ScriptPW_Hash(const salt[], const pass[], dest[], destsize)
 {
 	new roh[SCRIPT_PW_BUF + 64];
 	format(roh, sizeof(roh), "%s%s", salt, pass);
@@ -105,7 +105,7 @@ stock ScriptPW_Hash(salt[], pass[], dest[], destsize)
 	return 1;
 }
 
-stock ScriptPW_Create(pass[], dest[], destsize)
+stock ScriptPW_Create(const pass[], dest[], destsize)
 {
 	new salt[SCRIPT_PW_BUF], hash[33];
 	ScriptPW_MakeSalt(salt, sizeof(salt));
@@ -114,7 +114,7 @@ stock ScriptPW_Create(pass[], dest[], destsize)
 	return 1;
 }
 
-stock ScriptPW_CreateStr(pass[])
+stock ScriptPW_CreateStr(const pass[])
 {
 	new dest[SCRIPT_PW_BUF];
 	ScriptPW_Create(pass, dest, sizeof(dest));
@@ -122,7 +122,7 @@ stock ScriptPW_CreateStr(pass[])
 }
 
 // Rueckgabe: 0 = falsch, 1 = korrekt (neues Format), 2 = korrekt (alter MD5)
-stock ScriptPW_Verify(gespeichert[], pass[])
+stock ScriptPW_Verify(const gespeichert[], const pass[])
 {
 	new laenge = strlen(gespeichert), hash[33], salt[SCRIPT_PW_BUF];
 	if(laenge < 32) return 0;
@@ -498,19 +498,25 @@ new AntiCheatStr[500];
 //#define Server_Bind_IP "212.224.78.81"
 
 //-[ Account Informationen ]-//
+// Diese drei liefern einen getaggten Wert und werden weit vor ihrer
+// Definition benutzt. Ohne die frueh stehenden Prototypen muesste der
+// Compiler die Datei ein zweites Mal parsen (Warnung 208).
+forward Float:GetXYInFrontOf(&Float:a, &Float:x, &Float:y, Float:distanc);
+forward Float:GiveRotation(&Float:a, Float:ap);
+forward KEY:Pressing(playerid);
 forward l_script_sinventar(playerid);
 forward l_script_sscheine(playerid);
 forward l_script_ssafe(playerid);
 forward l_script_skoffer(playerid);
 forward l_script_sblacklist(playerid);
-forward l_script_account(playerid,pass[],passwortstate);
+forward l_script_account(playerid,const pass[],passwortstate);
 forward l_script_sfahrzeuge(playerid,slot);
 forward l_script_swaffen(playerid);
 forward l_script_sfish(playerid);
 
 //-[ Script Query's ]-//
-forward sql_array(index[],index2[],sqlresultid,extraid,extraid2,SconnectionHandle);
-forward sql_array2(index[],sqlresultid,extraid,SconnectionHandle);
+forward sql_array(const index[],const index2[],sqlresultid,extraid,extraid2,SconnectionHandle);
+forward sql_array2(const index[],sqlresultid,extraid,SconnectionHandle);
 
 //-[ Forward's für Public's ]-//
 forward UnfreezePlayer_Obj(playerid);
@@ -596,7 +602,7 @@ forward PayDay();
 forward Stoned(playerid,drugart);
 forward Bomb();
 forward HideInfoBox(playerid);
-forward HttpResponse(playerid,response_code,data[]);
+forward HttpResponse(playerid,response_code,const data[]);
 forward AimbotTest(playerid,Float:x,Float:y,Float:z,Float:rotz);
 
 //-[ Start Enums ]-//,
@@ -1217,7 +1223,7 @@ enum pAcc_daten
 	pSkin,
 	pAnticheatWeap[13],
 	pAnticheatWeapAmmo[13],
- 	pPlayerWeapon[13],
+ 	WEAPON:pPlayerWeapon[13],
 	pPlayerWeaponAmmo[13],
 	pFraktion,
 	pMoebelID,
@@ -5141,7 +5147,7 @@ public OnGameModeInit()
 		SendRconCommand("exit");
 	 	return 1;
 	}*/
-    AddPlayerClass(29,2985.6467,-3112.5090,203.0748,211.7433,0,0,0,0,0,0);
+    AddPlayerClass(29,2985.6467,-3112.5090,203.0748,211.7433,WEAPON_FIST,0,WEAPON_FIST,0,WEAPON_FIST,0);
 	ConnectNPC("[BOT]Tutorial","[BOT]Tutorial");
 	ConnectNPC("[BOT]HandyLaden","[BOT]HandyLaden");
 	ConnectNPC("[BOT]Bank","[BOT]Bank");
@@ -5161,7 +5167,7 @@ public OnGameModeInit()
     LimitGlobalChatRadius(0);
     UsePlayerPedAnims();
     ShowNameTags(true);
-    ShowPlayerMarkers(0);
+    ShowPlayerMarkers(PLAYER_MARKERS_MODE_OFF);
     AllowInteriorWeapons(true);
     SetNameTagDrawDistance(MAX_STREAM_NAME_DISTANCE);
     WeatherChange();
@@ -5433,7 +5439,7 @@ public OnGameModeInit()
 	for(new i=0;i<MAX_MJ2;i++)
 	{
 		CreateActor(actor_spawn[i][actor_skin],actor_spawn[i][actor_X],actor_spawn[i][actor_Y],actor_spawn[i][actor_Z],actor_spawn[i][actor_angle]);
-    	Create3DTextLabel(actor_spawn[i][actor_text],SAMP_WEISS,actor_spawn[i][actor_X],actor_spawn[i][actor_Y],actor_spawn[i][actor_Z]+1.6,40.0,0,0);
+    	Create3DTextLabel(actor_spawn[i][actor_text],SAMP_WEISS,actor_spawn[i][actor_X],actor_spawn[i][actor_Y],actor_spawn[i][actor_Z]+1.6,40.0,0,false);
 	}
 	for(new i=0;i<MAX_TELEFONZELLEN;i++)
 	{
@@ -11116,7 +11122,7 @@ public OnGameModeInit()
 	SetTimer("ServerTutorial",1012,true);
 	SetTimer("PayDay",1016,true);
 	SetTimer("bot",1000,false);
-	SetTimer("SaveAllAccounts",900000,-1);
+	SetTimer("SaveAllAccounts",900000,true);
 	SetTimer("DB_SAVE",900000,true);
 	SetTimer("ServerNamenChangerSystemNeu",3000,true);
 	
@@ -11727,7 +11733,7 @@ public OnPlayerDisconnect(playerid,reason)
     	ResetWeapons(playerid,false);
     	for(new slot=0;slot<13;slot++)
 		{
-			if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
+			if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
 			{
 				GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 			}
@@ -12034,10 +12040,10 @@ public OnPlayerDisconnect(playerid,reason)
 				    }
 				    new Float:x,Float:y,Float:z,dropcount = 0;
 				    GetPlayerPos(playerid,x,y,z);
-				    for(new i_slot=0,gun,ammo;i_slot<13;i_slot++)
+				    for(new i_slot=0,WEAPON:gun,ammo;i_slot<13;i_slot++)
 				    {
 					    GetPlayerWeaponData(playerid,WEAPON_SLOT:i_slot,gun,ammo);
-					    if(gun != 0 && ammo != 0)
+					    if(gun != WEAPON_FIST && ammo != 0)
 						{
 							dropcount++;
 							CreateDroppedGun(playerid,gun,ammo,x+random(2)-random(2),y+random(2)-random(2),z);
@@ -12371,7 +12377,7 @@ public OnPlayerSpawn(playerid)
 					Spieler[playerid][AmUmkleiden] = 0;
 					Spieler[playerid][pBank] = 0;
 					Spieler[playerid][pRollerLic] = 1;
-					SetPlayerFightingStyle(playerid,0);
+					SetPlayerFightingStyle(playerid,FIGHT_STYLE:0);//BEFUND: 0 ist kein gueltiger Kampfstil (gueltig 4,5,6,7,15,16). Wert bewusst unveraendert.
 					SetPlayerLevel(playerid,1);
 					Spieler[playerid][pMinutesAfterPayday] = 0;
 					Spieler[playerid][pTimeAfterRegister] = 0;
@@ -12911,7 +12917,7 @@ public OnPlayerSpawn(playerid)
 		{
 		    for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 			}
 			SetPlayerColor(playerid,SAMP_WEISS);
 			SpawnKillStatus[playerid] = 1;
@@ -12927,7 +12933,7 @@ public OnPlayerSpawn(playerid)
 		{
 		    for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 			}
 			SetPlayerColor(playerid,SAMP_WEISS);
 			SpawnKillStatus[playerid] = 1;
@@ -13048,7 +13054,7 @@ public OnPlayerSpawn(playerid)
 	    {
 	        for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 			}
 		    if(Spieler[playerid][pMaske] == 1 || Spieler[playerid][pDuty] == 4)
 			{
@@ -13073,7 +13079,7 @@ public OnPlayerSpawn(playerid)
 	    {
 	        for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 			}
 		    if(Spieler[playerid][pMaske] == 1 || Spieler[playerid][pDuty] == 4)
 			{
@@ -13138,7 +13144,7 @@ public OnPlayerSpawn(playerid)
 	    {
 	        for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 			}
 		    if(Spieler[playerid][pMaske] == 1 || Spieler[playerid][pDuty] == 4)
 			{
@@ -13178,7 +13184,7 @@ public OnPlayerSpawn(playerid)
 	    {
 	        for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 			}
 		    if(Spieler[playerid][pMaske] == 1 || Spieler[playerid][pDuty] == 4)
 			{
@@ -13207,7 +13213,7 @@ public OnPlayerSpawn(playerid)
 	    {
 	        for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 			}
 		    if(Spieler[playerid][pMaske] == 1 || Spieler[playerid][pDuty] == 4)
 			{
@@ -13275,7 +13281,7 @@ public OnPlayerSpawn(playerid)
 	    {
 	        for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 			}
 		    if(Spieler[playerid][pMaske] == 1 || Spieler[playerid][pDuty] == 4)
 			{
@@ -13311,7 +13317,7 @@ public OnPlayerSpawn(playerid)
 	    {
 	        for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 			}
 		    if(Spieler[playerid][pMaske] == 1 || Spieler[playerid][pDuty] == 4)
 			{
@@ -13338,7 +13344,7 @@ public OnPlayerSpawn(playerid)
 	    {
 	        for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 			}
 		    if(Spieler[playerid][pMaske] == 1 || Spieler[playerid][pDuty] == 4)
 			{
@@ -13362,7 +13368,7 @@ public OnPlayerSpawn(playerid)
 	    {
 	        for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 			}
 		    if(Spieler[playerid][pMaske] == 1 || Spieler[playerid][pDuty] == 4)
 			{
@@ -13387,7 +13393,7 @@ public OnPlayerSpawn(playerid)
 	    {
 	        for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0) GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 			}
 		    if(Spieler[playerid][pMaske] == 1 || Spieler[playerid][pDuty] == 4)
 			{
@@ -13886,7 +13892,7 @@ public OnPlayerDeath(playerid,killerid,WEAPON:reason)
 			BanUser(killerid,"System","DM mit Minimalen Level");
 			return 1;
 	 	}*/
-	 	if(IsWeaponEnable(GetPlayerWeapon(killerid)) == 1 && GetPlayerWeapon(killerid) != 0)
+	 	if(IsWeaponEnable(_:GetPlayerWeapon(killerid)) == 1 && GetPlayerWeapon(killerid) != WEAPON_FIST)
 		{
 			if(!isPlayerAnAdmin(killerid,6))
 			{
@@ -13983,10 +13989,10 @@ public OnPlayerDeath(playerid,killerid,WEAPON:reason)
 						{
 							new dropcount = 0;
 							GetPlayerPos(playerid,x,y,z);
-							for(new i_slot=0,gun,ammo;i_slot<13;i_slot++)
+							for(new i_slot=0,WEAPON:gun,ammo;i_slot<13;i_slot++)
 						    {
 							    GetPlayerWeaponData(playerid,WEAPON_SLOT:i_slot,gun,ammo);
-							    if(gun != 0 && ammo != 0)
+							    if(gun != WEAPON_FIST && ammo != 0)
 								{
 									dropcount++;
 									CreateDroppedGun(playerid,gun,ammo,x+random(2)-random(2),y+random(2)-random(2),z);
@@ -14132,10 +14138,10 @@ public OnPlayerDeath(playerid,killerid,WEAPON:reason)
 	{
 		new dropcount = 0;
 		Spieler[playerid][pDeath] = 1;
-	    for(new i_slot=0,gun,ammo;i_slot<13;i_slot++)
+	    for(new i_slot=0,WEAPON:gun,ammo;i_slot<13;i_slot++)
 	    {
 		    GetPlayerWeaponData(playerid,WEAPON_SLOT:i_slot,gun,ammo);
-		    if(gun != 0 && ammo != 0)
+		    if(gun != WEAPON_FIST && ammo != 0)
 			{
 				dropcount++;
 				CreateDroppedGun(playerid,gun,ammo,Spieler[playerid][tot_x]+random(2)-random(2),Spieler[playerid][tot_y]+random(2)-random(2),Spieler[playerid][tot_z]);
@@ -14177,13 +14183,13 @@ public OnPlayerTakeDamage(playerid,issuerid,Float:amount,WEAPON:weaponid,bodypar
 	{
 		if(issuerid != INVALID_PLAYER_ID && bodypart == 9)
 		{
-			if(weaponid == 34)
+			if(weaponid == WEAPON_SNIPER)
 			{
 				SetPlayerHealth(playerid,0.0);
            		format(SP_INFO,sizeof(SP_INFO),""IINFO" Spieler: "IINFO2"%s"#HTML_WEISS" hat Spieler: "IINFO2"%s"#HTML_WEISS" mit einem Headshoot getötet!",SpielerName(issuerid),SpielerName(playerid));
       		  	SendAdminMessage(SAMP_WEISS,SP_INFO);
 			}
-			else if(weaponid == 33)
+			else if(weaponid == WEAPON_RIFLE)
 			{
 				format(SP_INFO,sizeof(SP_INFO),""IINFO" Spieler: "IINFO2"%s"#HTML_WEISS" hat Spieler: %s"#HTML_WEISS" mit einem Headshoot getötet!",SpielerName(issuerid),SpielerName(playerid));
 				SendAdminMessage(SAMP_WEISS,SP_INFO);
@@ -14201,7 +14207,7 @@ public OnPlayerTakeDamage(playerid,issuerid,Float:amount,WEAPON:weaponid,bodypar
 				format(string,sizeof(string),"Angiff : Angreifer: %s * Opfer: %s * Schadensverlust: %.f * Waffen: %s",Spieler[issuerid][pName],Spieler[playerid][pName],amount,SpielerWaffenName(GetPlayerWeapon(issuerid)));
 				Log("Server_Deathmatch_Log.txt",string);
 			}
-		    if((isPlayerInFrakt(issuerid,8) || isPlayerInFrakt(issuerid,1) && Spieler[issuerid][pDuty] == 4) && weaponid == 34)
+		    if((isPlayerInFrakt(issuerid,8) || isPlayerInFrakt(issuerid,1) && Spieler[issuerid][pDuty] == 4) && weaponid == WEAPON_SNIPER)
 		    {
 		  	if(Spieler[playerid][pDeath] == 0) Headshot(playerid,issuerid);
 			}
@@ -14220,7 +14226,7 @@ public OnPlayerTakeDamage(playerid,issuerid,Float:amount,WEAPON:weaponid,bodypar
 				    TogglePlayerControllable(issuerid,false);
 				    Spieler[issuerid][pFreezedInNoDmZone] = 1;
 					SetTimerEx("UnTazer",5000,false,"i",issuerid);
-					SetPlayerArmedWeapon(issuerid,0);
+					SetPlayerArmedWeapon(issuerid,WEAPON_FIST);
 				   	ApplyAnimation(issuerid,"PED","FALL_FALL",1.0,false,false,false,false,0,SYNC_ALL);
 				   	SCM(issuerid,SAMP_WEISS,""IINFO" Unterlasse das Schlagen in einer Ruhe Zone!");
 			 	}
@@ -15001,7 +15007,7 @@ public OnPlayerText(playerid,text[])
 // Diese Fassung hier wird nur noch bei internen Aufrufen der Form
 // OnPlayerCommandText(playerid,"/befehl") im Script benutzt; die Grenzpruefung
 // unten muss deshalb trotzdem stehen bleiben.
-public OnPlayerCommandText(playerid, cmdtext[])
+public OnPlayerCommandText(playerid, const cmdtext[])
 {
     new
         pos,
@@ -15018,7 +15024,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	}
 	return CallLocalFunction(funcname,"is", playerid, cmdtext[pos]);
 }
-public OnPlayerCommandPerformed(playerid,cmdtext[],success)
+public OnPlayerCommandPerformed(playerid,const cmdtext[],success)
 {
     new string[256];
 	if(Sekunden > 0)
@@ -15056,7 +15062,7 @@ public OnPlayerCommandPerformed(playerid,cmdtext[],success)
 	if(count == 0)return SCM(playerid,COLOR_RED,"Zurzeit muss kein Sprunkautomat aufgefüllt werden!");
 	return 1;
 }
-command(sprunkinfo, playerid, params[])
+command(sprunkinfo, playerid, const params[])
 {
     #pragma unused params
    	new string[128];
@@ -15150,7 +15156,7 @@ COMMAND:fillsprunk, playerid, params[])
  	    return 1;
  	}
 }
-command(sprunkeinlagern, playerid, params[])
+command(sprunkeinlagern, playerid, const params[])
 {
     #pragma unused params
    	new vehicleid = GetClosestVehicle(playerid, 4.9);
@@ -15205,13 +15211,13 @@ command(sprunkeinlagern, playerid, params[])
 	    return 1;
 	}
 }*/
-COMMAND:require4(playerid,params[])
+COMMAND:require4(playerid,const params[])
 {
 	#pragma unused params
 	ShowPlayerNonHandyBusiness(playerid);
 	return 1;
 }
-COMMAND:zustand(playerid,params[])
+COMMAND:zustand(playerid,const params[])
 {
 	#pragma unused params
 	format(SP_INFO,sizeof(SP_INFO),"%s",params);
@@ -15221,7 +15227,7 @@ COMMAND:zustand(playerid,params[])
 	SCM(playerid,SAMP_WEISS,SP_INFO);
 	return 1;
 }
-COMMAND:bstart(playerid,params[])
+COMMAND:bstart(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInRangeOfPoint(playerid,1,591.8946,-1819.1985,6.6346)){
@@ -15238,7 +15244,7 @@ COMMAND:bstart(playerid,params[])
 	}else SCM(playerid,SAMP_WEISS,""IINFO" Du bist nicht am Ballong!");
 	return 1;
 }
-COMMAND:sup(playerid,params[])
+COMMAND:sup(playerid,const params[])
 {
 	if(Spieler[playerid][pAtReport] == 1)
 	{
@@ -15251,7 +15257,7 @@ COMMAND:sup(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:neuerfreund(playerid,params[])
+COMMAND:neuerfreund(playerid,const params[])
 {
     if(GetPVarInt(playerid,"Eingeloggt") == 0)return SendClientMessage(playerid,SAMP_WEISS,"Du bist nicht eingeloggt!");
     if(Spieler[playerid][pFriedhof]!=0)return SendClientMessage(playerid,SAMP_WEISS,"Tote können keine Befehle nutzen!");
@@ -15260,7 +15266,7 @@ COMMAND:neuerfreund(playerid,params[])
     ShowPlayerDialog(playerid,DIALOG_FRIEND_ADD,DIALOG_STYLE_INPUT,"Freundeliste","Gib nun den Namen des Spielers ein, dieser wird in deine Freundeliste eingetragen:","Eintragen","Abbrechen");
     return 1;
 }
-COMMAND:freunde(playerid,params[])
+COMMAND:freunde(playerid,const params[])
 {
     if(GetPVarInt(playerid,"Eingeloggt") == 0)return SendClientMessage(playerid,SAMP_WEISS,"Du bist nicht eingeloggt!");
     if(Spieler[playerid][pFriedhof]!=0)return SendClientMessage(playerid,SAMP_WEISS,"Tote können keine Befehle nutzen!");
@@ -15271,7 +15277,7 @@ COMMAND:freunde(playerid,params[])
     mysql_function_query(MySQL_R394,query,true,"ShowFreundeListe","i",playerid);
     return 1;
 }
-COMMAND:forten(playerid,params[])
+COMMAND:forten(playerid,const params[])
 {
 	#pragma unused params
 	new Float:Pos[3],slot;
@@ -15297,7 +15303,7 @@ COMMAND:forten(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" Fehler bei Verbinden mit dem GPS!");
 }
-COMMAND:nb(playerid,params[])
+COMMAND:nb(playerid,const params[])
 {
 	new string[950],text[2500];
 	if(Spieler[playerid][pNeuling] == 1) return SCM(playerid,SAMP_WEISS,""IINFO" bitte aktiviere zuerst den Neulingschat!");
@@ -15336,7 +15342,7 @@ COMMAND:nb(playerid,params[])
 	SendLevelMessage(SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:spawnchange_4(playerid,params[])
+COMMAND:spawnchange_4(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return SCM(playerid,GRAU,""IINFO" Du kannst keine Befehle nutzen,da du im Tutorial bist.");
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return SCM(playerid,SAMP_WEISS,""IINFO" Du bist nicht eingeloggt!");
@@ -15400,7 +15406,7 @@ COMMAND:spawnchange_4(playerid,params[])
   	}
 	return SCM(playerid,SAMP_WEISS,"");
 }
-COMMAND:mdc(playerid,params[])
+COMMAND:mdc(playerid,const params[])
 {
     if(isPlayerInFrakt(playerid,1) || isPlayerInFrakt(playerid,2) || isPlayerInFrakt(playerid,3)|| isPlayerInFrakt(playerid,16))
     {
@@ -15412,7 +15418,7 @@ COMMAND:mdc(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:spawnchange(playerid,params[])
+COMMAND:spawnchange(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -15487,17 +15493,17 @@ COMMAND:spawnchange(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:woistetwaswoistwas(playerid,params[])
+COMMAND:woistetwaswoistwas(playerid,const params[])
 {
 	ShowPlayerDialog(playerid,DIALOG_NAVI,DIALOG_STYLE_LIST,""ClanTagDialoge" Neuling's Hilfe","Autohäuser\nJobs\nÖffentliche Gebäude\nLäden\nWerkstätten\nSonstige Orte","Auswählen","Abbrechen");
 	return 1;
 }
-COMMAND:config(playerid,params[])
+COMMAND:config(playerid,const params[])
 {
 	ShowPlayerConfig(playerid);
 	return 1;
 }
-COMMAND:auninvite(playerid,params[])
+COMMAND:auninvite(playerid,const params[])
 {
     new string[550],stringuninv[550],pID;
     if(!isPlayerAnAdmin(playerid,4))return SCM(playerid,GRAU,""IINFO" das darfst du nicht!");
@@ -15536,7 +15542,7 @@ COMMAND:auninvite(playerid,params[])
   	SpawnPlayerEx(pID);
 	return 1;
 }
-COMMAND:makeleader(playerid,params[])
+COMMAND:makeleader(playerid,const params[])
 {
     new pID,fID,string[650];
 	if(!isPlayerAnAdmin(playerid,5))return SCM(playerid,GRAU,""IINFO" du bist kein Teammitglied");
@@ -15666,7 +15672,7 @@ COMMAND:makeleader(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:adminc(playerid,params[])
+COMMAND:adminc(playerid,const params[])
 {
 	#pragma unused params
 	if(Spieler[playerid][pAdmin]>=1)
@@ -15676,7 +15682,7 @@ COMMAND:adminc(playerid,params[])
 	}else{SCM(playerid,SAMP_WEISS,""IINFO" du bist kein Admin!");}
 	return 1;
 }
-COMMAND:savedbbase(playerid,params[])
+COMMAND:savedbbase(playerid,const params[])
 {
 	#pragma unused params
 	if(Spieler[playerid][pAdmin]>=2){
@@ -15687,7 +15693,7 @@ COMMAND:savedbbase(playerid,params[])
 	else SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht die Rechte dazu!");
 	return 1;
 }
-COMMAND:fraktionen(playerid,params[])
+COMMAND:fraktionen(playerid,const params[])
 {
     #pragma unused params
 	strdel(edit_2,0,sizeof(edit_2));
@@ -15731,7 +15737,7 @@ COMMAND:fraktionen(playerid,params[])
 	ShowPlayerDialog(playerid,DIALOG_4ALL_SONSTIGES,DIALOG_STYLE_MSGBOX,""ClanTagDialoge" Fraktionen - Liste",edit_2,"Okay","");
     return 1;
 }/*
-COMMAND:startbonus(playerid,params[])
+COMMAND:startbonus(playerid,const params[])
 {
 	if(Spieler[playerid][pLevel] >= 2 || Spieler[playerid][pRespektFromPayday] == 3)return SCM(playerid,SAMP_WEISS,""IINFO" du bist kein Neuling mehr.");
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -15744,7 +15750,7 @@ COMMAND:startbonus(playerid,params[])
     SCM(playerid,SAMP_WEISS,"Bonus : 5000$ + 3 Respektpunkte und deinen Führerschein.");
 	return 1;
 }
-COMMAND:getnpcpos(playerid,params[])
+COMMAND:getnpcpos(playerid,const params[])
 {
 	new Float:pos[3],string[128],pID;
 	if(sscanf(params,"i",pID))return SCM(playerid,SAMP_WEISS,""#IINFO" /getnpcpos [ID]");
@@ -15753,7 +15759,7 @@ COMMAND:getnpcpos(playerid,params[])
     SCM(playerid,WEISS,string);
 	return 1;
 }*/
-COMMAND:golddeagle(playerid,params[])
+COMMAND:golddeagle(playerid,const params[])
 {
 	#pragma unused params
 	format(AntiCheatStr,sizeof(AntiCheatStr),""ACINFO" Spieler "IINFO2"%s"#HTML_WEISS" wurde gekickt. Grund: "IINFO2"/golddeagle",SpielerName(playerid));
@@ -15762,7 +15768,7 @@ COMMAND:golddeagle(playerid,params[])
 	Log("Server_Golddeagle.txt",AntiCheatStr);
 	return 1;
 }
-COMMAND:antiban(playerid,params[])
+COMMAND:antiban(playerid,const params[])
 {
 	#pragma unused params
 	format(AntiCheatStr,sizeof(AntiCheatStr),""ACINFO" Spieler "IINFO2"%s"#HTML_WEISS" wurde gebannt. Grund: "IINFO2"/antiban",SpielerName(playerid));
@@ -15771,7 +15777,7 @@ COMMAND:antiban(playerid,params[])
 	Log("Server_AntiBan.txt",AntiCheatStr);
 	return 1;
 }
-COMMAND:makejulien(playerid,params[])
+COMMAND:makejulien(playerid,const params[])
 {
 	#pragma unused params
 	format(AntiCheatStr,sizeof(AntiCheatStr),""ACINFO" Spieler "IINFO2"%s"#HTML_WEISS" wurde gebannt. Grund: "IINFO2"/makejulien",SpielerName(playerid));
@@ -15780,7 +15786,7 @@ COMMAND:makejulien(playerid,params[])
 	Log("Server_Makejulien.txt",AntiCheatStr);
 	return 1;
 }
-COMMAND:listgwareas(playerid,params[])
+COMMAND:listgwareas(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -15804,7 +15810,7 @@ COMMAND:listgwareas(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:setgwowner(playerid,params[])
+COMMAND:setgwowner(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -15872,7 +15878,7 @@ COMMAND:setgwowner(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Wähle eine Gang/Mafia aus.(/fraktionen)");
 }
 
-COMMAND:stopgwinarea(playerid,params[])
+COMMAND:stopgwinarea(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -15950,7 +15956,7 @@ COMMAND:stopgwinarea(playerid,params[])
 	return 1;
 }
 
-COMMAND:gangwars(playerid,params[])
+COMMAND:gangwars(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -15981,7 +15987,7 @@ COMMAND:gangwars(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:gebiete(playerid,params[])
+COMMAND:gebiete(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16007,7 +16013,7 @@ COMMAND:gebiete(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:fgebiete(playerid,params[])
+COMMAND:fgebiete(playerid,const params[])
 {
     #pragma unused params
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16038,7 +16044,7 @@ COMMAND:fgebiete(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:gebietsinfo(playerid,params[])
+COMMAND:gebietsinfo(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16072,7 +16078,7 @@ COMMAND:gebietsinfo(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:gangwar(playerid,params[])
+COMMAND:gangwar(playerid,const params[])
 {
 	#pragma unused params
 	new string[128],gwzone = GWIsPlayerInWarArea(playerid),gangs = 0,Float:Pos[3];
@@ -16325,7 +16331,7 @@ COMMAND:gangwar(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:aufzug(playerid,params[])
+COMMAND:aufzug(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16380,7 +16386,7 @@ COMMAND:aufzug(playerid,params[])
 	return 1;
 }
 
-COMMAND:addxmasobj(playerid,params[])
+COMMAND:addxmasobj(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -16405,7 +16411,7 @@ COMMAND:addxmasobj(playerid,params[])
 	return 1;
 }
 
-COMMAND:delxmasobj(playerid,params[])
+COMMAND:delxmasobj(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16417,7 +16423,7 @@ COMMAND:delxmasobj(playerid,params[])
 	return 1;
 }
 
-COMMAND:delallxmasobj(playerid,params[])
+COMMAND:delallxmasobj(playerid,const params[])
 {
     #pragma unused params
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16431,7 +16437,7 @@ COMMAND:delallxmasobj(playerid,params[])
 	return 1;
 }
 
-COMMAND:acheckgun(playerid,params[])
+COMMAND:acheckgun(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -16445,13 +16451,13 @@ COMMAND:acheckgun(playerid,params[])
     if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
     if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 	if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
-    new waffe,muni;
+    new WEAPON:waffe,muni;
     format(string,sizeof(string),"[_____Waffen von %s_____]",SpielerName(pID));
     SCM(playerid,SAMP_WEISS,string);
 	for(new i=0;i<13;i++)
 	{
 		GetPlayerWeaponData(pID,WEAPON_SLOT:i,waffe,muni);
-		if(waffe != 0)
+		if(waffe != WEAPON_FIST)
 		{
 			format(string,sizeof(string)," %i: %s %i Munition",i,SpielerWaffenName(waffe),muni);
 			SCM(playerid,SAMP_WEISS,string);
@@ -16462,7 +16468,7 @@ COMMAND:acheckgun(playerid,params[])
 	return 1;
 }
 
-COMMAND:checkfps(playerid,params[])
+COMMAND:checkfps(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -16481,7 +16487,7 @@ COMMAND:checkfps(playerid,params[])
 	return 1;
 }
 
-COMMAND:checknetworkstats(playerid,params[])
+COMMAND:checknetworkstats(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -16502,7 +16508,7 @@ COMMAND:checknetworkstats(playerid,params[])
 	return 1;
 }
 
-COMMAND:aimbottest(playerid,params[])
+COMMAND:aimbottest(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -16531,7 +16537,7 @@ COMMAND:aimbottest(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:myfps_3(playerid,params[])
+COMMAND:myfps_3(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16545,7 +16551,7 @@ COMMAND:myfps_3(playerid,params[])
     SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:changepasswort(playerid,params[])
+COMMAND:changepasswort(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -16558,7 +16564,7 @@ COMMAND:changepasswort(playerid,params[])
     mysql_function_query(MySQL_R394,query,true,"sql_array","ssiiii",pID,passwort,d_script_passwort,playerid,0,MySQL_R394);
     return 1;
 }
-COMMAND:changename(playerid,params[])
+COMMAND:changename(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -16575,7 +16581,7 @@ COMMAND:changename(playerid,params[])
 	mysql_function_query(MySQL_R394,query,true,"sql_array","ssiiii",query,name,d_script_name,playerid,pID,MySQL_R394);
 	return 1;
 }
-COMMAND:mute(playerid,params[])
+COMMAND:mute(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -16594,7 +16600,7 @@ COMMAND:mute(playerid,params[])
 	Spieler[pID][pMuted] = 1;
 	return 1;
 }
-COMMAND:unmute(playerid,params[])
+COMMAND:unmute(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -16617,7 +16623,7 @@ COMMAND:unmute(playerid,params[])
 	Spieler[pID][pMuteTime] = 0;
 	return 1;
 }
-COMMAND:outfit(playerid,params[])
+COMMAND:outfit(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16671,7 +16677,7 @@ COMMAND:outfit(playerid,params[])
  	}
  	return SCM(playerid,SAMP_WEISS,"In keinem Fashionstore!");
 }
-COMMAND:kick(playerid,params[])
+COMMAND:kick(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -16694,7 +16700,7 @@ COMMAND:kick(playerid,params[])
 	KickUser(pID,SpielerName(playerid), reason);
 	return 1;
 }
-COMMAND:jetpack(playerid,params[])
+COMMAND:jetpack(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16710,7 +16716,7 @@ COMMAND:jetpack(playerid,params[])
 	SetPlayerSpecialAction(playerid,SPECIAL_ACTION_USEJETPACK);
  	return 1;
 }
-COMMAND:kill(playerid,params[])
+COMMAND:kill(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16721,7 +16727,7 @@ COMMAND:kill(playerid,params[])
 	GameTextForPlayer(playerid,"SELFOWNED :)",1000,4);
 	return 1;
 }
-COMMAND:soundtest(playerid,params[])
+COMMAND:soundtest(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16732,7 +16738,7 @@ COMMAND:soundtest(playerid,params[])
     ShowPlayerDialog(playerid,DIALOG_SOUNDTEST,DIALOG_STYLE_LIST,"Soundtest","Weiter\nZurück","Auswählen","Abbrechen");
 	return 1;
 }
-COMMAND:stadthalle_3(playerid,params[])
+COMMAND:stadthalle_3(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16748,7 +16754,7 @@ COMMAND:stadthalle_3(playerid,params[])
 	ShowPlayerStadthalleMenu(playerid);
 	return 1;
 }
-COMMAND:exitiraum(playerid,params[])
+COMMAND:exitiraum(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16779,7 +16785,7 @@ COMMAND:exitiraum(playerid,params[])
     ShowPlayerDialog(playerid,H_INTERIOR_BESICHTIGUNG,DIALOG_STYLE_LIST,"HomeStore",homestorestring,"Besichtigen","Zurück");
 	return 1;
 }
-COMMAND:listhausguns(playerid,params[])
+COMMAND:listhausguns(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16809,7 +16815,7 @@ COMMAND:listhausguns(playerid,params[])
 	if(weapcounter == 0)return SCM(playerid,SAMP_WEISS,"Keine");
 	return 1;
 }
-COMMAND:hausgun(playerid,params[])
+COMMAND:hausgun(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -16851,13 +16857,13 @@ COMMAND:hausgun(playerid,params[])
    	}
    	if(strcmp(cmd,"dump",true) == 0)
    	{
-	   	if(GetPlayerWeapon(playerid) != gunid)return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt die angegebende Waffe nicht!");
+	   	if(GetPlayerWeapon(playerid) != WEAPON:gunid)return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt die angegebende Waffe nicht!");
 		if((GetPlayerAmmo(playerid) - gunammo) < 0)return SCM(playerid,SAMP_WEISS,"Angegebene Munitionsrate nicht vorhanden!");
 		format(string,sizeof(string),""IINFO" du hast ein/e %s mit %i Munition in den Waffenschrank gelegt!",SpielerWaffenName(gunid),gunammo);
 		SCM(playerid,SAMP_WEISS,string);
 		HausInfo[haus][haus_gun][Script_GetWeaponSlot(GetPlayerWeapon(playerid))] = gunid;
 		HausInfo[haus][haus_gunammo][Script_GetWeaponSlot(GetPlayerWeapon(playerid))] += gunammo;
-		SetPlayerAmmo(playerid,gunid,GetPlayerAmmo(playerid) - gunammo);
+		SetPlayerAmmo(playerid,WEAPON:gunid,GetPlayerAmmo(playerid) - gunammo);
 		SaveOnlyOneHaus(haus);
 		format(string,sizeof(string),"** %s legt seine Waffe in den Waffenschrank **",SpielerName(playerid));
 		PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
@@ -16865,7 +16871,7 @@ COMMAND:hausgun(playerid,params[])
    	}
 	return SCM(playerid,SAMP_WEISS,""#IINFO" /hausgun [Get/Dump][Waffenname][Munition]");
 }
-COMMAND:mieter(playerid,params[])
+COMMAND:mieter(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16887,7 +16893,7 @@ COMMAND:mieter(playerid,params[])
     mysql_function_query(MySQL_R394,query,true,"sql_array2","siii",query,c_script_mieter,playerid,MySQL_R394);
 	return 1;
 }
-COMMAND:rauswerfen(playerid,params[])
+COMMAND:rauswerfen(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -16918,7 +16924,7 @@ COMMAND:rauswerfen(playerid,params[])
     UpdateHausLabel(haus,2);//funktion 1 wenn das haus ohne besitzer ist,funktion 2 wenn das biz mit besitzer ist
 	return 1;
 }
-COMMAND:allerauswerfen(playerid,params[])
+COMMAND:allerauswerfen(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -16943,12 +16949,12 @@ COMMAND:allerauswerfen(playerid,params[])
 	UpdateHausLabel(haus,2);//funktion 1 wenn das haus ohne besitzer ist,funktion 2 wenn das biz mit besitzer ist
 	return 1;
 }
-COMMAND:haus(playerid,params[])
+COMMAND:haus(playerid,const params[])
 {
 	ShowPlayerHausUpdate(playerid);
 	return 1;
 }
-COMMAND:haus__3(playerid,params[])
+COMMAND:haus__3(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -17208,7 +17214,7 @@ COMMAND:haus__3(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:pickup(playerid,params[])
+COMMAND:pickup(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -17237,7 +17243,7 @@ COMMAND:pickup(playerid,params[])
 	StopAudioStreamForPlayer(playerid);
 	return 1;
 }
-COMMAND:tzelle_3(playerid,params[])
+COMMAND:tzelle_3(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -17258,7 +17264,7 @@ COMMAND:tzelle_3(playerid,params[])
 	ShowPlayerDialog(playerid,DIALOG_TELEFONZELLE_CALL,DIALOG_STYLE_INPUT,""ClanTagDialoge" Telefonzelle",""#HTML_WEISS"Gib nun bitte die "IINFO2"Nummer"#HTML_WEISS" des Spielers ein um ein.\nUm ein "IINFO2"Anruf"#HTML_WEISS" zu tätigen","Anrufen","Abbrechen");
 	return 1;
 }
-COMMAND:hangup(playerid,params[])
+COMMAND:hangup(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -17309,7 +17315,7 @@ COMMAND:hangup(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht am Telefonieren.");
 }
 
-COMMAND:ptp(playerid,params[])
+COMMAND:ptp(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -17364,7 +17370,7 @@ COMMAND:ptp(playerid,params[])
 	return 1;
 }
 
-COMMAND:gotoxyz(playerid,params[])
+COMMAND:gotoxyz(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -17404,7 +17410,7 @@ COMMAND:gotoxyz(playerid,params[])
 	return 1;
 }
 
-COMMAND:moviecamtime(playerid,params[])
+COMMAND:moviecamtime(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -17425,7 +17431,7 @@ COMMAND:moviecamtime(playerid,params[])
 	return 1;
 }
 
-COMMAND:moviecam(playerid,params[])
+COMMAND:moviecam(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -17492,7 +17498,7 @@ COMMAND:moviecam(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""#IINFO" /moviecam [Fromcampos/Tocampos/Fromcamlockat/Tocamlockat/Start/Stop]");
 }
 
-COMMAND:marker(playerid,params[])
+COMMAND:marker(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -17537,7 +17543,7 @@ COMMAND:marker(playerid,params[])
 	return 1;
 }
 
-COMMAND:delmarker(playerid,params[])
+COMMAND:delmarker(playerid,const params[])
 {
 	new string[128],markerid;
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -17566,7 +17572,7 @@ COMMAND:delmarker(playerid,params[])
 	return 1;
 }
 
-COMMAND:gotomarker(playerid,params[])
+COMMAND:gotomarker(playerid,const params[])
 {
 	new string[128],markerid;
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -17610,7 +17616,7 @@ COMMAND:gotomarker(playerid,params[])
 	return 1;
 }
 
-COMMAND:goto(playerid,params[])
+COMMAND:goto(playerid,const params[])
 {
     new pID,string[128],Float:x,Float:y,Float:z;
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -17658,7 +17664,7 @@ COMMAND:goto(playerid,params[])
 	return 1;
 }
 
-COMMAND:gethere(playerid,params[])
+COMMAND:gethere(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -17704,7 +17710,7 @@ COMMAND:gethere(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:readall(playerid,params[])
+COMMAND:readall(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -17723,7 +17729,7 @@ COMMAND:readall(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:explodet(playerid,params[])
+COMMAND:explodet(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -17747,7 +17753,7 @@ COMMAND:explodet(playerid,params[])
 	return 1;
 }
 
-COMMAND:setweather(playerid,params[])
+COMMAND:setweather(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -17953,7 +17959,7 @@ COMMAND:setweather(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""#IINFO" /setweather [Normal/Regen/Sturm/Nebel/Schnee/Zufall][LS/SF/LV]");
 }
 
-COMMAND:setfraktionskasse(playerid,params[])
+COMMAND:setfraktionskasse(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18045,7 +18051,7 @@ COMMAND:setfraktionskasse(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,"Angegebene Fraktion besitzt keine Fraktionsbank.(/fraktionen)");
 }
-COMMAND:delfrakcar(playerid,params[])
+COMMAND:delfrakcar(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18112,7 +18118,7 @@ COMMAND:delfrakcar(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:addfrakcar(playerid,params[])
+COMMAND:addfrakcar(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18144,7 +18150,7 @@ COMMAND:addfrakcar(playerid,params[])
     SendFraktionsMessage(fID,FMELDUNG,string);
 	return 1;
 }
-COMMAND:adduserveh(playerid,params[])
+COMMAND:adduserveh(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18174,7 +18180,7 @@ COMMAND:adduserveh(playerid,params[])
     CreatePlayerVehicle(pID,model,Posi[0],Posi[1],Posi[2],Posi[3],"N/A",0);
 	return 1;
 }
-COMMAND:deluserveh(playerid,params[])
+COMMAND:deluserveh(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18235,7 +18241,7 @@ COMMAND:deluserveh(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Fahrzeug gehört keinem Spieler!");
 }
 
-COMMAND:delfraktionssperre(playerid,params[])
+COMMAND:delfraktionssperre(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18256,7 +18262,7 @@ COMMAND:delfraktionssperre(playerid,params[])
 	return 1;
 }
 
-COMMAND:afmember(playerid,params[])
+COMMAND:afmember(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18284,7 +18290,7 @@ COMMAND:afmember(playerid,params[])
 	if(onlinemembers == 0)return SCM(playerid,SAMP_WEISS,"Kein Fraktionsmitglied der angegebenen Fraktion Online.");
 	return 1;
 }
-COMMAND:showfkasse(playerid,params[])
+COMMAND:showfkasse(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18313,7 +18319,7 @@ COMMAND:showfkasse(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,"Angegebene Fraktion besitzt keine Fraktionsbank.(/fraktionen)");
 }
-COMMAND:fahrschule(playerid,params[])
+COMMAND:fahrschule(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -18375,7 +18381,7 @@ COMMAND:fahrschule(playerid,params[])
 	ShowPlayerDialog(playerid,DIALOG_FAHRSCHULE,DIALOG_STYLE_TABLIST_HEADERS,""ClanTagDialoge" Olaf's Fahrschule",edit_2,"Weiter","Abbrechen");
 	return 1;
 }
-COMMAND:fahrstunde(playerid,params[])
+COMMAND:fahrstunde(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18416,7 +18422,7 @@ COMMAND:fahrstunde(playerid,params[])
 	Spieler[pID][pVerbrauch] = 0;
 	return 1;
 }
-COMMAND:stopfahrstunde(playerid,params[])
+COMMAND:stopfahrstunde(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -18448,7 +18454,7 @@ COMMAND:stopfahrstunde(playerid,params[])
 	Spieler[pID][pVerbrauch] = 0;
 	return 1;
 }
-COMMAND:setopreis(playerid,params[])
+COMMAND:setopreis(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18507,7 +18513,7 @@ COMMAND:setopreis(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""#IINFO" /setopreis [Auto/Motorrad/Roller/Boot/Flug/Heli][Preis]");
 }
-COMMAND:sellschein(playerid,params[])
+COMMAND:sellschein(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18606,7 +18612,7 @@ COMMAND:sellschein(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""#IINFO" /sellschein [playerid/Name][Auto/Motorrad/Boot/Flug/Heli/Roller]");
 }
-COMMAND:durchsuchen(playerid,params[])
+COMMAND:durchsuchen(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18631,7 +18637,7 @@ COMMAND:durchsuchen(playerid,params[])
     ShowBag(pID,playerid);
     return 1;
 }
-COMMAND:rob(playerid,params[])
+COMMAND:rob(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18810,7 +18816,7 @@ COMMAND:rob(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" /rob [playerid/Name][Geld/C4/Ganja/Kokain/Opium/Spice/Handy/Materials]");
 }
 
-COMMAND:cheater(playerid,params[])
+COMMAND:cheater(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18839,7 +18845,7 @@ COMMAND:cheater(playerid,params[])
 	return 1;
 }
 
-COMMAND:melden(playerid,params[])
+COMMAND:melden(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18868,7 +18874,7 @@ COMMAND:melden(playerid,params[])
 	return 1;
 }
 
-COMMAND:showreports(playerid,params[])
+COMMAND:showreports(playerid,const params[])
 {
 	#pragma unused params
 	new string[128];
@@ -18886,7 +18892,7 @@ COMMAND:showreports(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:rpinfo(playerid,params[])
+COMMAND:rpinfo(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -18914,7 +18920,7 @@ COMMAND:rpinfo(playerid,params[])
 	SCM(playerid,SAMP_WEISS,""IINFO" diese Info kan nur alle 5 Minuten rausgegeben werden.");
 	return 1;
 }
-COMMAND:w(playerid,params[])
+COMMAND:w(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -18946,7 +18952,7 @@ COMMAND:w(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:fightstyle(playerid,params[])
+COMMAND:fightstyle(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -18962,7 +18968,7 @@ COMMAND:fightstyle(playerid,params[])
     ShowPlayerDialog(playerid,FIGHTSTYLE_DIALOG,DIALOG_STYLE_LIST,"Fightingstyle","Boxen(5000$)\nKung Fu(5000$)\nKneehead(5000$)\nGrabkick(5000$)\nElbow(5000$)","Kaufen","Abbrechen");
 	return 1;
 }
-COMMAND:armoralle_3(playerid,params[])
+COMMAND:armoralle_3(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -18984,14 +18990,14 @@ COMMAND:armoralle_3(playerid,params[])
     }
     return 1;
 }
-COMMAND:tc(playerid,params[])
+COMMAND:tc(playerid,const params[])
 {
     #pragma unused params
    	if(ReturnTelefonzellenID(playerid) == -1)return SCM(playerid,SAMP_WEISS,""IINFO" an keiner Telefonzelle.");
 	ShowPlayerDialog(playerid,DIALOG_TELEFONZELLEINFO,DIALOG_STYLE_LIST,""ClanTagDialoge" Telefonzelle",""#HTML_BLAU"1."#HTML_WEISS" Anrufen\n"#HTML_BLAU"2."#HTML_WEISS" Andere Dienste","Anwenden","Abbrechen");
 	return 1;
 }
-COMMAND:healalle_3(playerid,params[])
+COMMAND:healalle_3(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -19013,7 +19019,7 @@ COMMAND:healalle_3(playerid,params[])
     }
     return 1;
 }
-COMMAND:kickall(playerid,params[])
+COMMAND:kickall(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -19035,7 +19041,7 @@ COMMAND:kickall(playerid,params[])
     }
     return 1;
 }
-COMMAND:spawnall(playerid,params[])
+COMMAND:spawnall(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -19070,7 +19076,7 @@ COMMAND:spawnall(playerid,params[])
     return 1;
 }
 
-COMMAND:buylevel(playerid,params[])
+COMMAND:buylevel(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -19130,7 +19136,7 @@ COMMAND:buylevel(playerid,params[])
 	}
     return 1;
 }
-COMMAND:animlist(playerid,params[])
+COMMAND:animlist(playerid,const params[])
 {
     #pragma unused params
     if(IsPlayerInWater(playerid))return SCM(playerid,SAMP_WEISS,"Im Wasser sind keine Animationen möglich!");
@@ -19140,7 +19146,7 @@ COMMAND:animlist(playerid,params[])
 	SCM(playerid,SAMP_WEISS,"[/fucku /chat /taichi /chairsit /revive /dance1-4] /push /dig");
     return 1;
 }
-COMMAND:handsup(playerid,params[])
+COMMAND:handsup(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Auto keine Animation abspielen.");
@@ -19154,7 +19160,7 @@ COMMAND:handsup(playerid,params[])
 	return 1;
 }
 
-COMMAND:piss(playerid,params[])
+COMMAND:piss(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Auto keine Animation abspielen.");
@@ -19167,7 +19173,7 @@ COMMAND:piss(playerid,params[])
 	return 1;
 }
 
-COMMAND:wank(playerid,params[])
+COMMAND:wank(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19180,7 +19186,7 @@ COMMAND:wank(playerid,params[])
 	return 1;
 }
 
-COMMAND:callanim(playerid,params[])
+COMMAND:callanim(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19194,7 +19200,7 @@ COMMAND:callanim(playerid,params[])
 }
 
 
-COMMAND:stopcall(playerid,params[])
+COMMAND:stopcall(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19207,7 +19213,7 @@ COMMAND:stopcall(playerid,params[])
 	return 1;
 }
 
-COMMAND:drink(playerid,params[])
+COMMAND:drink(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19220,7 +19226,7 @@ COMMAND:drink(playerid,params[])
 	return 1;
 }
 
-COMMAND:bomb(playerid,params[])
+COMMAND:bomb(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19233,7 +19239,7 @@ COMMAND:bomb(playerid,params[])
 	return 1;
 }
 
-COMMAND:getarrested(playerid,params[])
+COMMAND:getarrested(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19246,7 +19252,7 @@ COMMAND:getarrested(playerid,params[])
 	return 1;
 }
 
-COMMAND:laugh(playerid,params[])
+COMMAND:laugh(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19259,7 +19265,7 @@ COMMAND:laugh(playerid,params[])
 	return 1;
 }
 
-COMMAND:lockat(playerid,params[])
+COMMAND:lockat(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19272,7 +19278,7 @@ COMMAND:lockat(playerid,params[])
 	return 1;
 }
 
-COMMAND:aim(playerid,params[])
+COMMAND:aim(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19285,7 +19291,7 @@ COMMAND:aim(playerid,params[])
 	return 1;
 }
 
-COMMAND:crossarms(playerid,params[])
+COMMAND:crossarms(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19298,7 +19304,7 @@ COMMAND:crossarms(playerid,params[])
 	return 1;
 }
 
-COMMAND:lay(playerid,params[])
+COMMAND:lay(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19311,7 +19317,7 @@ COMMAND:lay(playerid,params[])
 	return 1;
 }
 
-COMMAND:hide(playerid,params[])
+COMMAND:hide(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19324,7 +19330,7 @@ COMMAND:hide(playerid,params[])
 	return 1;
 }
 
-COMMAND:puke(playerid,params[])
+COMMAND:puke(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19337,7 +19343,7 @@ COMMAND:puke(playerid,params[])
 	return 1;
 }
 
-COMMAND:eat(playerid,params[])
+COMMAND:eat(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19350,7 +19356,7 @@ COMMAND:eat(playerid,params[])
 	return 1;
 }
 
-COMMAND:wave(playerid,params[])
+COMMAND:wave(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19363,7 +19369,7 @@ COMMAND:wave(playerid,params[])
 	return 1;
 }
 
-COMMAND:slapass(playerid,params[])
+COMMAND:slapass(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19376,7 +19382,7 @@ COMMAND:slapass(playerid,params[])
 	return 1;
 }
 
-COMMAND:deal(playerid,params[])
+COMMAND:deal(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19389,7 +19395,7 @@ COMMAND:deal(playerid,params[])
 	return 1;
 }
 
-COMMAND:die(playerid,params[])
+COMMAND:die(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19402,7 +19408,7 @@ COMMAND:die(playerid,params[])
 	return 1;
 }
 
-COMMAND:dig(playerid,params[])
+COMMAND:dig(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19415,7 +19421,7 @@ COMMAND:dig(playerid,params[])
 	return 1;
 }
 
-COMMAND:push(playerid,params[])
+COMMAND:push(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19428,7 +19434,7 @@ COMMAND:push(playerid,params[])
 	return 1;
 }
 
-COMMAND:kiss1(playerid,params[])
+COMMAND:kiss1(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19441,7 +19447,7 @@ COMMAND:kiss1(playerid,params[])
 	return 1;
 }
 
-COMMAND:kiss2(playerid,params[])
+COMMAND:kiss2(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19454,7 +19460,7 @@ COMMAND:kiss2(playerid,params[])
 	return 1;
 }
 
-COMMAND:kiss3(playerid,params[])
+COMMAND:kiss3(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19467,7 +19473,7 @@ COMMAND:kiss3(playerid,params[])
 	return 1;
 }
 
-COMMAND:kiss4(playerid,params[])
+COMMAND:kiss4(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19480,7 +19486,7 @@ COMMAND:kiss4(playerid,params[])
 	return 1;
 }
 
-COMMAND:police1(playerid,params[])
+COMMAND:police1(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19493,7 +19499,7 @@ COMMAND:police1(playerid,params[])
 	return 1;
 }
 
-COMMAND:police2(playerid,params[])
+COMMAND:police2(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19506,7 +19512,7 @@ COMMAND:police2(playerid,params[])
 	return 1;
 }
 
-COMMAND:police3(playerid,params[])
+COMMAND:police3(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19519,7 +19525,7 @@ COMMAND:police3(playerid,params[])
 	return 1;
 }
 
-COMMAND:police4(playerid,params[])
+COMMAND:police4(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19532,7 +19538,7 @@ COMMAND:police4(playerid,params[])
 	return 1;
 }
 
-COMMAND:police5(playerid,params[])
+COMMAND:police5(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19545,7 +19551,7 @@ COMMAND:police5(playerid,params[])
 	return 1;
 }
 
-COMMAND:police6(playerid,params[])
+COMMAND:police6(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19558,7 +19564,7 @@ COMMAND:police6(playerid,params[])
 	return 1;
 }
 
-COMMAND:police7(playerid,params[])
+COMMAND:police7(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19571,7 +19577,7 @@ COMMAND:police7(playerid,params[])
 	return 1;
 }
 
-COMMAND:police8(playerid,params[])
+COMMAND:police8(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19584,7 +19590,7 @@ COMMAND:police8(playerid,params[])
 	return 1;
 }
 
-COMMAND:blow1(playerid,params[])
+COMMAND:blow1(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19597,7 +19603,7 @@ COMMAND:blow1(playerid,params[])
 	return 1;
 }
 
-COMMAND:blow2(playerid,params[])
+COMMAND:blow2(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19610,7 +19616,7 @@ COMMAND:blow2(playerid,params[])
 	return 1;
 }
 
-COMMAND:blow3(playerid,params[])
+COMMAND:blow3(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19623,7 +19629,7 @@ COMMAND:blow3(playerid,params[])
 	return 1;
 }
 
-COMMAND:blow4(playerid,params[])
+COMMAND:blow4(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19636,7 +19642,7 @@ COMMAND:blow4(playerid,params[])
 	return 1;
 }
 
-COMMAND:blow5(playerid,params[])
+COMMAND:blow5(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19649,7 +19655,7 @@ COMMAND:blow5(playerid,params[])
 	return 1;
 }
 
-COMMAND:blow6(playerid,params[])
+COMMAND:blow6(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19662,7 +19668,7 @@ COMMAND:blow6(playerid,params[])
 	return 1;
 }
 
-COMMAND:blow7(playerid,params[])
+COMMAND:blow7(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19675,7 +19681,7 @@ COMMAND:blow7(playerid,params[])
 	return 1;
 }
 
-COMMAND:blow8(playerid,params[])
+COMMAND:blow8(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19688,7 +19694,7 @@ COMMAND:blow8(playerid,params[])
 	return 1;
 }
 
-COMMAND:blow9(playerid,params[])
+COMMAND:blow9(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19701,7 +19707,7 @@ COMMAND:blow9(playerid,params[])
 	return 1;
 }
 
-COMMAND:blow10(playerid,params[])
+COMMAND:blow10(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19714,7 +19720,7 @@ COMMAND:blow10(playerid,params[])
 	return 1;
 }
 
-COMMAND:blow11(playerid,params[])
+COMMAND:blow11(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19727,7 +19733,7 @@ COMMAND:blow11(playerid,params[])
 	return 1;
 }
 
-COMMAND:blow12(playerid,params[])
+COMMAND:blow12(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19740,7 +19746,7 @@ COMMAND:blow12(playerid,params[])
 	return 1;
 }
 
-COMMAND:smoke1(playerid,params[])
+COMMAND:smoke1(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19753,7 +19759,7 @@ COMMAND:smoke1(playerid,params[])
 	return 1;
 }
 
-COMMAND:smoke2(playerid,params[])
+COMMAND:smoke2(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19766,7 +19772,7 @@ COMMAND:smoke2(playerid,params[])
 	return 1;
 }
 
-COMMAND:groundsit(playerid,params[])
+COMMAND:groundsit(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19778,7 +19784,7 @@ COMMAND:groundsit(playerid,params[])
     animak[playerid] = true;
 	return 1;
 }
-COMMAND:chat(playerid,params[])
+COMMAND:chat(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19790,7 +19796,7 @@ COMMAND:chat(playerid,params[])
     animak[playerid] = true;
 	return 1;
 }
-COMMAND:fucku(playerid,params[])
+COMMAND:fucku(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19802,7 +19808,7 @@ COMMAND:fucku(playerid,params[])
     animak[playerid] = true;
 	return 1;
 }
-COMMAND:taichi(playerid,params[])
+COMMAND:taichi(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19814,7 +19820,7 @@ COMMAND:taichi(playerid,params[])
     animak[playerid] = true;
 	return 1;
 }
-COMMAND:chairsit(playerid,params[])
+COMMAND:chairsit(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19826,7 +19832,7 @@ COMMAND:chairsit(playerid,params[])
     animak[playerid] = true;
 	return 1;
 }
-COMMAND:revive(playerid,params[])
+COMMAND:revive(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19838,7 +19844,7 @@ COMMAND:revive(playerid,params[])
     animak[playerid] = true;
 	return 1;
 }
-COMMAND:dance1(playerid,params[])
+COMMAND:dance1(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19850,7 +19856,7 @@ COMMAND:dance1(playerid,params[])
     animak[playerid] = true;
 	return 1;
 }
-COMMAND:dance2(playerid,params[])
+COMMAND:dance2(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19862,7 +19868,7 @@ COMMAND:dance2(playerid,params[])
     animak[playerid] = true;
 	return 1;
 }
-COMMAND:dance3(playerid,params[])
+COMMAND:dance3(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19874,7 +19880,7 @@ COMMAND:dance3(playerid,params[])
     animak[playerid] = true;
 	return 1;
 }
-COMMAND:dance4(playerid,params[])
+COMMAND:dance4(playerid,const params[])
 {
 	#pragma unused params
 	if(IsPlayerInAnyVehicle(playerid))return SCM(playerid,SAMP_WEISS,""IINFO" du kannst im Fahrzeug keine Animation abspielen.");
@@ -19886,7 +19892,7 @@ COMMAND:dance4(playerid,params[])
     animak[playerid] = true;
 	return 1;
 }
-COMMAND:help(playerid,params[])
+COMMAND:help(playerid,const params[])
 {
 	#pragma unused params
 	strdel(edit_2,0,sizeof(edit_2));
@@ -19905,7 +19911,7 @@ COMMAND:help(playerid,params[])
 	ShowPlayerDialog(playerid,DIALOG_HELPSYS32,DIALOG_STYLE_LIST,""ClanTagDialoge" Hilfestellung",edit_2,"Ansehen","Abbrechen");
 	return 1;
 }
-COMMAND:freundhelp(playerid,params[])
+COMMAND:freundhelp(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -19919,7 +19925,7 @@ COMMAND:freundhelp(playerid,params[])
 	ShowPlayerDialog(playerid,DIALOG_HILFE_OPTIONAL,DIALOG_STYLE_MSGBOX,""ClanTagDialoge" Freundschafts -> Help",edit_2,"Zurück","Abbrechen");
 	return 1;
 }
-COMMAND:ghelp_3(playerid,params[])
+COMMAND:ghelp_3(playerid,const params[])
 {
 	#pragma unused params
 	new string[2600];
@@ -19941,14 +19947,14 @@ COMMAND:ghelp_3(playerid,params[])
 	ShowPlayerDialog(playerid,DIALOG_HILFE_OPTIONAL,DIALOG_STYLE_MSGBOX,""ClanTagDialoge" Hilfe Allgemein",string,"Zurück","Abbrechen");
 	return 1;
 }
-COMMAND:handyhelp_3(playerid,params[])
+COMMAND:handyhelp_3(playerid,const params[])
 {
 	#pragma unused params
     if(Spieler[playerid][pHandy] == 0)return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt kein Handy.");
     ShowPlayerDialog(playerid,DIALOG_HILFE_OPTIONAL,DIALOG_STYLE_MSGBOX,""#HTML_BLAU""#SERVERNAME"{FFFFFF} Handyhilfe",""#HTML_BLAU"Befehle{FFFFFF}:\n/handy | /akku | /pickup | /hangup | /nummer | /call | /sms | /service | /quitflat | /befreien","Zurück","Abbrechen");
 	return 1;
 }
-COMMAND:jobhelp_3(playerid,params[])
+COMMAND:jobhelp_3(playerid,const params[])
 {
 	#pragma unused params
 	new string[2600];
@@ -20017,13 +20023,13 @@ COMMAND:jobhelp_3(playerid,params[])
     }
 	return 1;
 }
-COMMAND:bankhelp_3(playerid,params[])
+COMMAND:bankhelp_3(playerid,const params[])
 {
 	#pragma unused params
 	ShowPlayerDialog(playerid,DIALOG_HILFE_OPTIONAL,DIALOG_STYLE_MSGBOX,""#HTML_BLAU""#SERVERNAME"{FFFFFF} Bank-/Geldhilfe",""#HTML_BLAU"Befehle{FFFFFF}:\n/bankmenu | /pay | /bankraub | /bank | /safe | /bankpin","Zurück","Abbrechen");
 	return 1;
 }
-COMMAND:haushelp_3(playerid,params[])
+COMMAND:haushelp_3(playerid,const params[])
 {
 	#pragma unused params
     ReturnPropertyData(playerid);
@@ -20034,7 +20040,7 @@ COMMAND:haushelp_3(playerid,params[])
 	ShowPlayerDialog(playerid,DIALOG_HILFE_OPTIONAL,DIALOG_STYLE_MSGBOX,""ClanTagDialoge" Hilfestellung -> Haushilfe",string,"Zurück","Abbrechen");
 	return 1;
 }
-COMMAND:renthelp_3(playerid,params[])
+COMMAND:renthelp_3(playerid,const params[])
 {
 	#pragma unused params
     new haus = Spieler[playerid][pRentHome];
@@ -20043,7 +20049,7 @@ COMMAND:renthelp_3(playerid,params[])
 	return 1;
 }
 
-COMMAND:bizhelp_3(playerid,params[])
+COMMAND:bizhelp_3(playerid,const params[])
 {
 	#pragma unused params
 	new biz = IsPlayerAnyBusinessOwner(Spieler[playerid][pName]);
@@ -20052,7 +20058,7 @@ COMMAND:bizhelp_3(playerid,params[])
 	return 1;
 }
 
-COMMAND:fhelp_3(playerid,params[])
+COMMAND:fhelp_3(playerid,const params[])
 {
 	#pragma unused params
 	new string[2600];
@@ -20517,20 +20523,20 @@ COMMAND:fhelp_3(playerid,params[])
 	}
 	return ShowPlayerDialog(playerid,DIALOG_HILFE_OPTIONAL,DIALOG_STYLE_MSGBOX,""#HTML_BLAU""#SERVERNAME"{FFFFFF} Fraktionshilfe",string,"Zurück","Abbrechen");
 }
-COMMAND:animhelp(playerid,params[])
+COMMAND:animhelp(playerid,const params[])
 {
 	#pragma unused params
 	ShowPlayerDialog(playerid,DIALOG_HILFE_OPTIONAL,DIALOG_STYLE_MSGBOX,""#HTML_BLAU""#SERVERNAME"{FFFFFF} Animationshilfe","/anim [Animation]","Zurück","Abbrechen");
 	return 1;
 }
-COMMAND:vehhelp(playerid,params[])
+COMMAND:vehhelp(playerid,const params[])
 {
 	#pragma unused params
 	if(GetPlayerVehicleCount(playerid) != 0)return ShowPlayerDialog(playerid,DIALOG_HILFE_OPTIONAL,DIALOG_STYLE_MSGBOX,""#HTML_BLAU""#SERVERNAME"{FFFFFF} Fahrzeughilfe",""#HTML_BLAU"Fahrzeug{FFFFFF}:\n/cv oder Taste Z zum kontrollieren eines Fahrzeugs | /kraum | /kofferrauminfo | /eject | /tanken | /cc | /werkstatt | /lock\n\n"#HTML_BLAU"Privatfahrzeug{FFFFFF}:\n/pveh","Zurück","Abbrechen");
     ShowPlayerDialog(playerid,DIALOG_HILFE_OPTIONAL,DIALOG_STYLE_MSGBOX,""#HTML_BLAU""#SERVERNAME"{FFFFFF} Fahrzeughilfe",""#HTML_BLAU"Fahrzeug{FFFFFF}:\n/cv oder Taste Z zum kontrollieren eines Fahrzeugs | /kraum | /kofferrauminfo | /eject | /tanken | /cc | /werkstatt | /lock","Zurück","Abbrechen");
 	return 1;
 }
-COMMAND:fishhelp(playerid,params[])
+COMMAND:fishhelp(playerid,const params[])
 {
 	#pragma unused params
 	new string[500];
@@ -20541,7 +20547,7 @@ COMMAND:fishhelp(playerid,params[])
     ShowPlayerDialog(playerid,DIALOG_HILFE_OPTIONAL,DIALOG_STYLE_MSGBOX,""#HTML_BLAU""#SERVERNAME"{FFFFFF} Fischshilfe",string,"Zurück","Abbrechen");
 	return 1;
 }
-COMMAND:firmakasse(playerid,params[])
+COMMAND:firmakasse(playerid,const params[])
 {
 	#pragma unused params
 	new org = Spieler[playerid][pOrgMember];
@@ -20553,7 +20559,7 @@ COMMAND:firmakasse(playerid,params[])
 	ShowPlayerDialog(playerid,DIALOG_FIRMKASSE,DIALOG_STYLE_LIST,""ClanTagDialoge" Firmakasse",edit_2,"Weiter","Abbrechen");
 	return 1;
 }
-COMMAND:orghelp(playerid,params[])
+COMMAND:orghelp(playerid,const params[])
 {
 	#pragma unused params
     new org = Spieler[playerid][pOrgMember],string[1000];
@@ -20585,7 +20591,7 @@ format(string,sizeof(string),"%s{FFFFFF}Mitgliedsbeitrag: %i$\n\n",string,OrgInf
 //strcat(string,""#HTML_WEISS" /orgmbeitrag "#HTML_GRAU"- um einen Spieler in deiner Firma aufzunehmen.\n");
 //strcat(string,""#HTML_WEISS" /orginvite "#HTML_GRAU"- um einen Spieler in deiner Firma aufzunehmen.\n");
 //strcat(string,""#HTML_WEISS" /orginvite "#HTML_GRAU"- um einen Spieler in deiner Firma aufzunehmen.\n");}
-COMMAND:parteihelp(playerid,params[])
+COMMAND:parteihelp(playerid,const params[])
 {
 	#pragma unused params
     new partei = Spieler[playerid][pParteiMember],string[500];
@@ -20611,7 +20617,7 @@ COMMAND:parteihelp(playerid,params[])
 	ShowPlayerDialog(playerid,DIALOG_HILFE_OPTIONAL,DIALOG_STYLE_MSGBOX,""#HTML_BLAU""#SERVERNAME"{FFFFFF} Parteihilfe",string,"Zurück","Abbrechen");
 	return 1;
 }*/
-COMMAND:ahelp(playerid,params[])
+COMMAND:ahelp(playerid,const params[])
 {
 	#pragma unused params
 	new string[2900];
@@ -20842,7 +20848,7 @@ COMMAND:ahelp(playerid,params[])
 	}
 	return ShowPlayerDialog(playerid,DIALOG_HILFE_OPTIONAL,DIALOG_STYLE_MSGBOX,""ClanTagDialoge" Teammitglieder Befehle",string,"Zurück","Abbrechen");
 }
-COMMAND:firstperson(playerid,params[])
+COMMAND:firstperson(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -20872,7 +20878,7 @@ COMMAND:firstperson(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:mfahrzeug(playerid,params[])
+COMMAND:mfahrzeug(playerid,const params[])
 {
 	new string[250];
 	strdel(edit_2,0,sizeof(edit_2));
@@ -20886,7 +20892,7 @@ COMMAND:mfahrzeug(playerid,params[])
 	ShowPlayerDialog(playerid,DIALOG_RENTVEHS2,DIALOG_STYLE_LIST,""ClanTagDialoge" Rollerverleih",edit_2,"Auswahl","Schließen");
 	return 1;
 }
-COMMAND:rlock(playerid,params[])
+COMMAND:rlock(playerid,const params[])
 {
 	new string[128],Float:Pos[4];
     if(Spieler[playerid][pRentAVeh][0] == 0)return SCM(playerid,SAMP_WEISS,""IINFO" du hast dir keinen Roller gemietet.");
@@ -20914,7 +20920,7 @@ COMMAND:rlock(playerid,params[])
 	}
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der Nähe deines gemieteten Fahrzeuges.");
 }
-COMMAND:mfahrzeug_2(playerid,params[])
+COMMAND:mfahrzeug_2(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -20983,7 +20989,7 @@ COMMAND:mfahrzeug_2(playerid,params[])
     }
 	return SCM(playerid,SAMP_WEISS,""#IINFO" /rentveh [Add/Lock/Del]");
 }
-COMMAND:rent(playerid,params[])
+COMMAND:rent(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -21139,7 +21145,7 @@ COMMAND:rent(playerid,params[])
     }
 	return SCM(playerid,SAMP_WEISS,""#IINFO" /rent [Zimmer/Hotel/Rentveh/Fahrzeug]");
 }
-COMMAND:unrent(playerid,params[])
+COMMAND:unrent(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -21183,7 +21189,7 @@ COMMAND:unrent(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""#IINFO" /unrent [Zimmer/Hotel/Rentveh]");
 }
 
-COMMAND:gchat(playerid,params[])
+COMMAND:gchat(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -21215,7 +21221,7 @@ COMMAND:gchat(playerid,params[])
 	return 1;
 }
 
-COMMAND:wtext(playerid,params[])
+COMMAND:wtext(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -21265,7 +21271,7 @@ COMMAND:wtext(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du kannst nur alle 10 Sekunden einen Werbetext absenden.");
 }
 
-COMMAND:server(playerid,params[])
+COMMAND:server(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -21303,7 +21309,7 @@ COMMAND:server(playerid,params[])
 	return 1;
 }
 
-COMMAND:use(playerid,params[])
+COMMAND:use(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -21464,7 +21470,7 @@ COMMAND:use(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" /use [Opium/Spice/Bier/Kokain/Ganja/Lunchpaket/Zigarette]");
 }
 
-COMMAND:sfight(playerid,params[])
+COMMAND:sfight(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -21570,7 +21576,7 @@ COMMAND:sfight(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:sfightinfo(playerid,params[])
+COMMAND:sfightinfo(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -21602,7 +21608,7 @@ COMMAND:sfightinfo(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:sverkaufen(playerid,params[])
+COMMAND:sverkaufen(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -21666,7 +21672,7 @@ COMMAND:sverkaufen(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:smenu(playerid,params[])
+COMMAND:smenu(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -21691,7 +21697,7 @@ COMMAND:smenu(playerid,params[])
  	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:steilhaber(playerid,params[])
+COMMAND:steilhaber(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -21729,7 +21735,7 @@ COMMAND:steilhaber(playerid,params[])
  	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:skickteilhaber(playerid,params[])
+COMMAND:skickteilhaber(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -21760,7 +21766,7 @@ COMMAND:skickteilhaber(playerid,params[])
  	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:slock(playerid,params[])
+COMMAND:slock(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -21806,7 +21812,7 @@ COMMAND:slock(playerid,params[])
  	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:seject(playerid,params[])
+COMMAND:seject(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -21858,7 +21864,7 @@ COMMAND:seject(playerid,params[])
 	}
  	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:baselock(playerid,params[])
+COMMAND:baselock(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -21894,7 +21900,7 @@ COMMAND:baselock(playerid,params[])
  	}
  	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:fheal(playerid,params[])
+COMMAND:fheal(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -21949,7 +21955,7 @@ COMMAND:fheal(playerid,params[])
     }
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:farmour(playerid,params[])
+COMMAND:farmour(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22004,7 +22010,7 @@ COMMAND:farmour(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:fwaffen(playerid,params[])
+COMMAND:fwaffen(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22405,7 +22411,7 @@ COMMAND:fwaffen(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:frakmenu(playerid,params[])
+COMMAND:frakmenu(playerid,const params[])
 {
     #pragma unused params
    	if(isPlayerInFrakt(playerid,4) || isPlayerInFrakt(playerid,5) || isPlayerInFrakt(playerid,7) || isPlayerInFrakt(playerid,8) || isPlayerInFrakt(playerid,9) || isPlayerInFrakt(playerid,10) || isPlayerInFrakt(playerid,12) || isPlayerInFrakt(playerid,13) || isPlayerInFrakt(playerid,14) || isPlayerInFrakt(playerid,15) || isPlayerInFrakt(playerid,16) || isPlayerInFrakt(playerid,17) || isPlayerInFrakt(playerid,18))
@@ -22416,7 +22422,7 @@ COMMAND:frakmenu(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:fbank(playerid,params[])
+COMMAND:fbank(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22454,7 +22460,7 @@ COMMAND:fbank(playerid,params[])
     ShowPlayerDialog(playerid,DIALOG_FVERWALTUNG_Motd,DIALOG_STYLE_INPUT,"Fraktionsverwaltung Spawnnachricht","Gebe nun hier den Text ein den deine Fraktionsmitglieder beim ersten Spawn auf dem Server sehen sollen.\nDer Text darf nicht mehr als 64 Zeichen haben!","Absenden","Zurück");
 	return 1;
 }*/
-COMMAND:rangedit(playerid,params[])
+COMMAND:rangedit(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -22498,7 +22504,7 @@ COMMAND:rangedit(playerid,params[])
     ShowPlayerEditRang(playerid);
 	return 1;
 }
-COMMAND:frangs(playerid,params[])
+COMMAND:frangs(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22518,7 +22524,7 @@ COMMAND:frangs(playerid,params[])
     ShowPlayerDialog(playerid,DIALOG_4ALL_SONSTIGES,DIALOG_STYLE_MSGBOX,""ClanTagDialoge" Rangnamen - Liste",string,"Okay","");
 	return 1;
 }/*
-COMMAND:arangedit(playerid,params[])
+COMMAND:arangedit(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -22556,7 +22562,7 @@ COMMAND:arangedit(playerid,params[])
     SCM(playerid,FMELDUNG,string);
 	return 1;
 }*/
-COMMAND:afrangs(playerid,params[])
+COMMAND:afrangs(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -22571,7 +22577,7 @@ COMMAND:afrangs(playerid,params[])
 	return 1;
 }
 
-COMMAND:aflimit(playerid,params[])
+COMMAND:aflimit(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -22587,7 +22593,7 @@ COMMAND:aflimit(playerid,params[])
 	return 1;
 }
 
-COMMAND:fverwaltung(playerid,params[])
+COMMAND:fverwaltung(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22607,7 +22613,7 @@ COMMAND:fverwaltung(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:porten(playerid,params[])
+COMMAND:porten(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22629,7 +22635,7 @@ COMMAND:porten(playerid,params[])
 	ShowPlayerDialog(playerid,DIALOG_APORTEN,DIALOG_STYLE_LIST,"Porten...",string,"Porten","Abbrechen");
 	return 1;
 }
-COMMAND:bank_3(playerid,params[])
+COMMAND:bank_3(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22649,7 +22655,7 @@ COMMAND:bank_3(playerid,params[])
 	ShowPlayerBankMenu(playerid);
 	return 1;
 }
-COMMAND:safe(playerid,params[])
+COMMAND:safe(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22666,7 +22672,7 @@ COMMAND:safe(playerid,params[])
  	ShowSafeMenu(playerid);
 	return 1;
 }
-COMMAND:bankpin(playerid,params[])
+COMMAND:bankpin(playerid,const params[])
 {
     #pragma unused params
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22689,7 +22695,7 @@ COMMAND:bankpin(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:bankmenu(playerid,params[])
+COMMAND:bankmenu(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22714,7 +22720,7 @@ COMMAND:bankmenu(playerid,params[])
 	ShowPlayerDialog(playerid,DIALOG_BANK_PINENTRY,DIALOG_STYLE_PASSWORD,""ClanTagDialoge" ATM",""#HTML_WEISS"Geben Sie Ihren gültigen "IINFO2"Bank-Pin"#HTML_WEISS" ein,um extern auf ihr Bankkonto zugreifen zu können.","Absenden","Abbrechen");
 	return 1;
 }
-COMMAND:weisung(playerid,params[])
+COMMAND:weisung(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -22772,7 +22778,7 @@ COMMAND:weisung(playerid,params[])
 	ApplyAnimation(GetPlayerID("[BOT]Bank"),"PED","IDLE_CHAT",4.0,false,false,false,false,0,SYNC_ALL);
 	return 1;
 }
-COMMAND:fraktueberweisung(playerid,params[])
+COMMAND:fraktueberweisung(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -22824,7 +22830,7 @@ COMMAND:fraktueberweisung(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,"Angegebene Fraktion besitzt keine Fraktionsbank.(/fraktionen)");
 }
-COMMAND:saveme(playerid,params[])
+COMMAND:saveme(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22840,7 +22846,7 @@ COMMAND:saveme(playerid,params[])
 	SaveAccount(playerid);
 	return 1;
 }
-COMMAND:gangfight(playerid,params[])
+COMMAND:gangfight(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -22878,7 +22884,7 @@ COMMAND:gangfight(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:stopgangfight(playerid,params[])
+COMMAND:stopgangfight(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22917,7 +22923,7 @@ COMMAND:stopgangfight(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:gangfightinfo(playerid,params[])
+COMMAND:gangfightinfo(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22943,7 +22949,7 @@ COMMAND:gangfightinfo(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:jtmenu(playerid,params[])
+COMMAND:jtmenu(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -22959,7 +22965,7 @@ COMMAND:jtmenu(playerid,params[])
 	ShowPlayerGeldJob(playerid);
 	return 1;
 }
-COMMAND:loadmoney_2(playerid,params[])
+COMMAND:loadmoney_2(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -22989,7 +22995,7 @@ COMMAND:loadmoney_2(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht am Lager!");
 }
-COMMAND:loadmoneystatus_2(playerid,params[])
+COMMAND:loadmoneystatus_2(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23010,7 +23016,7 @@ COMMAND:loadmoneystatus_2(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:loadmoneypoint_2(playerid,params[])
+COMMAND:loadmoneypoint_2(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -23043,7 +23049,7 @@ COMMAND:loadmoneypoint_2(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" /loadmoneypoint [LS/SF]");
 }
-COMMAND:fillatm(playerid,params[])
+COMMAND:fillatm(playerid,const params[])
 {
     #pragma unused params
     strdel(edit_2,0,sizeof(edit_2));
@@ -23080,7 +23086,7 @@ COMMAND:fillatm(playerid,params[])
 	ShowPlayerDialog(playerid,DIALOG_REQUIRE,DIALOG_STYLE_MSGBOX,""ClanTagDialoge" Geldautomat",edit_2,"Okay","");
 	return 1;
 }
-COMMAND:allthinginfo_2(playerid,params[])
+COMMAND:allthinginfo_2(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23118,7 +23124,7 @@ COMMAND:allthinginfo_2(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job.");
 }
-COMMAND:loadrubbish(playerid,params[])
+COMMAND:loadrubbish(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23155,7 +23161,7 @@ COMMAND:loadrubbish(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keinem Haus.");
 }
 
-COMMAND:loadrubbishstatus(playerid,params[])
+COMMAND:loadrubbishstatus(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23176,7 +23182,7 @@ COMMAND:loadrubbishstatus(playerid,params[])
 	return 1;
 }
 
-COMMAND:unloadrubbish(playerid,params[])
+COMMAND:unloadrubbish(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23208,7 +23214,7 @@ COMMAND:unloadrubbish(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Nicht an der Los Santos Mülldeponie./Nicht an der San Fierro Mülldeponie./Nicht an der Las Venturas Mülldeponie.");
 }
 
-COMMAND:landfill(playerid,params[])
+COMMAND:landfill(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -23248,7 +23254,7 @@ COMMAND:landfill(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" /landfill [LS/SF/LV]");
 }
 
-COMMAND:loaddirtstatus(playerid,params[])
+COMMAND:loaddirtstatus(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23269,7 +23275,7 @@ COMMAND:loaddirtstatus(playerid,params[])
 	return 1;
 }
 
-COMMAND:unloaddirt(playerid,params[])
+COMMAND:unloaddirt(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23301,7 +23307,7 @@ COMMAND:unloaddirt(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Nicht an der Los Santos Entsorgungsmaschine (/cleanmachine).");
 }
 
-COMMAND:cleanmachine(playerid,params[])
+COMMAND:cleanmachine(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23322,7 +23328,7 @@ COMMAND:cleanmachine(playerid,params[])
 	return 1;
 }
 
-COMMAND:loadzig(playerid,params[])
+COMMAND:loadzig(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23351,7 +23357,7 @@ COMMAND:loadzig(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Nicht an der Los Santos Zigarettenfabrik./Nicht an der San Fierro Zigarettenfabrik.");
 }
 
-COMMAND:loadzigstatus(playerid,params[])
+COMMAND:loadzigstatus(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23372,7 +23378,7 @@ COMMAND:loadzigstatus(playerid,params[])
 	return 1;
 }
 
-COMMAND:loadzigpoint(playerid,params[])
+COMMAND:loadzigpoint(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -23405,7 +23411,7 @@ COMMAND:loadzigpoint(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" /loadzigpoint [LS/SF]");
 }
 
-COMMAND:bentladen(playerid,params[])
+COMMAND:bentladen(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23438,7 +23444,7 @@ COMMAND:bentladen(playerid,params[])
 	return 1;
 }
 
-COMMAND:baufladen(playerid,params[])
+COMMAND:baufladen(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23470,7 +23476,7 @@ COMMAND:baufladen(playerid,params[])
     }
 	return 1;
 }
-COMMAND:bstarten(playerid,params[])
+COMMAND:bstarten(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23503,7 +23509,7 @@ COMMAND:bstarten(playerid,params[])
  	}
 	return 1;
 }
-COMMAND:fillztm(playerid,params[])
+COMMAND:fillztm(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23539,7 +23545,7 @@ COMMAND:fillztm(playerid,params[])
 	SCM(playerid,SAMP_WEISS,"Info: Die Auszahlung wird am Zahltag auf dein Konto überwiesen.");
 	return 1;
 }
-COMMAND:buyzig(playerid,params[])
+COMMAND:buyzig(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23565,7 +23571,7 @@ COMMAND:buyzig(playerid,params[])
 }
 
 
-COMMAND:startbaggern(playerid,params[])
+COMMAND:startbaggern(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23588,7 +23594,7 @@ COMMAND:startbaggern(playerid,params[])
 	return 1;
 }
 
-COMMAND:werkstatt(playerid,params[])
+COMMAND:werkstatt(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23608,7 +23614,7 @@ COMMAND:werkstatt(playerid,params[])
 	return 1;
 }
 
-COMMAND:driveby(playerid,params[])
+COMMAND:driveby(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23626,7 +23632,7 @@ COMMAND:driveby(playerid,params[])
 	return 1;
 }
 
-COMMAND:drivein(playerid,params[])
+COMMAND:drivein(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23669,7 +23675,7 @@ COMMAND:drivein(playerid,params[])
 	GiveHandy(playerid);
 	return 1;
 }*/
-COMMAND:call(playerid,params[])
+COMMAND:call(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23693,7 +23699,7 @@ COMMAND:call(playerid,params[])
 	PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 	return 1;
 }
-COMMAND:sms(playerid,params[])
+COMMAND:sms(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23718,7 +23724,7 @@ COMMAND:sms(playerid,params[])
 	return 1;
 }
 
-COMMAND:befreien(playerid,params[])
+COMMAND:befreien(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23763,7 +23769,7 @@ COMMAND:befreien(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt kein Handy./Dein Handy ist aus./Kein Empfang./An keiner Telefonzelle.");
 }
-COMMAND:dienste_3(playerid,params[])
+COMMAND:dienste_3(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23783,7 +23789,7 @@ COMMAND:dienste_3(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:akku(playerid,params[])
+COMMAND:akku(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23804,7 +23810,7 @@ COMMAND:akku(playerid,params[])
 	SCM(playerid,SAMP_WEISS,""IINFO" dein Handy wurde erfolgreich aufgeladen.");
 	return 1;
 }
-COMMAND:handy(playerid,params[])
+COMMAND:handy(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -23820,7 +23826,7 @@ COMMAND:handy(playerid,params[])
 	ShowPlayerHandyMenu2(playerid);
 	return 1;
 }
-COMMAND:togphone_2(playerid,params[])
+COMMAND:togphone_2(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23871,7 +23877,7 @@ COMMAND:togphone_2(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:tognews(playerid,params[])
+COMMAND:tognews(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23896,7 +23902,7 @@ COMMAND:tognews(playerid,params[])
 	return 1;
 }
 
-COMMAND:togrpchat(playerid,params[])
+COMMAND:togrpchat(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23921,7 +23927,7 @@ COMMAND:togrpchat(playerid,params[])
 	return 1;
 }
 
-COMMAND:togjobchat(playerid,params[])
+COMMAND:togjobchat(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -23945,7 +23951,7 @@ COMMAND:togjobchat(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:tog__3(playerid,params[])
+COMMAND:tog__3(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24060,7 +24066,7 @@ COMMAND:tog__3(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" /tog [News/Jobchat/Hud/Phone/RpChat/Hitsound]");
 }
 
-COMMAND:listwerbetafeln(playerid,params[])
+COMMAND:listwerbetafeln(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24084,7 +24090,7 @@ COMMAND:listwerbetafeln(playerid,params[])
 	return 1;
 }
 
-COMMAND:alistwerbetafeln(playerid,params[])
+COMMAND:alistwerbetafeln(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24101,7 +24107,7 @@ COMMAND:alistwerbetafeln(playerid,params[])
 	return 1;
 }
 
-COMMAND:tafeltext(playerid,params[])
+COMMAND:tafeltext(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24164,7 +24170,7 @@ COMMAND:tafeltext(playerid,params[])
 	return 1;
 }
 
-COMMAND:tafelweg(playerid,params[])
+COMMAND:tafelweg(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24197,7 +24203,7 @@ COMMAND:tafelweg(playerid,params[])
 	return 1;
 }
 
-COMMAND:atafelweg(playerid,params[])
+COMMAND:atafelweg(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24223,7 +24229,7 @@ COMMAND:atafelweg(playerid,params[])
 	return 1;
 }
 
-COMMAND:tafelwo(playerid,params[])
+COMMAND:tafelwo(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24250,7 +24256,7 @@ COMMAND:tafelwo(playerid,params[])
 	Spieler[playerid][pIsearch] = 1;
 	return 1;
 }
-COMMAND:atafelwo(playerid,params[])
+COMMAND:atafelwo(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24270,7 +24276,7 @@ COMMAND:atafelwo(playerid,params[])
 	Spieler[playerid][pIsearch] = 1;
 	return 1;
 }
-COMMAND:n(playerid,params[])
+COMMAND:n(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24324,7 +24330,7 @@ COMMAND:n(playerid,params[])
 	return 1;
 }
 
-COMMAND:leaveinterview(playerid,params[])
+COMMAND:leaveinterview(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24345,7 +24351,7 @@ COMMAND:leaveinterview(playerid,params[])
 	return 1;
 }
 
-COMMAND:kickinterview(playerid,params[])
+COMMAND:kickinterview(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24380,7 +24386,7 @@ COMMAND:kickinterview(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der Newsreporterbase oder in keinem Newsvan.");
 }
 
-COMMAND:interview(playerid,params[])
+COMMAND:interview(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24413,7 +24419,7 @@ COMMAND:interview(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der Newsreporterbase oder in keinem Newsvan.");
 }
-COMMAND:setadpreis(playerid,params[])
+COMMAND:setadpreis(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24442,7 +24448,7 @@ COMMAND:setadpreis(playerid,params[])
     //SendFraktionsMessage(Spieler[playerid][pFraktion],FMELDUNG,string);
 	return 1;
 }
-COMMAND:newspaperprice(playerid,params[])
+COMMAND:newspaperprice(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24468,7 +24474,7 @@ COMMAND:newspaperprice(playerid,params[])
     SendFraktionsMessage(Spieler[playerid][pFraktion],FMELDUNG,string);
 	return 1;
 }
-COMMAND:writenewspaper(playerid,params[])
+COMMAND:writenewspaper(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24566,7 +24572,7 @@ COMMAND:writenewspaper(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" /writenewspaper [1-8/Veröffentlichen/Zurückziehen][Text]");
 }
-COMMAND:readnewspaper(playerid,params[])
+COMMAND:readnewspaper(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24610,7 +24616,7 @@ COMMAND:readnewspaper(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du kannst hier keine Zeitung kaufen.");
 }
 
-COMMAND:lottoeinzahlen(playerid,params[])
+COMMAND:lottoeinzahlen(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24634,7 +24640,7 @@ COMMAND:lottoeinzahlen(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du sitzt in keinem Fraktionsfahrzeug.");
 }
 
-COMMAND:startlotto(playerid,params[])
+COMMAND:startlotto(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24685,7 +24691,7 @@ COMMAND:startlotto(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du kannst erst nach einer Stunde eine neue Lottorunde starten!");
 }
 
-COMMAND:jackpot(playerid,params[])
+COMMAND:jackpot(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24703,7 +24709,7 @@ COMMAND:jackpot(playerid,params[])
 	return 1;
 }
 
-COMMAND:weatherinfo(playerid,params[])
+COMMAND:weatherinfo(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24729,7 +24735,7 @@ COMMAND:weatherinfo(playerid,params[])
 	SCM(playerid,ORANGE,string);
 	return 1;
 }
-COMMAND:showfirmen(playerid,params[])
+COMMAND:showfirmen(playerid,const params[])
 {
 	#pragma unused params
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24789,7 +24795,7 @@ COMMAND:showfirmen(playerid,params[])
 	if(count == 0)return SCM(playerid,SAMP_WEISS,"Es wurden bisher keine Firmen gegründet.");
 	return 1;
 }
-COMMAND:showantraege(playerid,params[])
+COMMAND:showantraege(playerid,const params[])
 {
 	#pragma unused params
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24841,7 +24847,7 @@ COMMAND:showantraege(playerid,params[])
 	if(count == 0)return SCM(playerid,SAMP_WEISS,"Es wurden keine Anträge gestellt.");
 	return 1;
 }
-COMMAND:getweatherinfo(playerid,params[])
+COMMAND:getweatherinfo(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24858,7 +24864,7 @@ COMMAND:getweatherinfo(playerid,params[])
 	SCM(playerid,ORANGE,string);
 	return 1;
 }
-COMMAND:setrentvehpreis(playerid,params[])
+COMMAND:setrentvehpreis(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24872,7 +24878,7 @@ COMMAND:setrentvehpreis(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:setwhackpreis(playerid,params[])
+COMMAND:setwhackpreis(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24893,7 +24899,7 @@ COMMAND:setwhackpreis(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:setfreemanpreis(playerid,params[])
+COMMAND:setfreemanpreis(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24914,7 +24920,7 @@ COMMAND:setfreemanpreis(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:parteien(playerid,params[])
+COMMAND:parteien(playerid,const params[])
 {
 	#pragma unused params
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24940,7 +24946,7 @@ COMMAND:parteien(playerid,params[])
 	if(count == 0)return SCM(playerid,SAMP_WEISS,"Es wurden keine Parteien erstellt.");
 	return 1;
 }
-COMMAND:organisationen_2(playerid,params[])
+COMMAND:organisationen_2(playerid,const params[])
 {
 	#pragma unused params
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -24969,7 +24975,7 @@ COMMAND:organisationen_2(playerid,params[])
 	if(count == 0)return SCM(playerid,SAMP_WEISS,""IINFO2" es wurden keine Firmen erstellt.");
 	return 1;
 }
-COMMAND:aorginvite(playerid,params[])
+COMMAND:aorginvite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -24997,7 +25003,7 @@ COMMAND:aorginvite(playerid,params[])
 	Spieler[pID][pMenge] = org;
 	return 1;
 }
-COMMAND:aparteiinvite(playerid,params[])
+COMMAND:aparteiinvite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25025,7 +25031,7 @@ COMMAND:aparteiinvite(playerid,params[])
 	Spieler[pID][pMenge] = p;
 	return 1;
 }
-COMMAND:aorguninvite(playerid,params[])
+COMMAND:aorguninvite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25053,7 +25059,7 @@ COMMAND:aorguninvite(playerid,params[])
 	Spieler[pID][pOrgMember] = 0;
 	return 1;
 }
-COMMAND:aparteiuninvite(playerid,params[])
+COMMAND:aparteiuninvite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25081,7 +25087,7 @@ COMMAND:aparteiuninvite(playerid,params[])
 	Spieler[pID][pParteiMember] = 0;
 	return 1;
 }
-COMMAND:aorgmember(playerid,params[])
+COMMAND:aorgmember(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25111,7 +25117,7 @@ COMMAND:aorgmember(playerid,params[])
 	if(onlinemembers == 0)return SCM(playerid,SAMP_WEISS,"Kein Firmenmitglied Online.");
 	return 1;
 }
-COMMAND:aparteimember(playerid,params[])
+COMMAND:aparteimember(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25141,7 +25147,7 @@ COMMAND:aparteimember(playerid,params[])
 	if(onlinemembers == 0)return SCM(playerid,SAMP_WEISS,"Kein Parteimitglied Online.");
 	return 1;
 }
-COMMAND:aorgdelete(playerid,params[])
+COMMAND:aorgdelete(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -25183,7 +25189,7 @@ COMMAND:aorgdelete(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht der Besitzer der Organisation.");
 }
 
-COMMAND:aparteidelete(playerid,params[])
+COMMAND:aparteidelete(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -25224,7 +25230,7 @@ COMMAND:aparteidelete(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht der Besitzer der Partei.");
 }
 
-COMMAND:aorgsetmotto(playerid,params[])
+COMMAND:aorgsetmotto(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25248,7 +25254,7 @@ COMMAND:aorgsetmotto(playerid,params[])
 	return 1;
 }
 
-COMMAND:aparteisetmotto(playerid,params[])
+COMMAND:aparteisetmotto(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25272,7 +25278,7 @@ COMMAND:aparteisetmotto(playerid,params[])
 	return 1;
 }
 
-COMMAND:aorgname(playerid,params[])
+COMMAND:aorgname(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25296,7 +25302,7 @@ COMMAND:aorgname(playerid,params[])
 	return 1;
 }
 
-COMMAND:aparteiname(playerid,params[])
+COMMAND:aparteiname(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25320,7 +25326,7 @@ COMMAND:aparteiname(playerid,params[])
 	return 1;
 }
 
-COMMAND:aorgmakeleader(playerid,params[])
+COMMAND:aorgmakeleader(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25348,7 +25354,7 @@ COMMAND:aorgmakeleader(playerid,params[])
 	return 1;
 }
 
-COMMAND:aparteimakeleader(playerid,params[])
+COMMAND:aparteimakeleader(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25376,7 +25382,7 @@ COMMAND:aparteimakeleader(playerid,params[])
 	return 1;
 }
 
-COMMAND:aorgtakeleader(playerid,params[])
+COMMAND:aorgtakeleader(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25405,7 +25411,7 @@ COMMAND:aorgtakeleader(playerid,params[])
 	return 1;
 }
 
-COMMAND:aparteitakeleader(playerid,params[])
+COMMAND:aparteitakeleader(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25434,7 +25440,7 @@ COMMAND:aparteitakeleader(playerid,params[])
 	return 1;
 }
 
-COMMAND:partei(playerid,params[])
+COMMAND:partei(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25495,7 +25501,7 @@ COMMAND:partei(playerid,params[])
 	Log("Parteichatsqllog",string);
 	return 1;
 }
-COMMAND:fc(playerid,params[])
+COMMAND:fc(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25556,7 +25562,7 @@ COMMAND:fc(playerid,params[])
 	Log("Firmalog.txt",string);
 	return 1;
 }
-COMMAND:parteimember(playerid,params[])
+COMMAND:parteimember(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -25585,7 +25591,7 @@ COMMAND:parteimember(playerid,params[])
 	if(onlinemembers == 0)return SCM(playerid,SAMP_WEISS,"Kein Parteimitglied Online.");
 	return 1;
 }
-COMMAND:firmmitglieder(playerid,params[])
+COMMAND:firmmitglieder(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -25614,7 +25620,7 @@ COMMAND:firmmitglieder(playerid,params[])
 	if(onlinemembers == 0)return SCM(playerid,SAMP_WEISS,""IINFO" kein Firmenmitglied Online.");
 	return 1;
 }
-COMMAND:firmname(playerid,params[])
+COMMAND:firmname(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25636,7 +25642,7 @@ COMMAND:firmname(playerid,params[])
 	SendOrganisationsMessage(org,SAMP_WEISS,string);
 	return 1;
 }/*
-COMMAND:orgmbeitrag(playerid,params[])
+COMMAND:orgmbeitrag(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25658,7 +25664,7 @@ COMMAND:orgmbeitrag(playerid,params[])
 	SendOrganisationsMessage(org,SAMP_WEISS,string);
 	return 1;
 }*/
-COMMAND:orgdelete(playerid,params[])
+COMMAND:orgdelete(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -25697,7 +25703,7 @@ COMMAND:orgdelete(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht der Besitzer der Firma.");
 }
-COMMAND:firmleave(playerid,params[])
+COMMAND:firmleave(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -25718,7 +25724,7 @@ COMMAND:firmleave(playerid,params[])
 	Spieler[playerid][pOrgMember] = 0;
 	return 1;
 }
-COMMAND:firminvite(playerid,params[])
+COMMAND:firminvite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25745,7 +25751,7 @@ COMMAND:firminvite(playerid,params[])
 	Spieler[pID][pMenge] = org;
 	return 1;
 }
-COMMAND:firmuninvite(playerid,params[])
+COMMAND:firmuninvite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25772,7 +25778,7 @@ COMMAND:firmuninvite(playerid,params[])
 	Spieler[pID][pOrgMember] = 0;
 	return 1;
 }
-COMMAND:firmleiter(playerid,params[])
+COMMAND:firmleiter(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25798,7 +25804,7 @@ COMMAND:firmleiter(playerid,params[])
 	Spieler[pID][pOrgLeader] = org;
 	return 1;
 }
-COMMAND:firmunleiter(playerid,params[])
+COMMAND:firmunleiter(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25825,7 +25831,7 @@ COMMAND:firmunleiter(playerid,params[])
 	Spieler[pID][pOrgLeader] = 0;
 	return 1;
 }
-COMMAND:firmbeschreibung(playerid,params[])
+COMMAND:firmbeschreibung(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25868,7 +25874,7 @@ COMMAND:firmbeschreibung(playerid,params[])
 	CreatePartei(partei,playerid);
 	return 1;
 }
-COMMAND:parteiname(playerid,params[])
+COMMAND:parteiname(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25890,7 +25896,7 @@ COMMAND:parteiname(playerid,params[])
 	SendParteiMessage(p,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:parteimbeitrag(playerid,params[])
+COMMAND:parteimbeitrag(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25912,7 +25918,7 @@ COMMAND:parteimbeitrag(playerid,params[])
 	SendParteiMessage(p,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:parteidelete(playerid,params[])
+COMMAND:parteidelete(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -25950,7 +25956,7 @@ COMMAND:parteidelete(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht der Besitzer der Partei.");
 }
-COMMAND:parteileave(playerid,params[])
+COMMAND:parteileave(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -25971,7 +25977,7 @@ COMMAND:parteileave(playerid,params[])
 	Spieler[playerid][pParteiMember] = 0;
 	return 1;
 }
-COMMAND:parteiinvite(playerid,params[])
+COMMAND:parteiinvite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -25998,7 +26004,7 @@ COMMAND:parteiinvite(playerid,params[])
 	Spieler[pID][pMenge] = p;
 	return 1;
 }
-COMMAND:parteiuninvite(playerid,params[])
+COMMAND:parteiuninvite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -26025,7 +26031,7 @@ COMMAND:parteiuninvite(playerid,params[])
 	Spieler[pID][pParteiMember] = 0;
 	return 1;
 }
-COMMAND:parteimakeleader(playerid,params[])
+COMMAND:parteimakeleader(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -26051,7 +26057,7 @@ COMMAND:parteimakeleader(playerid,params[])
 	Spieler[pID][pParteiLeader] = p;
 	return 1;
 }
-COMMAND:parteitakeleader(playerid,params[])
+COMMAND:parteitakeleader(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -26078,7 +26084,7 @@ COMMAND:parteitakeleader(playerid,params[])
 	Spieler[pID][pParteiLeader] = 0;
 	return 1;
 }
-COMMAND:parteisetmotto(playerid,params[])
+COMMAND:parteisetmotto(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -26101,7 +26107,7 @@ COMMAND:parteisetmotto(playerid,params[])
 	return 1;
 }*/
 
-COMMAND:showgehalt(playerid,params[])
+COMMAND:showgehalt(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -26128,7 +26134,7 @@ COMMAND:showgehalt(playerid,params[])
  	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:setgehalt(playerid,params[])
+COMMAND:setgehalt(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -26164,7 +26170,7 @@ COMMAND:setgehalt(playerid,params[])
  	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:setrang(playerid,params[])
+COMMAND:setrang(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -26198,7 +26204,7 @@ COMMAND:setrang(playerid,params[])
 	return 1;
 }
 
-COMMAND:seturang(playerid,params[])
+COMMAND:seturang(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -26249,7 +26255,7 @@ COMMAND:seturang(playerid,params[])
 	return 1;
 }
 
-COMMAND:givecoins(playerid,params[])
+COMMAND:givecoins(playerid,const params[])
 {
     #pragma unused params
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -26288,7 +26294,7 @@ COMMAND:givecoins(playerid,params[])
 	return 1;
 }
 
-COMMAND:give(playerid,params[])
+COMMAND:give(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -26557,7 +26563,7 @@ COMMAND:give(playerid,params[])
     return SCM(playerid,SAMP_WEISS,"[Materials/Werkzeugkasten/Benzinkanister/Köder/Opiumsamen/Spicesamen]");
 }
 
-COMMAND:deljobtime(playerid,params[])
+COMMAND:deljobtime(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -26576,7 +26582,7 @@ COMMAND:deljobtime(playerid,params[])
     Spieler[pID][pJobSperre] = 0;
 	return 1;
 }
-COMMAND:set(playerid,params[])
+COMMAND:set(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(Spieler[playerid][pAWAYFROMKEYBOARD] == 1)return AFK_MSG(playerid);
@@ -26944,7 +26950,7 @@ COMMAND:set(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:spawnplayer(playerid,params[])
+COMMAND:spawnplayer(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -26970,7 +26976,7 @@ COMMAND:spawnplayer(playerid,params[])
 	Spieler[pID][pDeathTime] = 0;
 	return SpawnPlayerEx(pID);
 }
-COMMAND:makeadmin(playerid,params[])
+COMMAND:makeadmin(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27031,7 +27037,7 @@ COMMAND:makeadmin(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du hast nicht den Rang dazu!");
 }
-COMMAND:setschein(playerid,params[])
+COMMAND:setschein(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27153,7 +27159,7 @@ COMMAND:setschein(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" /setschein [playerid/Name][Auto/Motorrad/Boot/Flug/Heli/Waffen/Perso/Angel/Roller/Alle]");
 }
-COMMAND:job(playerid,params[])
+COMMAND:job(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -27179,7 +27185,7 @@ COMMAND:job(playerid,params[])
 	ShowPlayerJobAnnahme(playerid);
 	return 1;
 }
-COMMAND:stopjob(playerid,params[])
+COMMAND:stopjob(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -27199,7 +27205,7 @@ COMMAND:stopjob(playerid,params[])
     KillTimer(JobTimer[playerid]);
 	return 1;
 }
-COMMAND:quitjob(playerid,params[])
+COMMAND:quitjob(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -27219,7 +27225,7 @@ COMMAND:quitjob(playerid,params[])
 	JobExit(playerid);
 	return 1;
 }
-COMMAND:quitflat(playerid,params[])
+COMMAND:quitflat(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -27239,7 +27245,7 @@ COMMAND:quitflat(playerid,params[])
     UpdateHandyTextdraw(playerid);
 	return 1;
 }
-COMMAND:unfreeze(playerid,params[])
+COMMAND:unfreeze(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27267,7 +27273,7 @@ COMMAND:unfreeze(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:freeze(playerid,params[])
+COMMAND:freeze(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27297,7 +27303,7 @@ COMMAND:freeze(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:werbung(playerid,params[])
+COMMAND:werbung(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -27346,7 +27352,7 @@ COMMAND:werbung(playerid,params[])
 	return 1;
 }
 
-COMMAND:login(playerid,params[])
+COMMAND:login(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -27369,7 +27375,7 @@ COMMAND:login(playerid,params[])
 	return 1;
 }
 
-COMMAND:register__4(playerid,params[])
+COMMAND:register__4(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -27391,7 +27397,7 @@ COMMAND:register__4(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:ochatten_3(playerid,params[])
+COMMAND:ochatten_3(playerid,const params[])
 {
     #pragma unused params
    	if(!isPlayerAnAdmin(playerid,3))return SCM(playerid,SAMP_WEISS,""IINFO" du bist kein Admin oder hast nicht die befugnis dazu!");
@@ -27407,7 +27413,7 @@ COMMAND:ochatten_3(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:leaderchat_3(playerid,params[])
+COMMAND:leaderchat_3(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -27430,7 +27436,7 @@ COMMAND:leaderchat_3(playerid,params[])
 	return 1;
 }
 
-COMMAND:givegun(playerid,params[])
+COMMAND:givegun(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27450,7 +27456,7 @@ COMMAND:givegun(playerid,params[])
     return 1;
 }
 
-COMMAND:waffenschein(playerid,params[])
+COMMAND:waffenschein(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27509,7 +27515,7 @@ COMMAND:waffenschein(playerid,params[])
   	return 1;
 }
 
-COMMAND:gwdnote(playerid,params[])
+COMMAND:gwdnote(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27532,7 +27538,7 @@ COMMAND:gwdnote(playerid,params[])
 	return 1;
 }
 
-COMMAND:eh(playerid,params[])
+COMMAND:eh(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27558,7 +27564,7 @@ COMMAND:eh(playerid,params[])
 	return 1;
 }
 
-COMMAND:zivinote(playerid,params[])
+COMMAND:zivinote(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27581,7 +27587,7 @@ COMMAND:zivinote(playerid,params[])
 	return 1;
 }
 
-COMMAND:setflyorder(playerid,params[])
+COMMAND:setflyorder(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27660,7 +27666,7 @@ COMMAND:setflyorder(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" /setflyorder [playerid/Name][Give/Take][Flugzeug/Helikopter]");
 }
 
-COMMAND:setgwdnote(playerid,params[])
+COMMAND:setgwdnote(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27691,7 +27697,7 @@ COMMAND:setgwdnote(playerid,params[])
 	return 1;
 }
 
-COMMAND:setzivinote(playerid,params[])
+COMMAND:setzivinote(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27722,7 +27728,7 @@ COMMAND:setzivinote(playerid,params[])
 	return 1;
 }
 
-COMMAND:show(playerid,params[])
+COMMAND:show(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27833,7 +27839,7 @@ COMMAND:show(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" /show [Finanzen/Lizensen/Perso/Visitenkarte/Marke/Presseausweis][playerid/Name]");
 }
 
-COMMAND:awiederbeleben_3(playerid,params[])
+COMMAND:awiederbeleben_3(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -27868,7 +27874,7 @@ COMMAND:awiederbeleben_3(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:fverkaufen(playerid,params[])
+COMMAND:fverkaufen(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -27935,7 +27941,7 @@ COMMAND:fverkaufen(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:ovehlist(playerid,params[])
+COMMAND:ovehlist(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -27969,7 +27975,7 @@ COMMAND:ovehlist(playerid,params[])
 	return 1;
 }
 
-COMMAND:ofvehlist(playerid,params[])
+COMMAND:ofvehlist(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28005,7 +28011,7 @@ COMMAND:ofvehlist(playerid,params[])
 	if(vehiclesspawned == 0)return SCM(playerid,SAMP_WEISS,"Keine Vorhanden.");
 	return 1;
 }
-COMMAND:acheckvehicleowner(playerid,params[])
+COMMAND:acheckvehicleowner(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -28044,7 +28050,7 @@ COMMAND:acheckvehicleowner(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" das Fahrzeug gehört weder einer Fraktion noch einem Spieler.");
 }
 
-COMMAND:samenkaufen(playerid,params[])
+COMMAND:samenkaufen(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -28151,7 +28157,7 @@ COMMAND:samenkaufen(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:ortsamen(playerid,params[])
+COMMAND:ortsamen(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28179,7 +28185,7 @@ COMMAND:ortsamen(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:ortpflanze(playerid,params[])
+COMMAND:ortpflanze(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -28205,7 +28211,7 @@ COMMAND:ortpflanze(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:pflanzen(playerid,params[])
+COMMAND:pflanzen(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -28256,7 +28262,7 @@ COMMAND:pflanzen(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:giessen(playerid,params[])
+COMMAND:giessen(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28284,7 +28290,7 @@ COMMAND:giessen(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:dpflanze(playerid,params[])
+COMMAND:dpflanze(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28313,7 +28319,7 @@ COMMAND:dpflanze(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:tdrogen(playerid,params[])
+COMMAND:tdrogen(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28350,7 +28356,7 @@ COMMAND:tdrogen(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:kpflanze(playerid,params[])
+COMMAND:kpflanze(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28382,7 +28388,7 @@ COMMAND:kpflanze(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:destroypflanze(playerid,params[])
+COMMAND:destroypflanze(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28407,7 +28413,7 @@ COMMAND:destroypflanze(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:shplfanzen(playerid,params[])
+COMMAND:shplfanzen(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28436,7 +28442,7 @@ COMMAND:shplfanzen(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:lastcp(playerid,params[])
+COMMAND:lastcp(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28454,7 +28460,7 @@ COMMAND:lastcp(playerid,params[])
 	new vehicleid = GetPlayerVehicleID(playerid);
 	if(InviteInRace[playerid] == 1)
 	{
-		if(IsPlayerInAnyVehicle(playerid) == 1)
+		if(IsPlayerInAnyVehicle(playerid) == true)
 		{
 		    if(vehicleid == RaceFahrzeug[playerid])
 			{
@@ -28485,7 +28491,7 @@ COMMAND:lastcp(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:verstaerkung(playerid, params[])
+COMMAND:verstaerkung(playerid, const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -28500,7 +28506,7 @@ COMMAND:verstaerkung(playerid, params[])
 	ServiceCall(playerid,10);
     return 1;
 }
-COMMAND:tune(playerid, params[])
+COMMAND:tune(playerid, const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28524,7 +28530,7 @@ COMMAND:tune(playerid, params[])
     return 1;
 }
 
-COMMAND:teilnehmen(playerid, params[])
+COMMAND:teilnehmen(playerid, const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28547,7 +28553,7 @@ COMMAND:teilnehmen(playerid, params[])
 }
 
 
-COMMAND:aflip(playerid,params[])
+COMMAND:aflip(playerid,const params[])
 {
     #pragma unused params
    	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28560,7 +28566,7 @@ COMMAND:aflip(playerid,params[])
 	if(Spieler[playerid][pTazerd] == 1)return TAZER_MSG(playerid);
 	if(Spieler[playerid][pCuffed] == 1)return CUFF_MSG(playerid);
 	if(!isPlayerAnAdmin(playerid,3))return ADMIN_MSG(playerid);
- 	if(IsPlayerInAnyVehicle(playerid) == 1)
+ 	if(IsPlayerInAnyVehicle(playerid) == true)
 	{
 		new Float:Angle,string[128];
 		GetVehicleZAngle(GetPlayerVehicleID(playerid), Angle);
@@ -28577,7 +28583,7 @@ COMMAND:aflip(playerid,params[])
 	}
 }
 
-COMMAND:flip(playerid,params[])
+COMMAND:flip(playerid,const params[])
 {
     #pragma unused params
    	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28591,7 +28597,7 @@ COMMAND:flip(playerid,params[])
 	if(Spieler[playerid][pCuffed] == 1)return CUFF_MSG(playerid);
 	if(InviteInRace[playerid] == 1)
 	{
-	    if(IsPlayerInAnyVehicle(playerid) == 1)
+	    if(IsPlayerInAnyVehicle(playerid) == true)
 		{
 		 	new Float:Angle;
 	 		GetVehicleZAngle(GetPlayerVehicleID(playerid), Angle);
@@ -28612,7 +28618,7 @@ COMMAND:flip(playerid,params[])
 	return 1;
 }
 
-COMMAND:racecars(playerid,params[])
+COMMAND:racecars(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28650,7 +28656,7 @@ COMMAND:racecars(playerid,params[])
 
 
 
-COMMAND:racelist(playerid,params[])
+COMMAND:racelist(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28686,7 +28692,7 @@ COMMAND:racelist(playerid,params[])
  	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:rinvite(playerid,params[])
+COMMAND:rinvite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -28717,7 +28723,7 @@ COMMAND:rinvite(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:rinviteall(playerid,params[])
+COMMAND:rinviteall(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28761,7 +28767,7 @@ COMMAND:rinviteall(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:runinvite(playerid,params[])
+COMMAND:runinvite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -28796,7 +28802,7 @@ COMMAND:runinvite(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:selectrace(playerid,params[])
+COMMAND:selectrace(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -28876,7 +28882,7 @@ COMMAND:selectrace(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:startrace(playerid,params[])
+COMMAND:startrace(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28916,7 +28922,7 @@ COMMAND:startrace(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:stoprace(playerid,params[])
+COMMAND:stoprace(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -28966,7 +28972,7 @@ COMMAND:stoprace(playerid,params[])
    	}
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:searchracecp(playerid,params[])
+COMMAND:searchracecp(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -28993,7 +28999,7 @@ COMMAND:searchracecp(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:predigt(playerid,params[])
+COMMAND:predigt(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -29043,7 +29049,7 @@ COMMAND:predigt(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:searchrace(playerid,params[])
+COMMAND:searchrace(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -29088,7 +29094,7 @@ COMMAND:searchrace(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:newracetrack(playerid,params[])
+COMMAND:newracetrack(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -29147,7 +29153,7 @@ COMMAND:newracetrack(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:drace(playerid,params[])
+COMMAND:drace(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -29184,7 +29190,7 @@ COMMAND:drace(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:cp(playerid,params[])
+COMMAND:cp(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -29242,7 +29248,7 @@ COMMAND:cp(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:delcp(playerid,params[])
+COMMAND:delcp(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -29277,7 +29283,7 @@ COMMAND:delcp(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:saverace(playerid,params[])
+COMMAND:saverace(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -29303,7 +29309,7 @@ COMMAND:saverace(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:fvehlist(playerid,params[])
+COMMAND:fvehlist(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -29343,7 +29349,7 @@ COMMAND:fvehlist(playerid,params[])
 	return 1;
 }
 
-COMMAND:buyjackcar(playerid,params[])
+COMMAND:buyjackcar(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -29359,7 +29365,7 @@ COMMAND:buyjackcar(playerid,params[])
 	return 1;
 }
 	
-COMMAND:showjackcar(playerid,params[])
+COMMAND:showjackcar(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -29375,7 +29381,7 @@ COMMAND:showjackcar(playerid,params[])
 	return 1;
 }
 
-COMMAND:fparken(playerid,params[])
+COMMAND:fparken(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -29405,7 +29411,7 @@ COMMAND:fparken(playerid,params[])
 	PutPlayerInVehicleEx(playerid,Fahrzeug[fv][Vehicle],0);
 	return 1;
 }
-COMMAND:fsetrang(playerid,params[])
+COMMAND:fsetrang(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -29445,7 +29451,7 @@ COMMAND:fsetrang(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:flock(playerid,params[])
+COMMAND:flock(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -29495,7 +29501,7 @@ COMMAND:flock(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der Nähe eines Fraktionsfahrzeuges.");
 }
 
-COMMAND:anmelden(playerid,params[])
+COMMAND:anmelden(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -29525,7 +29531,7 @@ COMMAND:anmelden(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du kannst das Fahrzeug nicht anmelden.");
 }
-COMMAND:frespawn(playerid,params[])
+COMMAND:frespawn(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -29579,7 +29585,7 @@ COMMAND:frespawn(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:orespawn(playerid,params[])
+COMMAND:orespawn(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -29616,7 +29622,7 @@ stock VehicleOwnedByPlayer(playerid, vehicleid)
 	}
 	return false;
 }
-COMMAND:abschleppen(playerid,params[])
+COMMAND:abschleppen(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -29683,7 +29689,7 @@ COMMAND:abschleppen(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,"Nicht am Ordungsamtstellplatz.");
 }
-COMMAND:oentsperren(playerid,params[])
+COMMAND:oentsperren(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -29713,7 +29719,7 @@ COMMAND:oentsperren(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" nicht am Ordungsamtstellplatz.");
 }
-COMMAND:opark(playerid,params[])
+COMMAND:opark(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -29767,7 +29773,7 @@ COMMAND:opark(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" nicht am Ordungsamtstellplatz.");
 }
-COMMAND:respawnjobveh_3(playerid,params[])
+COMMAND:respawnjobveh_3(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30042,7 +30048,7 @@ COMMAND:respawnjobveh_3(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Müll/Bestatter/Cleaner/Fluglierferant/Postbote/Landwirt/Eis/Bank/Truck/Bus/KFZ/Taxi/ZigTransport/Erzbagger/Bauarbeiter");
 }
 
-COMMAND:respawnallveh(playerid,params[])
+COMMAND:respawnallveh(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -30068,7 +30074,7 @@ COMMAND:respawnallveh(playerid,params[])
 	return 1;
 }
 
-COMMAND:respawnallfraktveh(playerid,params[])
+COMMAND:respawnallfraktveh(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30098,7 +30104,7 @@ COMMAND:respawnallfraktveh(playerid,params[])
 	return 1;
 }
 
-COMMAND:afparken(playerid,params[])
+COMMAND:afparken(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -30129,7 +30135,7 @@ COMMAND:afparken(playerid,params[])
 	return 1;
 }
 
-COMMAND:aflock(playerid,params[])
+COMMAND:aflock(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -30175,7 +30181,7 @@ COMMAND:aflock(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der Nähe eines Fraktionsfahrzeuges.");
 }
-COMMAND:jlock(playerid,params[])
+COMMAND:jlock(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -30211,7 +30217,7 @@ COMMAND:jlock(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:pveh(playerid,params[])
+COMMAND:pveh(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30229,7 +30235,7 @@ COMMAND:pveh(playerid,params[])
    	    return 1;
    	}
 }
-COMMAND:lock(playerid,params[])
+COMMAND:lock(playerid,const params[])
 {
     new string[156],Float:Pos[4];
     for(new slot=0;slot<MAX_PLAYER_VEHS;slot++)
@@ -30263,7 +30269,7 @@ COMMAND:lock(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:invite(playerid,params[])
+COMMAND:invite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30312,7 +30318,7 @@ COMMAND:invite(playerid,params[])
    	return 1;
 }
 
-COMMAND:uninvite(playerid,params[])
+COMMAND:uninvite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30357,7 +30363,7 @@ COMMAND:uninvite(playerid,params[])
     return 1;
 }
 
-COMMAND:getip(playerid,params[])
+COMMAND:getip(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30373,7 +30379,7 @@ COMMAND:getip(playerid,params[])
 	return 1;
 }
 
-COMMAND:spec(playerid,params[])
+COMMAND:spec(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30414,7 +30420,7 @@ COMMAND:spec(playerid,params[])
 	return 1;
 }
 
-COMMAND:unspec(playerid,params[])
+COMMAND:unspec(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -30444,7 +30450,7 @@ public SetToOldLocation(playerid)
 	SetPlayerVirtualWorld(playerid,Spieler[playerid][LastInGamePos_world]);
 }
 
-COMMAND:showstats(playerid,params[])
+COMMAND:showstats(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30462,7 +30468,7 @@ COMMAND:showstats(playerid,params[])
 	return 1;
 }
 
-COMMAND:showoldstats(playerid,params[])
+COMMAND:showoldstats(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30480,7 +30486,7 @@ COMMAND:showoldstats(playerid,params[])
 	return 1;
 }
 
-COMMAND:showtasche(playerid,params[])
+COMMAND:showtasche(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30497,7 +30503,7 @@ COMMAND:showtasche(playerid,params[])
 	return 1;
 }
 
-COMMAND:showscheine(playerid,params[])
+COMMAND:showscheine(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30514,7 +30520,7 @@ COMMAND:showscheine(playerid,params[])
 	return 1;
 }
 
-COMMAND:scheine(playerid,params[])
+COMMAND:scheine(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -30530,7 +30536,7 @@ COMMAND:scheine(playerid,params[])
 	return 1;
 }
 /*
-COMMAND:stats(playerid,params[])
+COMMAND:stats(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -30541,7 +30547,7 @@ COMMAND:stats(playerid,params[])
     return 1;
 }
 
-COMMAND:oldstats(playerid,params[])
+COMMAND:oldstats(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -30552,7 +30558,7 @@ COMMAND:oldstats(playerid,params[])
     return 1;
 }
 */
-COMMAND:tasche(playerid,params[])
+COMMAND:tasche(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -30568,7 +30574,7 @@ COMMAND:tasche(playerid,params[])
     return 1;
 }
 
-COMMAND:inventar(playerid,params[])
+COMMAND:inventar(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -30583,7 +30589,7 @@ COMMAND:inventar(playerid,params[])
 	ShowBag(playerid,playerid);
     return 1;
 }
-COMMAND:blacklists(playerid,params[])
+COMMAND:blacklists(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -30599,7 +30605,7 @@ COMMAND:blacklists(playerid,params[])
 	return 1;
 }
 
-COMMAND:tban(playerid,params[])
+COMMAND:tban(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30656,7 +30662,7 @@ COMMAND:tban(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" /tban [playerid/Name][Zeit][Minuten/Stunden/Tage/Wochen][Grund]");
 }
-COMMAND:ban(playerid,params[])
+COMMAND:ban(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30677,7 +30683,7 @@ COMMAND:ban(playerid,params[])
 	HDDBan(pID);
 	return 1;
 }
-COMMAND:unban(playerid,params[])
+COMMAND:unban(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30691,7 +30697,7 @@ COMMAND:unban(playerid,params[])
  	return 1;
 }
 
-COMMAND:addmultiacc(playerid,params[])
+COMMAND:addmultiacc(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30704,7 +30710,7 @@ COMMAND:addmultiacc(playerid,params[])
  	return 1;
 }
 
-COMMAND:delmultiacc(playerid,params[])
+COMMAND:delmultiacc(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30717,7 +30723,7 @@ COMMAND:delmultiacc(playerid,params[])
  	return 1;
 }
 
-COMMAND:warn(playerid,params[])
+COMMAND:warn(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30747,7 +30753,7 @@ COMMAND:warn(playerid,params[])
 	return 1;
 }
 
-COMMAND:clearwarn(playerid,params[])
+COMMAND:clearwarn(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30767,7 +30773,7 @@ COMMAND:clearwarn(playerid,params[])
 	SCM(pID,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:o(playerid,params[])
+COMMAND:o(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30858,7 +30864,7 @@ COMMAND:o(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:sex(playerid,params[])
+COMMAND:sex(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30893,7 +30899,7 @@ COMMAND:sex(playerid,params[])
 	return 1;
 }
 
-COMMAND:dice(playerid,params[])
+COMMAND:dice(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -30920,7 +30926,7 @@ COMMAND:dice(playerid,params[])
 	return 1;
 }
 
-COMMAND:wuerfeln(playerid,params[])
+COMMAND:wuerfeln(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -31027,7 +31033,7 @@ COMMAND:wuerfeln(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Warte erst auf deinen Würfel-Partner.");
 }
 
-COMMAND:applyforhousekey(playerid,params[])
+COMMAND:applyforhousekey(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -31055,7 +31061,7 @@ COMMAND:applyforhousekey(playerid,params[])
 	return 1;
 }
 
-COMMAND:maklerlock(playerid,params[])
+COMMAND:maklerlock(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -31099,7 +31105,7 @@ COMMAND:maklerlock(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,"Schlüssel nicht Aktiv!");
 }
-COMMAND:immobilie(playerid,params[])
+COMMAND:immobilie(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -31213,7 +31219,7 @@ COMMAND:immobilie(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" /immobilie [Haus/Business][Hausnummer/Bizid][Besitzerid/Name][Käuferid/Name][Preis]");
 }
 
-COMMAND:searchtrailer(playerid,params[])
+COMMAND:searchtrailer(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -31238,7 +31244,7 @@ COMMAND:searchtrailer(playerid,params[])
 	return 1;
 }
 
-COMMAND:ladung(playerid,params[])
+COMMAND:ladung(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -31306,7 +31312,7 @@ COMMAND:ladung(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du kannst hier keine Ladung aufladen!");
 }
 
-COMMAND:sellice(playerid,params[])
+COMMAND:sellice(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -31340,7 +31346,7 @@ COMMAND:sellice(playerid,params[])
 	return 1;
 }
 
-COMMAND:sellnacho(playerid,params[])
+COMMAND:sellnacho(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -31374,7 +31380,7 @@ COMMAND:sellnacho(playerid,params[])
 	return 1;
 }
 
-COMMAND:vertrag(playerid,params[])
+COMMAND:vertrag(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -31406,7 +31412,7 @@ COMMAND:vertrag(playerid,params[])
 	Spieler[pID][pAngebot] = 13;
 	return 1;
 }
-COMMAND:cv_3(playerid,params[])
+COMMAND:cv_3(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -31706,7 +31712,7 @@ COMMAND:cv_3(playerid,params[])
    	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" /cv [Motor/Licht/Motorhaube/Kofferraum/Radio/Handbremse/Info]");
 }
-COMMAND:cancel(playerid,params[])
+COMMAND:cancel(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -32059,7 +32065,7 @@ COMMAND:cancel(playerid,params[])
 	SCM(playerid,SAMP_WEISS,""IINFO" /cancel [Frisk/Ticket/Interview/Fahrstunde/SAPD/Medic/Feuer/Race/Freebl/Sinlist/Befreiung]");
 	return SCM(playerid,SAMP_WEISS,"[Abschleppen/Taxi/Mechaniker/Elektriker/Rubbish/Repair/Refill/Immobilie/Vertrag/Alkoholtest]");
 }
-COMMAND:op(playerid,params[])
+COMMAND:op(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -32250,7 +32256,7 @@ COMMAND:op(playerid,params[])
    	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" /op [Fraktion/Job]");
 }
-COMMAND:xmas(playerid,params[])
+COMMAND:xmas(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -32271,7 +32277,7 @@ COMMAND:xmas(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht am Weihnachtsbaum.");
 }
 
-COMMAND:accept(playerid,params[])
+COMMAND:accept(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -33516,7 +33522,7 @@ COMMAND:accept(playerid,params[])
 	SCM(playerid,SAMP_WEISS,""IINFO" /accept [Ganja/Kokain/Opium/Spice/Sex/Ice/Frisk/Ticket/Interview/Schein/Elektriker/Race/Freebl/Alkoholtest/Befreiung/Dice/Segen]");
 	return SCM(playerid,SAMP_WEISS,"[Fahrstunde/SAPD/Medic/Feuer/Abschleppen/Taxi/Bestatten/Mechaniker/Rubbish/Waffe/Repair/Refill/Immobilie/Vertrag/Orginvite/Sinlist/Nacho]");
 }
-COMMAND:kaution(playerid,params[])
+COMMAND:kaution(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -33589,7 +33595,7 @@ COMMAND:kaution(playerid,params[])
 	return 1;
 }
 
-COMMAND:addjtime(playerid,params[])
+COMMAND:addjtime(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -33627,7 +33633,7 @@ COMMAND:addjtime(playerid,params[])
 	return 1;
 }
 
-COMMAND:deljtime(playerid,params[])
+COMMAND:deljtime(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -33666,7 +33672,7 @@ COMMAND:deljtime(playerid,params[])
 	return 1;
 }
 
-COMMAND:augenbinde(playerid,params[])
+COMMAND:augenbinde(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -33703,7 +33709,7 @@ COMMAND:augenbinde(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:delaugenbinde(playerid,params[])
+COMMAND:delaugenbinde(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -33740,7 +33746,7 @@ COMMAND:delaugenbinde(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:invitevb(playerid,params[])
+COMMAND:invitevb(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -33774,7 +33780,7 @@ COMMAND:invitevb(playerid,params[])
    	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:uninvitevb(playerid,params[])
+COMMAND:uninvitevb(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -33806,7 +33812,7 @@ COMMAND:uninvitevb(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:vb(playerid,params[])
+COMMAND:vb(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -33862,7 +33868,7 @@ COMMAND:vb(playerid,params[])
 	return 1;
 }
 
-COMMAND:fkasse(playerid,params[])
+COMMAND:fkasse(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -33896,7 +33902,7 @@ COMMAND:fkasse(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:knockout(playerid,params[])
+COMMAND:knockout(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -33937,7 +33943,7 @@ COMMAND:knockout(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:reinzerren(playerid,params[])
+COMMAND:reinzerren(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -33977,7 +33983,7 @@ COMMAND:reinzerren(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:fesseln(playerid,params[])
+COMMAND:fesseln(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -34016,7 +34022,7 @@ COMMAND:fesseln(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:entfesseln(playerid,params[])
+COMMAND:entfesseln(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -34056,7 +34062,7 @@ COMMAND:entfesseln(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:setsinlist(playerid,params[])
+COMMAND:setsinlist(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -34091,7 +34097,7 @@ COMMAND:setsinlist(playerid,params[])
 }
 
 
-COMMAND:setbl(playerid,params[])
+COMMAND:setbl(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -34130,7 +34136,7 @@ COMMAND:setbl(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:delbl(playerid,params[])
+COMMAND:delbl(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -34163,7 +34169,7 @@ COMMAND:delbl(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:freesinlist(playerid,params[])
+COMMAND:freesinlist(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -34198,7 +34204,7 @@ COMMAND:freesinlist(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:freebl(playerid,params[])
+COMMAND:freebl(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -34233,7 +34239,7 @@ COMMAND:freebl(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:sinlist(playerid,params[])
+COMMAND:sinlist(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -34269,7 +34275,7 @@ COMMAND:sinlist(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:blacklist(playerid,params[])
+COMMAND:blacklist(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -34305,7 +34311,7 @@ COMMAND:blacklist(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:stadium(playerid,params[])
+COMMAND:stadium(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -34326,7 +34332,7 @@ COMMAND:stadium(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht am Los Santos Stadium!");
 }
 
-COMMAND:helm(playerid,params[])
+COMMAND:helm(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -34361,7 +34367,7 @@ COMMAND:helm(playerid,params[])
 	return 1;
 }
 
-COMMAND:equipment(playerid,params[])
+COMMAND:equipment(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -34394,7 +34400,7 @@ COMMAND:equipment(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der Nähe eines Fraktionsfahrzeuges.");
 }
 
-COMMAND:feueralarm(playerid,params[])
+COMMAND:feueralarm(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -34464,7 +34470,7 @@ COMMAND:feueralarm(playerid,params[])
 	return 1;
 }
 
-COMMAND:generatekey(playerid,params[])
+COMMAND:generatekey(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -34493,7 +34499,7 @@ COMMAND:generatekey(playerid,params[])
 	return 1;
 }
 
-COMMAND:openalljails(playerid,params[])
+COMMAND:openalljails(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -34541,7 +34547,7 @@ COMMAND:openalljails(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Die Zellen wurden bereits geöffnet.");
 }
 
-COMMAND:schild(playerid,params[])
+COMMAND:schild(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -34574,7 +34580,7 @@ COMMAND:schild(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:dienstequip(playerid,params[])
+COMMAND:dienstequip(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -34641,7 +34647,7 @@ COMMAND:dienstequip(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:dienstwaffe(playerid,params[])
+COMMAND:dienstwaffe(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -34776,7 +34782,7 @@ COMMAND:dienstwaffe(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:finvite(playerid,params[])
+COMMAND:finvite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -34813,7 +34819,7 @@ COMMAND:finvite(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:allowsperrzone(playerid,params[])
+COMMAND:allowsperrzone(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -34843,7 +34849,7 @@ COMMAND:allowsperrzone(playerid,params[])
 	return 1;
 }
 
-COMMAND:delsperrzone(playerid,params[])
+COMMAND:delsperrzone(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -34873,7 +34879,7 @@ COMMAND:delsperrzone(playerid,params[])
 	return 1;
 }
 
-COMMAND:setbwunit(playerid,params[])
+COMMAND:setbwunit(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -34934,7 +34940,7 @@ COMMAND:setbwunit(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:funinvite(playerid,params[])
+COMMAND:funinvite(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -34971,7 +34977,7 @@ COMMAND:funinvite(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:bwunitduty(playerid,params[])
+COMMAND:bwunitduty(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -35027,7 +35033,7 @@ COMMAND:bwunitduty(playerid,params[])
   			ResetWeapons(playerid,false);
 			for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
 				{
 					GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 				}
@@ -35184,7 +35190,7 @@ COMMAND:duty(playerid,params[])//normales duty für sapd,San Andreas Rettungsdien
 			ResetWeapons(playerid,false);
 			for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
 				{
 					GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 				}
@@ -35211,7 +35217,7 @@ COMMAND:duty(playerid,params[])//normales duty für sapd,San Andreas Rettungsdien
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:zivilduty(playerid,params[])
+COMMAND:zivilduty(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -35281,7 +35287,7 @@ COMMAND:zivilduty(playerid,params[])
 				ResetWeapons(playerid,false);
 				for(new slot=0;slot<13;slot++)
 				{
-					if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
+					if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
 					{
 						GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 					}
@@ -35337,7 +35343,7 @@ COMMAND:highwayduty(playerid,params[])//autobahnpolizeiduty
 			ResetWeapons(playerid,false);
 			for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
 				{
 					GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 				}
@@ -35397,7 +35403,7 @@ COMMAND:swatduty(playerid,params[])//swatduty
 			ResetWeapons(playerid,false);
 			for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
 				{
 					GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 				}
@@ -35465,7 +35471,7 @@ COMMAND:feuerduty(playerid,params[])//feuerwehrduty
 			ResetWeapons(playerid,false);
 			for(new slot=0;slot<13;slot++)
 			{
-				if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
+				if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
 				{
 					GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 				}
@@ -35490,7 +35496,7 @@ COMMAND:feuerduty(playerid,params[])//feuerwehrduty
 	return SCM(playerid,SAMP_WEISS,""IINFO" du musst erst Offduty sein!");
 }
 
-COMMAND:beamte(playerid,params[])
+COMMAND:beamte(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -35524,7 +35530,7 @@ COMMAND:beamte(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:d(playerid,params[])
+COMMAND:d(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -35600,7 +35606,7 @@ COMMAND:d(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:ex(playerid,params[])
+COMMAND:ex(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -35675,7 +35681,7 @@ COMMAND:ex(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:radarpistole(playerid,params[])
+COMMAND:radarpistole(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -35720,7 +35726,7 @@ COMMAND:radarpistole(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:blitzerinfo(playerid,params[])
+COMMAND:blitzerinfo(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -35751,7 +35757,7 @@ COMMAND:blitzerinfo(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:addtmast(playerid,params[])
+COMMAND:addtmast(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -35774,7 +35780,7 @@ COMMAND:addtmast(playerid,params[])
 	CreateTmasten(playerid);
   	return 1;
 }
-COMMAND:deltmast(playerid,params[])
+COMMAND:deltmast(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -35793,7 +35799,7 @@ COMMAND:deltmast(playerid,params[])
 	DeleteTMasten(playerid);
   	return 1;
 }
-COMMAND:repairtmast(playerid,params[])
+COMMAND:repairtmast(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -35827,7 +35833,7 @@ COMMAND:repairtmast(playerid,params[])
 	FMastenInfo[msten][RubLabel] = INVALID_3D_TEXT;
 	return 1;
 }
-COMMAND:empfangsrate(playerid,params[])
+COMMAND:empfangsrate(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -35870,7 +35876,7 @@ COMMAND:empfangsrate(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:repairinfo(playerid,params[])
+COMMAND:repairinfo(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -35886,7 +35892,7 @@ COMMAND:repairinfo(playerid,params[])
 	ShowPlayerTechnikerMenu(playerid);
 	return 1;
 }
-COMMAND:repairinfo_2(playerid,params[])
+COMMAND:repairinfo_2(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -35964,7 +35970,7 @@ COMMAND:repairinfo_2(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,"");
 }
-COMMAND:repairatm(playerid,params[])
+COMMAND:repairatm(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -35998,7 +36004,7 @@ COMMAND:repairatm(playerid,params[])
 	return 1;
 }
 
-COMMAND:repairtzelle(playerid,params[])
+COMMAND:repairtzelle(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36031,7 +36037,7 @@ COMMAND:repairtzelle(playerid,params[])
 	TeleZelleInfo[i][RubLabel] = INVALID_3D_TEXT;
 	return 1;
 }
-COMMAND:repairblitzer(playerid,params[])
+COMMAND:repairblitzer(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36065,7 +36071,7 @@ COMMAND:repairblitzer(playerid,params[])
 	Blitzer[i][RubLabel] = INVALID_3D_TEXT;
 	return 1;
 }
-COMMAND:addmine(playerid,params[])
+COMMAND:addmine(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36086,7 +36092,7 @@ COMMAND:addmine(playerid,params[])
 	return 1;
 }
 
-COMMAND:delmine(playerid,params[])
+COMMAND:delmine(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36109,7 +36115,7 @@ COMMAND:delmine(playerid,params[])
 	return 1;
 }
 
-COMMAND:delallminen(playerid,params[])
+COMMAND:delallminen(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36131,7 +36137,7 @@ COMMAND:delallminen(playerid,params[])
 	SendClientMessageToAll(0x00489184,string);
 	return 1;
 }
-COMMAND:addblitzer(playerid,params[])
+COMMAND:addblitzer(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -36154,7 +36160,7 @@ COMMAND:addblitzer(playerid,params[])
  	}
   	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:delblitzer(playerid,params[])
+COMMAND:delblitzer(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36176,7 +36182,7 @@ COMMAND:delblitzer(playerid,params[])
   	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:delallblitzer(playerid,params[])
+COMMAND:delallblitzer(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36202,7 +36208,7 @@ COMMAND:delallblitzer(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:nagelband(playerid,params[])
+COMMAND:nagelband(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36226,7 +36232,7 @@ COMMAND:nagelband(playerid,params[])
   	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:delnagelband(playerid,params[])
+COMMAND:delnagelband(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36248,7 +36254,7 @@ COMMAND:delnagelband(playerid,params[])
   	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:delallnagelband(playerid,params[])
+COMMAND:delallnagelband(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36274,7 +36280,7 @@ COMMAND:delallnagelband(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:sperre(playerid,params[])
+COMMAND:sperre(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -36306,7 +36312,7 @@ COMMAND:sperre(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:delsperre(playerid,params[])
+COMMAND:delsperre(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36328,7 +36334,7 @@ COMMAND:delsperre(playerid,params[])
   	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:delallsperre(playerid,params[])
+COMMAND:delallsperre(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36354,7 +36360,7 @@ COMMAND:delallsperre(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:rauchsignal(playerid,params[])
+COMMAND:rauchsignal(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36379,7 +36385,7 @@ COMMAND:rauchsignal(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:delrauchsignal(playerid,params[])
+COMMAND:delrauchsignal(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36401,7 +36407,7 @@ COMMAND:delrauchsignal(playerid,params[])
   	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:delallrauchsignal(playerid,params[])
+COMMAND:delallrauchsignal(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36427,7 +36433,7 @@ COMMAND:delallrauchsignal(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:setpunkte(playerid,params[])
+COMMAND:setpunkte(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -36496,7 +36502,7 @@ COMMAND:setpunkte(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:delpunkte(playerid,params[])
+COMMAND:delpunkte(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -36545,7 +36551,7 @@ COMMAND:delpunkte(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:anwalterlaubnis(playerid,params[])
+COMMAND:anwalterlaubnis(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -36578,7 +36584,7 @@ COMMAND:anwalterlaubnis(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:vehtake(playerid,params[])
+COMMAND:vehtake(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36628,7 +36634,7 @@ COMMAND:vehtake(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:takemaske(playerid,params[])
+COMMAND:takemaske(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -36676,7 +36682,7 @@ COMMAND:takemaske(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:detachthings(playerid,params[])
+COMMAND:detachthings(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -36953,7 +36959,7 @@ COMMAND:detachthings(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:take(playerid,params[])
+COMMAND:take(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -37421,7 +37427,7 @@ COMMAND:take(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion./Du bist nicht im Admindienst.");
 }
 
-COMMAND:segen(playerid,params[])
+COMMAND:segen(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -37452,7 +37458,7 @@ COMMAND:segen(playerid,params[])
     }
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:ticket(playerid,params[])
+COMMAND:ticket(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -37488,7 +37494,7 @@ COMMAND:ticket(playerid,params[])
     }
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:su(playerid,params[])
+COMMAND:su(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -37544,7 +37550,7 @@ COMMAND:su(playerid,params[])
     }
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:pfreikaufen(playerid,params[])
+COMMAND:pfreikaufen(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -37569,7 +37575,7 @@ COMMAND:pfreikaufen(playerid,params[])
     fverwaltungen[16][Geld] += (Menge*MAX_PRICE_PER_POINT);
 	return 1;
 }
-COMMAND:clear(playerid,params[])
+COMMAND:clear(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -37628,7 +37634,7 @@ COMMAND:clear(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:ram(playerid,params[])
+COMMAND:ram(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -37756,7 +37762,7 @@ COMMAND:ram(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:tazer(playerid,params[])
+COMMAND:tazer(playerid,const params[])
 {
  	if(isPlayerInFrakt(playerid,1) || isPlayerInFrakt(playerid,2) || isPlayerInFrakt(playerid,6) || isPlayerInFrakt(playerid,16)){
 		strdel(edit_2,0,sizeof(edit_2));
@@ -37770,7 +37776,7 @@ COMMAND:tazer(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:tazer_3(playerid,params[])
+COMMAND:tazer_3(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -37828,7 +37834,7 @@ COMMAND:tazer_3(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:checkpunkte(playerid,params[])
+COMMAND:checkpunkte(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -37854,7 +37860,7 @@ COMMAND:checkpunkte(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:checkgun(playerid,params[])
+COMMAND:checkgun(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -37873,13 +37879,13 @@ COMMAND:checkgun(playerid,params[])
 	    if(!IsPlayerConnected(pID))return Eingeloggt_MSG(playerid);
 	    if(GetPVarInt(pID,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
 		if(IsPlayerNPC(pID))return SCM(playerid,SAMP_WEISS,""IINFO" das kannst du nicht!");
-	    new waffe,muni;
+	    new WEAPON:waffe,muni;
 	    format(string,sizeof(string),"[_____Waffen von %s_____]",SpielerName(pID));
 	    SCM(playerid,SAMP_WEISS,string);
 		for(new i=0;i<13;i++)
 		{
 			GetPlayerWeaponData(pID,WEAPON_SLOT:i,waffe,muni);
-			if(waffe != 0)
+			if(waffe != WEAPON_FIST)
 			{
 				format(string,sizeof(string)," %i: %s %i Munition",i,SpielerWaffenName(waffe),muni);
 				SCM(playerid,SAMP_WEISS,string);
@@ -37891,7 +37897,7 @@ COMMAND:checkgun(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:checkwanteds(playerid,params[])
+COMMAND:checkwanteds(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -37917,7 +37923,7 @@ COMMAND:checkwanteds(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:gesuchte(playerid,params[])
+COMMAND:gesuchte(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -37965,7 +37971,7 @@ COMMAND:gesuchte(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:wanteds(playerid,params[])
+COMMAND:wanteds(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -38012,7 +38018,7 @@ COMMAND:wanteds(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:setsteuern(playerid,params[])
+COMMAND:setsteuern(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38031,7 +38037,7 @@ COMMAND:setsteuern(playerid,params[])
 	}
  	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion./Du bist nicht im Admindienst.");
 }
-COMMAND:akte(playerid,params[])
+COMMAND:akte(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -38052,7 +38058,7 @@ COMMAND:akte(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:wlicht(playerid,params[])
+COMMAND:wlicht(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -38094,7 +38100,7 @@ COMMAND:wlicht(playerid,params[])
 	return 1;
 }
 
-COMMAND:blaulicht(playerid,params[])
+COMMAND:blaulicht(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -38237,7 +38243,7 @@ COMMAND:blaulicht(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:cuff(playerid,params[])
+COMMAND:cuff(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38279,7 +38285,7 @@ COMMAND:cuff(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:uncuff(playerid,params[])
+COMMAND:uncuff(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38320,7 +38326,7 @@ COMMAND:uncuff(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:alkoholtest(playerid,params[])
+COMMAND:alkoholtest(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38357,7 +38363,7 @@ COMMAND:alkoholtest(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:frisk(playerid,params[])
+COMMAND:frisk(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38394,7 +38400,7 @@ COMMAND:frisk(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:dfrisk(playerid,params[])
+COMMAND:dfrisk(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38423,7 +38429,7 @@ COMMAND:dfrisk(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:freilassen(playerid,params[])
+COMMAND:freilassen(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38493,7 +38499,7 @@ COMMAND:freilassen(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:afreilassen(playerid,params[])
+COMMAND:afreilassen(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38546,7 +38552,7 @@ COMMAND:afreilassen(playerid,params[])
 	return 1;
 }
 
-COMMAND:einsperren(playerid,params[])
+COMMAND:einsperren(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38606,7 +38612,7 @@ COMMAND:einsperren(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:oeinsperren(playerid,params[])
+COMMAND:oeinsperren(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -38658,7 +38664,7 @@ COMMAND:oeinsperren(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:orten(playerid,params[])
+COMMAND:orten(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38696,7 +38702,7 @@ COMMAND:orten(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:ortenveh(playerid,params[])
+COMMAND:ortenveh(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38727,7 +38733,7 @@ COMMAND:ortenveh(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:bounce(playerid,params[])
+COMMAND:bounce(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38761,7 +38767,7 @@ COMMAND:bounce(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:grab(playerid,params[])
+COMMAND:grab(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38803,7 +38809,7 @@ COMMAND:grab(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:gov(playerid,params[])
+COMMAND:gov(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38851,7 +38857,7 @@ COMMAND:gov(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:cs(playerid,params[])
+COMMAND:cs(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38902,7 +38908,7 @@ COMMAND:cs(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:m(playerid,params[])
+COMMAND:m(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -38954,7 +38960,7 @@ COMMAND:m(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:gefangene(playerid,params[])
+COMMAND:gefangene(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -39001,7 +39007,7 @@ COMMAND:gefangene(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Nicht in der jeweiligen Fraktion/Job.");
 }
 
-COMMAND:radar(playerid,params[])
+COMMAND:radar(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -39045,7 +39051,7 @@ COMMAND:radar(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht am Radar oder in keinem Flugzeug/Helikopter.");
 }
 
-COMMAND:bildschirm(playerid,params[])
+COMMAND:bildschirm(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -39205,7 +39211,7 @@ COMMAND:bildschirm(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Nicht am Bildschirm.");
 }
 
-COMMAND:wiederbeleben(playerid,params[])
+COMMAND:wiederbeleben(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -39241,7 +39247,7 @@ COMMAND:wiederbeleben(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:retten(playerid,params[])
+COMMAND:retten(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -39271,7 +39277,7 @@ COMMAND:retten(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:rescue(playerid,params[])
+COMMAND:rescue(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -39315,7 +39321,7 @@ COMMAND:rescue(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:hospital(playerid,params[])
+COMMAND:hospital(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -39357,7 +39363,7 @@ COMMAND:hospital(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:heilen(playerid,params[])
+COMMAND:heilen(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return SCM(playerid,SAMP_WEISS,""IINFO" du kannst keine Befehle nutzen, da du im Tutorial bist.");
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -39393,7 +39399,7 @@ COMMAND:heilen(playerid,params[])
 	return 1;
 }
 
-COMMAND:sellgun(playerid,params[])
+COMMAND:sellgun(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -39724,7 +39730,7 @@ COMMAND:sellgun(playerid,params[])
  	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:gunlist(playerid,params[])
+COMMAND:gunlist(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -39748,7 +39754,7 @@ COMMAND:gunlist(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:showgunlist(playerid,params[])
+COMMAND:showgunlist(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -39781,7 +39787,7 @@ COMMAND:showgunlist(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:eisenlager(playerid,params[])
+COMMAND:eisenlager(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -39805,7 +39811,7 @@ COMMAND:eisenlager(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:getmats(playerid,params[])
+COMMAND:getmats(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -39852,7 +39858,7 @@ COMMAND:getmats(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:delmats(playerid,params[])
+COMMAND:delmats(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -39894,7 +39900,7 @@ COMMAND:delmats(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
 
-COMMAND:find(playerid,params[])
+COMMAND:find(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -39928,7 +39934,7 @@ COMMAND:find(playerid,params[])
 	return 1;
 }
 
-COMMAND:findveh(playerid,params[])
+COMMAND:findveh(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -39955,7 +39961,7 @@ COMMAND:findveh(playerid,params[])
 	return 1;
 }
 
-COMMAND:entladen(playerid,params[])
+COMMAND:entladen(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -40020,7 +40026,7 @@ COMMAND:entladen(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du hast den Farmer Job nicht gestartet!");
 }
-COMMAND:eatbrot(playerid,params[])
+COMMAND:eatbrot(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -40043,7 +40049,7 @@ COMMAND:eatbrot(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht im Alkatraz/Knast/Gefängnis.");
 }
-COMMAND:knastzeit(playerid,params[])
+COMMAND:knastzeit(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -40064,7 +40070,7 @@ COMMAND:knastzeit(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:friedhofzeit_3(playerid,params[])
+COMMAND:friedhofzeit_3(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -40077,7 +40083,7 @@ COMMAND:friedhofzeit_3(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:totenzeit_3(playerid,params[])
+COMMAND:totenzeit_3(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -40090,7 +40096,7 @@ COMMAND:totenzeit_3(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:whack(playerid,params[])
+COMMAND:whack(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -40142,7 +40148,7 @@ COMMAND:whack(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:sellwhack(playerid,params[])
+COMMAND:sellwhack(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -40204,7 +40210,7 @@ COMMAND:sellwhack(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:sellrepair(playerid,params[])
+COMMAND:sellrepair(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -40242,7 +40248,7 @@ COMMAND:sellrepair(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:msellrepair(playerid,params[])
+COMMAND:msellrepair(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -40281,7 +40287,7 @@ COMMAND:msellrepair(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:sellrefill(playerid,params[])
+COMMAND:sellrefill(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -40319,7 +40325,7 @@ COMMAND:sellrefill(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:msellrefill(playerid,params[])
+COMMAND:msellrefill(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -40358,7 +40364,7 @@ COMMAND:msellrefill(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:auspumpen(playerid,params[])
+COMMAND:auspumpen(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -40397,7 +40403,7 @@ COMMAND:auspumpen(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:mauspumpen(playerid,params[])
+COMMAND:mauspumpen(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -40437,7 +40443,7 @@ COMMAND:mauspumpen(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du besitzt nicht den jeweiligen Job./Du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:selldrugs(playerid,params[])
+COMMAND:selldrugs(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -40540,7 +40546,7 @@ COMMAND:selldrugs(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" /selldrugs [Ganja/Kokain/OpiumSpice][playerid/Name][Menge][Preis]");
 }
-COMMAND:nummer(playerid,params[])
+COMMAND:nummer(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -40559,7 +40565,7 @@ COMMAND:nummer(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
     return 1;
 }
-COMMAND:enter_3(playerid,params[])
+COMMAND:enter_3(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -40717,7 +40723,7 @@ COMMAND:enter_3(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du kannst hier nichts betreten.");
 }
 
-COMMAND:exit(playerid,params[])
+COMMAND:exit(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -40861,7 +40867,7 @@ COMMAND:exit(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du kannst hier nichts verlassen.");
 }
-COMMAND:id(playerid,params[])
+COMMAND:id(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -40874,7 +40880,7 @@ COMMAND:id(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:gethdd(playerid,params[])
+COMMAND:gethdd(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -40888,7 +40894,7 @@ COMMAND:gethdd(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:report(playerid,params[])
+COMMAND:report(playerid,const params[])
 {
 	#pragma unused params
 	new onlineadmins;
@@ -40900,7 +40906,7 @@ COMMAND:report(playerid,params[])
     if(!isPlayerInFrakt(playerid,0))return ShowPlayerReportFrak(playerid);
 	return ShowPlayerReport(playerid);
 }
-COMMAND:reportfix(playerid,params[])
+COMMAND:reportfix(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -40919,7 +40925,7 @@ COMMAND:reportfix(playerid,params[])
 	SCM(playerid,SAMP_WEISS,""IINFO" alle Reports wurden gelöscht.");
 	return 1;
 }
-COMMAND:rtclose(playerid,params[])
+COMMAND:rtclose(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -40957,7 +40963,7 @@ COMMAND:rtclose(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du hast keinen Report abgesendet.");
 }
-COMMAND:muenze(playerid,params[])
+COMMAND:muenze(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -40993,7 +40999,7 @@ COMMAND:muenze(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:telefonbuch(playerid,params[])
+COMMAND:telefonbuch(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -41015,7 +41021,7 @@ COMMAND:telefonbuch(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:anwaelte(playerid,params[])
+COMMAND:anwaelte(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -41052,7 +41058,7 @@ COMMAND:anwaelte(playerid,params[])
 	if(onlineanwaelte == 0)return SCM(playerid,SAMP_WEISS,""IINFO" derzeit ist kein Anwalt verfügbar.");
 	return 1;
 }
-COMMAND:makler(playerid,params[])
+COMMAND:makler(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -41092,7 +41098,7 @@ COMMAND:makler(playerid,params[])
 	if(onlinemakler == 0)return SCM(playerid,SAMP_WEISS,""IINFO" derzeit ist kein Immobilienmakler/in verfügbar.");
 	return 1;
 }
-COMMAND:fillveh(playerid,params[])
+COMMAND:fillveh(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -41118,7 +41124,7 @@ COMMAND:fillveh(playerid,params[])
 	PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 	return 1;
 }
-COMMAND:repairveh(playerid,params[])
+COMMAND:repairveh(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -41144,7 +41150,7 @@ COMMAND:repairveh(playerid,params[])
 	PlayerTalkPublic(playerid,SAMP_PublicChatColor,string,10);
 	return SCM(playerid,SAMP_WEISS,"Nicht in der Nähe eine Fahrzeuges.");
 }
-COMMAND:mlock(playerid,params[])
+COMMAND:mlock(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -41250,7 +41256,7 @@ COMMAND:mlock(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,"/lock [RentVeh/FraktionsVeh/AdminVeh]");
 }
-COMMAND:alock(playerid,params[])
+COMMAND:alock(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -41289,7 +41295,7 @@ COMMAND:alock(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der Nähe eines Adminfahrzeuges.");
 }
-COMMAND:idrop_3(playerid,params[])
+COMMAND:idrop_3(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -41340,7 +41346,7 @@ COMMAND:idrop_3(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" /idrop [Gun/Koffer]");
 }
-COMMAND:ipickup_3(playerid,params[])
+COMMAND:ipickup_3(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -41493,7 +41499,7 @@ COMMAND:ipickup_3(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" /ipickup [Gun/Koffer]");
 }
-COMMAND:ownkofferinfo(playerid,params[])
+COMMAND:ownkofferinfo(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -41510,7 +41516,7 @@ COMMAND:ownkofferinfo(playerid,params[])
     ShowPlayerDialog(playerid,DIALOG_4ALL_SONSTIGES,DIALOG_STYLE_MSGBOX,"Koffer",string,"Verlassen","");
 	return 1;
 }
-COMMAND:kofferinfo(playerid,params[])
+COMMAND:kofferinfo(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -41602,7 +41608,7 @@ COMMAND:kofferinfo(playerid,params[])
 	return 1;
 }
 
-COMMAND:koffer(playerid,params[])
+COMMAND:koffer(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -41865,7 +41871,7 @@ COMMAND:koffer(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" /koffer [reinlegen/rausnehmen][Ganja/Kokain/Materials/MatsPakete/Spice/Opium/Lunchpakete/C4/Köder/Geld/Zigaretten][Menge]");
 }
 
-COMMAND:kofferrauminfo(playerid,params[])
+COMMAND:kofferrauminfo(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -41891,7 +41897,7 @@ COMMAND:kofferrauminfo(playerid,params[])
  	}
 	return SCM(playerid,SAMP_WEISS,"Nicht in der Nähe eine Fahrzeuges oder der Kofferraum eines Fahrzeuges ist nicht geöffnet.");
 }
-COMMAND:kraum(playerid,params[])
+COMMAND:kraum(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -42139,7 +42145,7 @@ COMMAND:kraum(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,"Nicht in der Nähe deines Fahrzeuges oder der Kofferraum eines Fahrzeuges ist nicht geöffnet.");
 }
-COMMAND:slap(playerid,params[])
+COMMAND:slap(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -42165,7 +42171,7 @@ COMMAND:slap(playerid,params[])
 	else SetPlayerPosEx(playerid,x,y,z+pSize);
 	return 1;
 }
-COMMAND:reloadveh(playerid,params[])
+COMMAND:reloadveh(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -42188,7 +42194,7 @@ COMMAND:reloadveh(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:gotoveh(playerid,params[])
+COMMAND:gotoveh(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -42212,7 +42218,7 @@ COMMAND:gotoveh(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:getvehhere(playerid,params[])
+COMMAND:getvehhere(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -42237,7 +42243,7 @@ COMMAND:getvehhere(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:beamtenstore(playerid,params[])
+COMMAND:beamtenstore(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -42256,13 +42262,13 @@ COMMAND:beamtenstore(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:supmobil(playerid,params[])
+COMMAND:supmobil(playerid,const params[])
 {
     if(!isPlayerAnAdmin(playerid,1))return ADMIN_MSG(playerid);
 	ShowPlayerSupMobilMenu(playerid);
 	return 1;
 }
-COMMAND:supmobil_2(playerid,params[])
+COMMAND:supmobil_2(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -42325,7 +42331,7 @@ COMMAND:supmobil_2(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" /supmobil_2 [Add/Lock/Del]");
 }
-COMMAND:delveh(playerid,params[])
+COMMAND:delveh(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -42345,7 +42351,7 @@ COMMAND:delveh(playerid,params[])
 	adminmobile[IsAAdminVeh(GetPlayerVehicleID(playerid))] = -1;
 	return 1;
 }
-COMMAND:delallveh(playerid,params[])
+COMMAND:delallveh(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -42376,7 +42382,7 @@ COMMAND:delallveh(playerid,params[])
 	SendAdminMessage(GELB,string);
 	return 1;
 }
-COMMAND:reporten(playerid,params[])
+COMMAND:reporten(playerid,const params[])
 {
 	#pragma unused params
     if(isPlayerAnAdmin(playerid,1))
@@ -42389,7 +42395,7 @@ COMMAND:reporten(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:veh(playerid,params[])
+COMMAND:veh(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -42434,7 +42440,7 @@ COMMAND:veh(playerid,params[])
    	}
 	return 1;
 }
-COMMAND:deleventveh(playerid,params[])
+COMMAND:deleventveh(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -42454,7 +42460,7 @@ COMMAND:deleventveh(playerid,params[])
 	eventmobile[IsAEventVeh(GetPlayerVehicleID(playerid))] = -1;
 	return 1;
 }
-COMMAND:delalleventveh(playerid,params[])
+COMMAND:delalleventveh(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -42482,7 +42488,7 @@ COMMAND:delalleventveh(playerid,params[])
 	SendAdminMessage(SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:eventveh(playerid,params[])
+COMMAND:eventveh(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -42524,7 +42530,7 @@ COMMAND:eventveh(playerid,params[])
    	}
 	return 1;
 }
-COMMAND:garage(playerid,params[])
+COMMAND:garage(playerid,const params[])
 {
     #pragma unused params
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -42601,7 +42607,7 @@ COMMAND:garage(playerid,params[])
  	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keiner Garage.");
 }
-COMMAND:tresorgate(playerid,params[])
+COMMAND:tresorgate(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -42636,7 +42642,7 @@ COMMAND:tresorgate(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:zollinfo(playerid,params[])
+COMMAND:zollinfo(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -42667,7 +42673,7 @@ COMMAND:zollinfo(playerid,params[])
   	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:searchzoll(playerid,params[])
+COMMAND:searchzoll(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -42695,7 +42701,7 @@ COMMAND:searchzoll(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:ramzoll(playerid,params[])
+COMMAND:ramzoll(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -42723,7 +42729,7 @@ COMMAND:ramzoll(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:czoll(playerid,params[])
+COMMAND:czoll(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -42759,7 +42765,7 @@ COMMAND:czoll(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:czollall(playerid,params[])
+COMMAND:czollall(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -42805,7 +42811,7 @@ COMMAND:czollall(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:zoll(playerid,params[])
+COMMAND:zoll(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -42874,7 +42880,7 @@ COMMAND:zoll(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:csiwaffen(playerid,params[])
+COMMAND:csiwaffen(playerid,const params[])
 {
     #pragma unused params
 	if(IsPlayerInRangeOfPoint(playerid,10,226.7648,74.0639,1005.0391))
@@ -42900,7 +42906,7 @@ COMMAND:csiwaffen(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:tor(playerid,params[])
+COMMAND:tor(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -44415,7 +44421,7 @@ COMMAND:tor(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Kein Tor in der Nähe.");
 }
 
-COMMAND:delmoney(playerid,params[])
+COMMAND:delmoney(playerid,const params[])
 {
     if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -44432,7 +44438,7 @@ COMMAND:delmoney(playerid,params[])
     ACMoney(playerid,-geld);
     return 1;
 }
-COMMAND:cc(playerid,params[])
+COMMAND:cc(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -44492,7 +44498,7 @@ COMMAND:cc(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:s(playerid,params[])
+COMMAND:s(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -44541,7 +44547,7 @@ COMMAND:s(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:c(playerid,params[])
+COMMAND:c(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -44594,7 +44600,7 @@ COMMAND:c(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:lr(playerid,params[])
+COMMAND:lr(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -44647,7 +44653,7 @@ COMMAND:lr(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:b(playerid,params[])
+COMMAND:b(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -44689,7 +44695,7 @@ COMMAND:b(playerid,params[])
 	return 1;
 }
 
-COMMAND:me(playerid,params[])
+COMMAND:me(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -44731,7 +44737,7 @@ COMMAND:me(playerid,params[])
 	return 1;
 }
 
-COMMAND:oc(playerid,params[])
+COMMAND:oc(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -44773,7 +44779,7 @@ COMMAND:oc(playerid,params[])
 	return 1;
 }
 
-COMMAND:sellfish(playerid,params[])
+COMMAND:sellfish(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -44804,7 +44810,7 @@ COMMAND:sellfish(playerid,params[])
     return SCM(playerid,SAMP_WEISS,"In keinem 24/7!");
 }
 
-COMMAND:threwback(playerid,params[])
+COMMAND:threwback(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -44826,7 +44832,7 @@ COMMAND:threwback(playerid,params[])
 	return 1;
 }
 
-COMMAND:fishinfo(playerid,params[])
+COMMAND:fishinfo(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -44853,7 +44859,7 @@ COMMAND:fishinfo(playerid,params[])
 	return 1;
 }
 
-COMMAND:fish(playerid,params[])
+COMMAND:fish(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -44908,7 +44914,7 @@ COMMAND:fish(playerid,params[])
 	return 1;
 }
 
-COMMAND:delclothes(playerid,params[])
+COMMAND:delclothes(playerid,const params[])
 {
 	#pragma unused params
 	if(!IsPlayerAttachedObjectSlotUsed(playerid,0) && Spieler[playerid][pBuyClothes] == -1)return SCM(playerid,SAMP_WEISS,""IINFO" du hast keine Kopfbekleidung übergezogen.");
@@ -44917,7 +44923,7 @@ COMMAND:delclothes(playerid,params[])
 	return 1;
 }
 
-COMMAND:kartbahn(playerid,params[])
+COMMAND:kartbahn(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -44953,7 +44959,7 @@ COMMAND:kartbahn(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keiner Kart-Bahn.");
 }
 
-COMMAND:parachute(playerid,params[])
+COMMAND:parachute(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -44988,7 +44994,7 @@ COMMAND:parachute(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keinem Base-Jump Business.");
 }
 
-COMMAND:tanken(playerid,params[])
+COMMAND:tanken(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -45022,7 +45028,7 @@ COMMAND:tanken(playerid,params[])
     }
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keiner Tankstelle.");
 }
-COMMAND:kanister(playerid,params[])
+COMMAND:kanister(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -45061,7 +45067,7 @@ COMMAND:kanister(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keiner Tankstelle.");
 }
-COMMAND:ktank(playerid,params[])
+COMMAND:ktank(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -45115,7 +45121,7 @@ COMMAND:ktank(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keiner Tankstelle/Kasse.");
 }
 
-COMMAND:pbenter(playerid,params[])
+COMMAND:pbenter(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -45148,7 +45154,7 @@ COMMAND:pbenter(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist an keiner Paintball-Arena.");
 }
 
-COMMAND:pbexit(playerid,params[])
+COMMAND:pbexit(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -45171,7 +45177,7 @@ COMMAND:pbexit(playerid,params[])
     SetPlayerWaffenSkill(playerid);
     for(new slot=0;slot<13;slot++)
 	{
-		if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
+		if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
 		{
 			GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 		}
@@ -45239,7 +45245,7 @@ COMMAND:pbexit(playerid,params[])
 	return 1;
 }
 
-COMMAND:buy(playerid,params[])
+COMMAND:buy(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -45331,7 +45337,7 @@ COMMAND:buy(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Diese Business verkauft nichts.");
 }
 
-COMMAND:bizmenu(playerid,params[])
+COMMAND:bizmenu(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -45349,7 +45355,7 @@ COMMAND:bizmenu(playerid,params[])
     return 1;
 }
 
-COMMAND:mybizpartner(playerid,params[])
+COMMAND:mybizpartner(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -45390,7 +45396,7 @@ COMMAND:mybizpartner(playerid,params[])
     return 1;
 }
 
-COMMAND:kickmybizpartner(playerid,params[])
+COMMAND:kickmybizpartner(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -45416,7 +45422,7 @@ COMMAND:kickmybizpartner(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Dein Business hat keinen Teilhaber bzw. hast du Niemanden als Teilhaber ernannt.");
 }
 
-COMMAND:bizlock(playerid,params[])
+COMMAND:bizlock(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -45445,7 +45451,7 @@ COMMAND:bizlock(playerid,params[])
 	return 1;
 }
 
-COMMAND:buyrentvehs(playerid,params[])
+COMMAND:buyrentvehs(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -45480,7 +45486,7 @@ COMMAND:buyrentvehs(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist kein Besitzer eines Business./Du besitzt keine Fahrzeugvermietung.");
 }
 
-COMMAND:erstellen_3(playerid,params[])
+COMMAND:erstellen_3(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -45624,7 +45630,7 @@ COMMAND:erstellen_3(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" /erstellen [Haus/Business/Schwarzmarkt/Gutschein]");
 }
 
-COMMAND:kaufen(playerid,params[])
+COMMAND:kaufen(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -45747,7 +45753,7 @@ COMMAND:kaufen(playerid,params[])
     return 1;
 }
 
-COMMAND:bizverkaufen(playerid,params[])
+COMMAND:bizverkaufen(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -45781,7 +45787,7 @@ COMMAND:bizverkaufen(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" du musst an deinem Business sein.");
 }
 
-COMMAND:averkaufen(playerid,params[])
+COMMAND:averkaufen(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -45885,7 +45891,7 @@ COMMAND:averkaufen(playerid,params[])
     return 1;
 }
 
-COMMAND:apropertydelete(playerid,params[])
+COMMAND:apropertydelete(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -46034,7 +46040,7 @@ COMMAND:apropertydelete(playerid,params[])
     return SCM(playerid,SAMP_WEISS,""IINFO" /apropertydelete [Haus/Business/Schwarzmarkt][Hausnummer/ID/ID]");
 }
 
-COMMAND:allownedsmarkets(playerid,params[])
+COMMAND:allownedsmarkets(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -46061,7 +46067,7 @@ COMMAND:allownedsmarkets(playerid,params[])
     if(counter == 0)return SCM(playerid,SAMP_WEISS,"Keine vorhanden!");
 	return 1;
 }
-COMMAND:allfreesmarkets(playerid,params[])
+COMMAND:allfreesmarkets(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -46088,7 +46094,7 @@ COMMAND:allfreesmarkets(playerid,params[])
     if(counter == 0)return SCM(playerid,SAMP_WEISS,"Keine vorhanden!");
 	return 1;
 }
-COMMAND:allownedbizzes(playerid,params[])
+COMMAND:allownedbizzes(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -46115,7 +46121,7 @@ COMMAND:allownedbizzes(playerid,params[])
     if(counter == 0)return SCM(playerid,SAMP_WEISS,"Keine vorhanden!");
 	return 1;
 }
-COMMAND:allfreebizzes(playerid,params[])
+COMMAND:allfreebizzes(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -46142,7 +46148,7 @@ COMMAND:allfreebizzes(playerid,params[])
     if(counter == 0)return SCM(playerid,SAMP_WEISS,""IINFO" keine vorhanden!");
 	return 1;
 }
-COMMAND:allownedhouses(playerid,params[])
+COMMAND:allownedhouses(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -46169,7 +46175,7 @@ COMMAND:allownedhouses(playerid,params[])
     if(counter == 0)return SCM(playerid,SAMP_WEISS,"Keine vorhanden!");
 	return 1;
 }
-COMMAND:fh(playerid,params[])
+COMMAND:fh(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -46196,7 +46202,7 @@ COMMAND:fh(playerid,params[])
     if(counter == 0)return SCM(playerid,SAMP_WEISS,"Keine vorhanden!");
 	return 1;
 }
-COMMAND:gotohaus(playerid,params[])
+COMMAND:gotohaus(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -46294,7 +46300,7 @@ COMMAND:gotohaus(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" /gotohaus [Haus | Business] [Straßennummer]");
 }
-COMMAND:f(playerid,params[])
+COMMAND:f(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -46339,7 +46345,7 @@ COMMAND:f(playerid,params[])
 	Log("FraktionChat.txt",string);
 	return 1;
 }
-COMMAND:fl(playerid,params[])
+COMMAND:fl(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -46402,7 +46408,7 @@ COMMAND:fl(playerid,params[])
 	return 1;
 }
 
-COMMAND:l(playerid,params[])
+COMMAND:l(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -46466,7 +46472,7 @@ COMMAND:l(playerid,params[])
 	return 1;
 }
 
-COMMAND:j(playerid,params[])
+COMMAND:j(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -46533,7 +46539,7 @@ COMMAND:j(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,"Nicht im jeweiligen Job!");
 }
 
-COMMAND:r(playerid,params[])
+COMMAND:r(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -46594,7 +46600,7 @@ COMMAND:r(playerid,params[])
 	Log("Racechatsqllog",string);
 	return 1;
 }
-COMMAND:flastdriver(playerid,params[])
+COMMAND:flastdriver(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -46615,7 +46621,7 @@ COMMAND:flastdriver(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:fvl(playerid,params[])
+COMMAND:fvl(playerid,const params[])
 {
 	#pragma unused params
  	if(isPlayerInFrakt(playerid,0))return SCM(playerid,SAMP_WEISS,""IINFO" du bist in keiner Fraktion.");
@@ -46624,7 +46630,7 @@ COMMAND:fvl(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:fmember(playerid,params[])
+COMMAND:fmember(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -46653,7 +46659,7 @@ COMMAND:fmember(playerid,params[])
 	if(onlinemembers == 0)return SCM(playerid,SAMP_WEISS,"Kein Fraktionsmitglied Online.");
 	return 1;
 }
-COMMAND:leader(playerid,params[])
+COMMAND:leader(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -46687,7 +46693,7 @@ COMMAND:leader(playerid,params[])
 	if(onlineleader == 0)return SCM(playerid,SAMP_WEISS,""IINFO" kein Leader einer Fraktion Online.");
 	return 1;
 }
-COMMAND:leiche(playerid,params[])
+COMMAND:leiche(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -46725,7 +46731,7 @@ COMMAND:leiche(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:bestatten(playerid,params[])
+COMMAND:bestatten(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -46773,7 +46779,7 @@ COMMAND:bestatten(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:lastdriver(playerid,params[])
+COMMAND:lastdriver(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -46793,7 +46799,7 @@ COMMAND:lastdriver(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:a(playerid,params[])
+COMMAND:a(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -46815,7 +46821,7 @@ COMMAND:a(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:afix(playerid,params[])
+COMMAND:afix(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -46898,7 +46904,7 @@ COMMAND:afix(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" /afix[Blitzer/Funkmasten/Telefonzellen/ATM/alle]");
 }
-COMMAND:afeuer(playerid,params[])
+COMMAND:afeuer(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -46917,7 +46923,7 @@ COMMAND:afeuer(playerid,params[])
 	SCM(playerid,SAMP_WEISS,""IINFO" du hast ein feuer gelegt!");
 	return 1;
 }
-COMMAND:unprison(playerid,params[])
+COMMAND:unprison(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -46947,7 +46953,7 @@ COMMAND:unprison(playerid,params[])
 	Log("UnPrisonsqllog",string);
 	return 1;
 }
-COMMAND:prison(playerid,params[])
+COMMAND:prison(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -46997,7 +47003,7 @@ COMMAND:prison(playerid,params[])
 	return 1;
 }
 
-COMMAND:breakprison(playerid,params[])
+COMMAND:breakprison(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47021,7 +47027,7 @@ COMMAND:breakprison(playerid,params[])
 	return 1;
 }
 
-COMMAND:checkprison(playerid,params[])
+COMMAND:checkprison(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -47038,7 +47044,7 @@ COMMAND:checkprison(playerid,params[])
 	return 1;
 }
 
-COMMAND:pay(playerid,params[])
+COMMAND:pay(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
  	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -47088,7 +47094,7 @@ COMMAND:pay(playerid,params[])
 	return 1;
 }
 
-COMMAND:navi(playerid,params[])
+COMMAND:navi(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47107,7 +47113,7 @@ COMMAND:navi(playerid,params[])
 }
 
 
-COMMAND:cshop(playerid,params[])
+COMMAND:cshop(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47123,7 +47129,7 @@ COMMAND:cshop(playerid,params[])
     ShowPlayerDialog(playerid,COIN_SHOP,DIALOG_STYLE_LIST,"Coin Shop","5 Tage Donator (100 Coins)\n12 Tage Donator (250 Coins)\n30 Tage Donator (500 Coins)\n50 Tage Donator (750)\n75 Tage Donator (1000 Coins)\nHotring Racer (750 Coins)\nStretch (1000 Coins)\nGolf Caddy (600 Coins)","Kaufen","Abbruch") ;
 	return 1;
 }
-COMMAND:gutschein(playerid,params[])
+COMMAND:gutschein(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47140,7 +47146,7 @@ COMMAND:gutschein(playerid,params[])
 	return 1;
 }
 
-COMMAND:wiw(playerid,params[])
+COMMAND:wiw(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47159,7 +47165,7 @@ COMMAND:wiw(playerid,params[])
 	return 1;
 }
 
-COMMAND:arefill(playerid,params[])
+COMMAND:arefill(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47181,7 +47187,7 @@ COMMAND:arefill(playerid,params[])
     return 1;
 }
 
-COMMAND:avehfix(playerid,params[])
+COMMAND:avehfix(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47207,7 +47213,7 @@ COMMAND:avehfix(playerid,params[])
 	return 1;
 }
 
-COMMAND:acolor(playerid,params[])
+COMMAND:acolor(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47231,7 +47237,7 @@ COMMAND:acolor(playerid,params[])
 	SCM(playerid,SAMP_WEISS,string);
 	return 1;
 }
-COMMAND:arepair(playerid,params[])
+COMMAND:arepair(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47276,7 +47282,7 @@ COMMAND:arepair(playerid,params[])
     SCM(playerid,SAMP_WEISS,""IINFO" das ausnutzen deses Befehl "IINFO2"/arepair"#HTML_WEISS" kann zur einer Sanktion führen!");
     return 1;
 }
-COMMAND:aduty(playerid,params[])
+COMMAND:aduty(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -47294,14 +47300,14 @@ COMMAND:aduty(playerid,params[])
 		    GetPlayerPos(playerid,Admin3DText_X,Admin3DText_Y,Admin3DText_Z);
 	 		switch(Spieler[playerid][pAdmin])
 	 		{
-				case 1: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_1"\n "#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,0);
-				case 2: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_2"\n "#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,0);
-				case 3: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n "#IINFO2" "Admin_3"\n"#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,0);
-				case 4: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_4"\n"#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,0);
-				case 5: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_5"\n"#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,0);
-				case 6: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_6"\n"#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,0);
-				case 7: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_7"\n"#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,0);
-				case 8: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_8"\n"#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,0);
+				case 1: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_1"\n "#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,false);
+				case 2: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_2"\n "#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,false);
+				case 3: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n "#IINFO2" "Admin_3"\n"#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,false);
+				case 4: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_4"\n"#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,false);
+				case 5: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_5"\n"#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,false);
+				case 6: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_6"\n"#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,false);
+				case 7: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_7"\n"#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,false);
+				case 8: AdminDuty_3DText[playerid] = Create3DTextLabel(""#IINFO2"[ "#HTML_WEISS"Teammitglied"#HTML_WEISS" "#HTML_BLAU"]"#HTML_WEISS"\n"#IINFO2" "Admin_8"\n"#HTML_GRUEN"Duty",SAMP_WEISS,Admin3DText_X,Admin3DText_Y,Admin3DText_Z,50.0,0,false);
 	 		}
 	 		Attach3DTextLabelToPlayer(AdminDuty_3DText[playerid],playerid,0.0,0.0,0.75);
 		}
@@ -47343,7 +47349,7 @@ COMMAND:aduty(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:admins(playerid,params[])
+COMMAND:admins(playerid,const params[])
 {
     #pragma unused params
 	new string[350];
@@ -47351,7 +47357,7 @@ COMMAND:admins(playerid,params[])
 	mysql_tquery(MySQL_R394,string,"GetAdmins","i",playerid);
 	return 1;
 }
-COMMAND:apremium(playerid,params[])
+COMMAND:apremium(playerid,const params[])
 {
     #pragma unused params
 	if(isPlayerAnAdmin(playerid,1)){
@@ -47361,7 +47367,7 @@ COMMAND:apremium(playerid,params[])
 	}else SCM(playerid,SAMP_WEISS,""IINFO" das darfst du nicht!");
 	return 1;
 }
-COMMAND:fahrlehrer(playerid,params[])
+COMMAND:fahrlehrer(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47399,7 +47405,7 @@ COMMAND:fahrlehrer(playerid,params[])
 	if(onlineFahrlehrerer == 0)return SCM(playerid,SAMP_WEISS,"Keine Fahrlehrer Online.");
 	return 1;
 }
-COMMAND:medics(playerid,params[])
+COMMAND:medics(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47439,7 +47445,7 @@ COMMAND:medics(playerid,params[])
 	return 1;
 }
 
-COMMAND:afklist(playerid,params[])
+COMMAND:afklist(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47466,7 +47472,7 @@ COMMAND:afklist(playerid,params[])
 	return 1;
 }
 
-COMMAND:noobs(playerid,params[])
+COMMAND:noobs(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47497,7 +47503,7 @@ COMMAND:noobs(playerid,params[])
 	return 1;
 }
 
-COMMAND:alkatraz(playerid,params[])
+COMMAND:alkatraz(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47526,7 +47532,7 @@ COMMAND:alkatraz(playerid,params[])
 	return 1;
 }
 
-COMMAND:armybase(playerid,params[])
+COMMAND:armybase(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47555,7 +47561,7 @@ COMMAND:armybase(playerid,params[])
 	return 1;
 }
 
-COMMAND:drestart(playerid,params[])
+COMMAND:drestart(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47581,7 +47587,7 @@ COMMAND:drestart(playerid,params[])
 	return 1;
 }
 
-COMMAND:restart(playerid,params[])
+COMMAND:restart(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47610,7 +47616,7 @@ COMMAND:restart(playerid,params[])
 	return 1;
 }
 
-COMMAND:klingel(playerid,params[])
+COMMAND:klingel(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47665,7 +47671,7 @@ COMMAND:klingel(playerid,params[])
 
 }
 
-COMMAND:countdown(playerid,params[])
+COMMAND:countdown(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -47696,7 +47702,7 @@ COMMAND:countdown(playerid,params[])
     return 1;
 }
 
-COMMAND:flycam(playerid,params[])
+COMMAND:flycam(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47732,7 +47738,7 @@ COMMAND:flycam(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:clearchat(playerid,params[])
+COMMAND:clearchat(playerid,const params[])
 {
  	if(!isPlayerAnAdmin(playerid,2))return ADMIN_MSG(playerid);
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47745,7 +47751,7 @@ COMMAND:clearchat(playerid,params[])
 	SCM(playerid,SAMP_WEISS,cl_form);
 	return 1;
 }
-COMMAND:afk(playerid,params[])
+COMMAND:afk(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47757,7 +47763,7 @@ COMMAND:afk(playerid,params[])
 	Spieler[playerid][pAWAYFROMKEYBOARD] = 1;
 	TogglePlayerControllable(playerid,false);
 	format(string,sizeof(string),""IINFO2"AFK seit"#HTML_WEISS"\n%02d:%02d Uhr",stunde,minute);
-	AFKLabel[playerid] = Create3DTextLabel(string,SAMP_WEISS,30.0,40.0,50.0,MAX_STREAM_NAME_DISTANCE,0,1);
+	AFKLabel[playerid] = Create3DTextLabel(string,SAMP_WEISS,30.0,40.0,50.0,MAX_STREAM_NAME_DISTANCE,0,true);
 	Attach3DTextLabelToPlayer(AFKLabel[playerid],playerid,0.0,0.0,-0.2);
 	SCM(playerid,SAMP_WEISS,""IINFO2" du bist nun im AFK Modus");
 	if(gwzone != -1)
@@ -47771,7 +47777,7 @@ COMMAND:afk(playerid,params[])
 	return 1;
 }
 
-COMMAND:back(playerid,params[])
+COMMAND:back(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47805,7 +47811,7 @@ COMMAND:back(playerid,params[])
 	return 1;
 }
 
-COMMAND:delcheck(playerid,params[])
+COMMAND:delcheck(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47831,7 +47837,7 @@ COMMAND:delcheck(playerid,params[])
 	return 1;
 }
 
-COMMAND:waffenlagerraub(playerid,params[])
+COMMAND:waffenlagerraub(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47912,7 +47918,7 @@ COMMAND:waffenlagerraub(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:bankraub(playerid,params[])
+COMMAND:bankraub(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -47994,7 +48000,7 @@ COMMAND:bankraub(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:repcar(playerid,params[])
+COMMAND:repcar(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -48033,7 +48039,7 @@ COMMAND:repcar(playerid,params[])
     }
     return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:klaukleidung(playerid,params[])
+COMMAND:klaukleidung(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -48075,7 +48081,7 @@ COMMAND:klaukleidung(playerid,params[])
 	return 1;
 }
 
-COMMAND:umziehen(playerid,params[])
+COMMAND:umziehen(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -48107,7 +48113,7 @@ COMMAND:umziehen(playerid,params[])
 	return 1;
 }
 
-COMMAND:bekleiden(playerid,params[])
+COMMAND:bekleiden(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -48145,7 +48151,7 @@ COMMAND:bekleiden(playerid,params[])
 	return 1;
 }
 
-COMMAND:maske(playerid,params[])
+COMMAND:maske(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -48208,7 +48214,7 @@ COMMAND:maske(playerid,params[])
 	return SCM(playerid,SAMP_WEISS,""IINFO" /maske [Absetzen/Rot/Grün/Weiß]");
 }
 
-COMMAND:sturmhaube(playerid,params[])
+COMMAND:sturmhaube(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -48266,7 +48272,7 @@ COMMAND:sturmhaube(playerid,params[])
  	}
  	return 1;
 }
-COMMAND:changespawn(playerid,params[])
+COMMAND:changespawn(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -48287,7 +48293,7 @@ COMMAND:changespawn(playerid,params[])
  	SendFraktionsMessage(Spieler[playerid][pFraktion],FMELDUNG,string);
 	return 1;
 }
-COMMAND:setcontractsrang(playerid,params[])
+COMMAND:setcontractsrang(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -48308,7 +48314,7 @@ COMMAND:setcontractsrang(playerid,params[])
     SendFraktionsMessage(Spieler[playerid][pFraktion],FMELDUNG,string);
 	return 1;
 }
-COMMAND:contracts(playerid,params[])
+COMMAND:contracts(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -48338,7 +48344,7 @@ COMMAND:contracts(playerid,params[])
 	if(onlinecontracts == 0)return SCM(playerid,SAMP_WEISS,"Kein Spieler auf den Kofpgeld ausgestzt ist Online.");
 	return 1;
 }
-COMMAND:delcontract(playerid,params[])
+COMMAND:delcontract(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -48362,7 +48368,7 @@ COMMAND:delcontract(playerid,params[])
 	SendFraktionsMessage(Spieler[playerid][pFraktion],FMELDUNG,string);
 	return 1;
 }
-COMMAND:contract(playerid,params[])
+COMMAND:contract(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -48393,7 +48399,7 @@ COMMAND:contract(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,"An keinem Contract Punkt.");
 }
-COMMAND:robc4(playerid,params[])
+COMMAND:robc4(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -48481,7 +48487,7 @@ COMMAND:robc4(playerid,params[])
 	format(string,sizeof(string),""IINFO" du kannst den C4-Transporter erst wieder in "IINFO2"%i:%02d"#HTML_WEISS" Minuten ausrauben.",floatround(c4robtime/60),floatround(c4robtime%60));
 	return SCM(playerid,SAMP_WEISS,string);
 }
-COMMAND:legbombe(playerid,params[])
+COMMAND:legbombe(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -48513,7 +48519,7 @@ COMMAND:legbombe(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:defuse(playerid,params[])
+COMMAND:defuse(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -48542,7 +48548,7 @@ COMMAND:defuse(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:kofferbombe(playerid,params[])
+COMMAND:kofferbombe(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -48675,7 +48681,7 @@ COMMAND:kofferbombe(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" /kofferbombe [Normal/Fernzünder/Zünden]");
 }
-COMMAND:autobombe(playerid,params[])
+COMMAND:autobombe(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -48702,7 +48708,7 @@ COMMAND:autobombe(playerid,params[])
 	OnePlayAnim(playerid,"BOMBER","BOM_Plant",4.0,0,0,0,0,0),StopAudioStreamForPlayer(playerid);
 	return 1;
 }
-COMMAND:explode(playerid,params[])
+COMMAND:explode(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -48786,7 +48792,7 @@ COMMAND:explode(playerid,params[])
 	}
 	return 1;
 }
-COMMAND:raketenwerfer(playerid,params[])
+COMMAND:raketenwerfer(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -48852,7 +48858,7 @@ COMMAND:raketenwerfer(playerid,params[])
     }
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:granaten(playerid,params[])
+COMMAND:granaten(playerid,const params[])
 {
     #pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -48913,7 +48919,7 @@ COMMAND:granaten(playerid,params[])
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" du bist nicht in der jeweiligen Fraktion.");
 }
-COMMAND:eject(playerid,params[])
+COMMAND:eject(playerid,const params[])
 {
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
 	if(GetPVarInt(playerid,"Eingeloggt") == 0)return Eingeloggt_MSG(playerid);
@@ -48939,7 +48945,7 @@ COMMAND:eject(playerid,params[])
  	RemovePlayerFromVehicle(pID);
 	return 1;
 }
-COMMAND:fdcode(playerid,params[])
+COMMAND:fdcode(playerid,const params[])
 {
  	new fv = IsAFraktionsVeh(playerid);
 	if(GetPlayerVehicleSeat(playerid) != 0)return SCM(playerid,SAMP_WEISS,""IINFO" nicht der Fahrer des Fahrzeugs.");
@@ -48950,7 +48956,7 @@ COMMAND:fdcode(playerid,params[])
 	}else SCM(playerid,SAMP_WEISS,""IINFO" nicht in diesem Fahrzeug möglich!");
 	return 1;
 }
-COMMAND:fdcodedel(playerid,params[])
+COMMAND:fdcodedel(playerid,const params[])
 {
  	new fv2 = IsAFraktionsVeh(playerid);
 	if(GetPlayerVehicleSeat(playerid) != 0)return SCM(playerid,SAMP_WEISS,""IINFO" nicht der Fahrer des Fahrzeugs.");
@@ -48967,7 +48973,7 @@ COMMAND:fdcodedel(playerid,params[])
 	}else SCM(playerid,SAMP_WEISS,""IINFO" nicht in diesem Fahrzeug möglich!");
 	return 1;
 }
-COMMAND:fare(playerid,params[])
+COMMAND:fare(playerid,const params[])
 {
 	#pragma unused params
 	if(ImTutorial[playerid] != 0)return ImTutorial_MSG(playerid);
@@ -49274,7 +49280,7 @@ public OnPlayerStateChange(playerid,PLAYER_STATE:newstate,PLAYER_STATE:oldstate)
     if(newstate != PLAYER_STATE_SPECTATING) SyncFperson(playerid);
     if(newstate == PLAYER_STATE_PASSENGER)
 	{
-		SetPlayerArmedWeapon(playerid,0);
+		SetPlayerArmedWeapon(playerid,WEAPON_FIST);
 		if(IsVehicleATaxi(vehicleid))
 	    {
 		    new driver = Script_GetVehicleDriver(vehicleid);
@@ -49358,7 +49364,7 @@ public OnPlayerStateChange(playerid,PLAYER_STATE:newstate,PLAYER_STATE:oldstate)
 	}
 	if(newstate == PLAYER_STATE_DRIVER)
 	{
-		SetPlayerArmedWeapon(playerid,0);
+		SetPlayerArmedWeapon(playerid,WEAPON_FIST);
 		if(Spieler[playerid][TachoShow] == false)
 		{
 			Spieler[playerid][TachoTimer] = SetTimerEx("Tachometer",986,true,"i",playerid);
@@ -53070,7 +53076,7 @@ public OnPlayerClickTextDraw(playerid,Text:clickedid)
 					Spieler[playerid][AmUmkleiden] = 0;
 					Spieler[playerid][pBank] = 0;
 					Spieler[playerid][pRollerLic] = 1;
-					SetPlayerFightingStyle(playerid,0);
+					SetPlayerFightingStyle(playerid,FIGHT_STYLE:0);//BEFUND: 0 ist kein gueltiger Kampfstil (gueltig 4,5,6,7,15,16). Wert bewusst unveraendert.
 					SetPlayerLevel(playerid,1);
 					Spieler[playerid][pMinutesAfterPayday] = 0;
 					Spieler[playerid][pTimeAfterRegister] = 0;
@@ -53950,7 +53956,7 @@ public OnVehiclePaintjob(playerid,vehicleid,paintjobid)
 	}
 	return 1;
 }
-public OnQueryError(errorid,error[],callback[],query[],connectionHandle)
+public OnQueryError(errorid,const error[],const callback[],const query[],connectionHandle)
 {
 	new logstring[900],queryteil[512],qi,qj,imwert;
 	// Die Werte zwischen Hochkommata werden ausgeblendet. Sonst landen
@@ -55793,7 +55799,7 @@ public OnPlayerKeyStateChange(playerid,KEY:newkeys,KEY:oldkeys)
 		return 1;
     }
    	//Anti Bunnyhop
-	if((newkeys & KEY_JUMP) && !IsPlayerInAnyVehicle(playerid) && GetPlayerWeapon(playerid) != 43 && GetPlayerWeapon(playerid) != 34 && GetPlayerWeapon(playerid) != 35 && GetPlayerWeapon(playerid) != 36)
+	if((newkeys & KEY_JUMP) && !IsPlayerInAnyVehicle(playerid) && GetPlayerWeapon(playerid) != WEAPON_CAMERA && GetPlayerWeapon(playerid) != WEAPON_SNIPER && GetPlayerWeapon(playerid) != WEAPON_ROCKETLAUNCHER && GetPlayerWeapon(playerid) != WEAPON_HEATSEEKER)
     {
         AntiBunny[playerid] ++;
         SetTimerEx("ResetBunny", 3461, false,"i", playerid);
@@ -56400,7 +56406,7 @@ public OnPlayerKeyStateChange(playerid,KEY:newkeys,KEY:oldkeys)
 					ResetWeapons(playerid,false);
 					for(new slot=0;slot<13;slot++)
 					{
-						if(Spieler[playerid][pPlayerWeapon][slot] != 0 && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
+						if(Spieler[playerid][pPlayerWeapon][slot] != WEAPON_FIST && Spieler[playerid][pPlayerWeaponAmmo][slot] != 0)
 						{
 							GiveWeapon(playerid,Spieler[playerid][pPlayerWeapon][slot],Spieler[playerid][pPlayerWeaponAmmo][slot],false);
 						}
@@ -56642,7 +56648,7 @@ public OnPlayerKeyStateChange(playerid,KEY:newkeys,KEY:oldkeys)
 			    }
 		    }
 	    }
-	    if(GetPlayerWeapon(playerid) == 41)
+	    if(GetPlayerWeapon(playerid) == WEAPON_SPRAYCAN)
 	    {
 		    if(isPlayerInFrakt(playerid,4) || isPlayerInFrakt(playerid,5) || isPlayerInFrakt(playerid,7) || isPlayerInFrakt(playerid,13) || isPlayerInFrakt(playerid,17))
 		    {
@@ -56749,7 +56755,7 @@ public OnPlayerKeyStateChange(playerid,KEY:newkeys,KEY:oldkeys)
 		    }
 	    }
     }
-    if(newkeys & 131072)
+    if(newkeys & KEY_NO)
     {
     	if(Spieler[playerid][pViewStats] != false)
 		{
@@ -58284,7 +58290,7 @@ public OnUnoccupiedVehicleUpdate(vehicleid,playerid,passenger_seat)
 	    {
 		  	if(IsVehicleInRangeOfPoint(vehicleid,2.0,NagelBand[i][sperreX],NagelBand[i][sperreY],NagelBand[i][sperreZ]))
 		   	{
-				UpdateVehicleDamageStatus(vehicleid,0,0,0,ReifenPlatt(1,1,1,1));
+				UpdateVehicleDamageStatus(vehicleid,VEHICLE_PANEL_STATUS_NONE,VEHICLE_DOOR_STATUS_NONE,VEHICLE_LIGHT_STATUS_NONE,VEHICLE_TYRE_STATUS:ReifenPlatt(1,1,1,1));
 			}
 		}
 	}
@@ -58318,7 +58324,7 @@ public OnPlayerUpdate(playerid)
     Float:oldhp = OLDhealth[playerid],
     Float:oldarm = OLDarmour[playerid],
 	vehicleid = GetPlayerVehicleID(playerid),
-	keys,ud,lr;
+	KEY:keys,ud,lr;
     if(IsPlayerInAnyVehicle(playerid))
 	{
 		for(new i=0;i<MAX_NAGELBAENDER;i++)
@@ -58327,7 +58333,7 @@ public OnPlayerUpdate(playerid)
 		    {
 			  	if(IsVehicleInRangeOfPoint(vehicleid,2.0,NagelBand[i][sperreX],NagelBand[i][sperreY],NagelBand[i][sperreZ]))
 			   	{
-					UpdateVehicleDamageStatus(vehicleid,0,0,0,ReifenPlatt(1,1,1,1));
+					UpdateVehicleDamageStatus(vehicleid,VEHICLE_PANEL_STATUS_NONE,VEHICLE_DOOR_STATUS_NONE,VEHICLE_LIGHT_STATUS_NONE,VEHICLE_TYRE_STATUS:ReifenPlatt(1,1,1,1));
 				}
 			}
 		}
@@ -60858,7 +60864,7 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 					format(string,sizeof(string),"%s",inputtext);
 					format(SP_INFO,sizeof(SP_INFO),""IINFO" dein Fahrzeug Code lautet: "IINFO2"%s"#HTML_WEISS".",inputtext);
 					SCM(playerid,SAMP_WEISS,SP_INFO);
-					fdcodetext[GetPlayerVehicleID(playerid)] = Create3DTextLabel(string,SAMP_WEISS, 0.0, 0.0, 0.0, 50.0, 0, 1 );
+					fdcodetext[GetPlayerVehicleID(playerid)] = Create3DTextLabel(string,SAMP_WEISS, 0.0, 0.0, 0.0, 50.0, 0, true );
 					Attach3DTextLabelToVehicle(fdcodetext[GetPlayerVehicleID(playerid)],GetPlayerVehicleID(playerid),0.800000,-2.899999,0.000000);
     
 				}else{
@@ -71936,16 +71942,16 @@ public OnDialogResponse(playerid,dialogid,response,listitem,inputtext[])
 
 	    case DIALOG_DRIVEBY:
 	    {
-		    if(response == 0)return SetPlayerArmedWeapon(playerid,0);
+		    if(response == 0)return SetPlayerArmedWeapon(playerid,WEAPON_FIST);
 		    if(response == 1)
 		    {
 			    switch(listitem)
 			    {
-				    case 0: SetPlayerArmedWeapon(playerid,25);
-				    case 1: SetPlayerArmedWeapon(playerid,29);
-				    case 2: SetPlayerArmedWeapon(playerid,30);
-				    case 3: SetPlayerArmedWeapon(playerid,31);
-				    case 4: SetPlayerArmedWeapon(playerid,28);
+				    case 0: SetPlayerArmedWeapon(playerid,WEAPON_SHOTGUN);
+				    case 1: SetPlayerArmedWeapon(playerid,WEAPON_MP5);
+				    case 2: SetPlayerArmedWeapon(playerid,WEAPON_AK47);
+				    case 3: SetPlayerArmedWeapon(playerid,WEAPON_M4);
+				    case 4: SetPlayerArmedWeapon(playerid,WEAPON_UZI);
 			    }
 			    return 1;
 		    }
@@ -74381,7 +74387,7 @@ public UnTazer(playerid)
 	return 1;
 }
 
-public HttpResponse(playerid,response_code,data[])
+public HttpResponse(playerid,response_code,const data[])
 {
 	printf("Data:%s | %i",data,response_code);
 	return 1;
@@ -76462,7 +76468,7 @@ public OnFireUpdate()
 					else if(Aiming_at_Flame(playerid) != -1)
 					{
 						value = Aiming_at_Flame(playerid);
-						if(GetPlayerWeapon(playerid) == 41)
+						if(GetPlayerWeapon(playerid) == WEAPON_SPRAYCAN)
 						{
 						CreateExplosion(Flame[value][Flame_x],Flame[value][Flame_y],Flame[value][Flame_z],2,5);
 						continue;
@@ -76517,7 +76523,7 @@ public OnFireUpdate()
 
 public Erzbaggern(playerid,count)
 {
-	new string[128],keys,ud,lr;
+	new string[128],KEY:keys,ud,lr;
     GetPlayerKeys(playerid,keys,ud,lr);
 	switch(count)
 	{
@@ -76565,13 +76571,13 @@ public Erzbaggern(playerid,count)
 }
 public Spraytag(playerid,count)
 {
-    new Float:a,string[128],keys,ud,lr;
+    new Float:a,string[128],KEY:keys,ud,lr;
     GetPlayerKeys(playerid,keys,ud,lr);
     switch(count)
     {
 	    case 0:
 	    {
-		    if(keys & KEY_FIRE && GetPlayerWeapon(playerid) == 41)
+		    if(keys & KEY_FIRE && GetPlayerWeapon(playerid) == WEAPON_SPRAYCAN)
 		    {
 		        if(!IsPlayerInVehicle(playerid,GetPlayerVehicleID(playerid)))
 		        {
@@ -76620,7 +76626,7 @@ public Spraytag(playerid,count)
 		}
 		case 1:
 		{
-			if(keys & KEY_FIRE && GetPlayerWeapon(playerid) == 41)
+			if(keys & KEY_FIRE && GetPlayerWeapon(playerid) == WEAPON_SPRAYCAN)
 		    {
 				for(new i=0;i<MAX_SPRAYTAGS;i++)
 				{
@@ -77729,7 +77735,7 @@ public Taxometer(playerid,fahrerid)
 	}
 	return 1;
 }
-public l_script_account(playerid,pass[],passwortstate)
+public l_script_account(playerid,const pass[],passwortstate)
 {
     new query[356],result[25],rows,fields;
     if(mysql_errno(MySQL_R394) != 0)
@@ -77886,7 +77892,7 @@ public l_script_account(playerid,pass[],passwortstate)
 		Spieler[playerid][pSTVOpoints] = strval(result);
 		strdel(result,0,sizeof(result));
 		cache_get_field_content(0,"KampfStyle",result);
-		SetPlayerFightingStyle(playerid,strval(result));
+		SetPlayerFightingStyle(playerid,FIGHT_STYLE:strval(result));
 		strdel(result,0,sizeof(result));
 		cache_get_field_content(0,"Handy",result);
 		Spieler[playerid][pHandy] = strval(result);
@@ -78618,7 +78624,7 @@ public l_script_swaffen(playerid)
 		{
 			format(savestring,sizeof(savestring),"Waffen%i",slot);
 			cache_get_field_content(0,savestring,result);
-			Spieler[playerid][pPlayerWeapon][slot] = strval(result);
+			Spieler[playerid][pPlayerWeapon][slot] = WEAPON:strval(result);
 			strdel(result,0,sizeof(result));
 			format(savestring,sizeof(savestring),"Ammo%i",slot);
 			cache_get_field_content(0,savestring,result);
@@ -78896,7 +78902,7 @@ public l_script_ssafe(playerid)
 	}
 	return 1;
 }
-public sql_array(index[],index2[],sqlresultid,extraid,extraid2,SconnectionHandle)
+public sql_array(const index[],const index2[],sqlresultid,extraid,extraid2,SconnectionHandle)
 {
     new query[1000],rows,fields;
 	if(SconnectionHandle != MySQL_R394 || mysql_errno(MySQL_R394) != 0)
@@ -79049,7 +79055,7 @@ public sql_array(index[],index2[],sqlresultid,extraid,extraid2,SconnectionHandle
 	}
 	return 1;
 }
-public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
+public sql_array2(const index[],sqlresultid,extraid,SconnectionHandle)
 {
 	new query[4000],result[650],rows,fields;
 	if(SconnectionHandle != MySQL_R394 || mysql_errno(MySQL_R394) != 0)
@@ -80646,8 +80652,8 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 			zeit = strval(result);
 		    if(zeit == -1)
 		    {
-				for(new t=0;t<MAX_TEXT_DRAWS;t++){ if(Text:t != INVALID_TEXT_DRAW) TextDrawHideForPlayer(extraid,Text:t); }
-				for(new t=0;t<MAX_PLAYER_TEXT_DRAWS;t++){ if(Text:t != INVALID_TEXT_DRAW) PlayerTextDrawHide(extraid,PlayerText:t); }
+				for(new t=0;t<_:MAX_TEXT_DRAWS;t++){ if(Text:t != INVALID_TEXT_DRAW) TextDrawHideForPlayer(extraid,Text:t); }
+				for(new t=0;t<_:MAX_PLAYER_TEXT_DRAWS;t++){ if(Text:t != INVALID_TEXT_DRAW) PlayerTextDrawHide(extraid,PlayerText:t); }
 				SCM(extraid,SAMP_WEISS,"Verbindung unterbrochen...");
 				format(query,sizeof(query),"%s du wurdest vom Server gebannt.\nFalls du zu unrecht gebannt wurdest,\nmelde dich im Teamspeak³ oder schreibe uns im Forum.\n\nDauer: unbegrenzt\nGrund: %s\nAdmin: %s\n\n"#HTML_BLAU""#SERVERNAME"{FFFFFF} Adminteam",SpielerName(extraid),reason,admin);
 				ShowPlayerDialog(extraid,DIALOG_4ALL_SONSTIGES,DIALOG_STYLE_MSGBOX,""ClanTagDialoge" Bann",query,"Verlassen","");
@@ -80667,8 +80673,8 @@ public sql_array2(index[],sqlresultid,extraid,SconnectionHandle)
 			    if(gettime() < zeit)
 			 	{
 					new timebanned = zeit-gettime();
-                	for(new t=0;t<MAX_TEXT_DRAWS;t++){ if(Text:t != INVALID_TEXT_DRAW) TextDrawHideForPlayer(extraid,Text:t); }
-					for(new t=0;t<MAX_PLAYER_TEXT_DRAWS;t++){ if(Text:t != INVALID_TEXT_DRAW) PlayerTextDrawHide(extraid,PlayerText:t); }
+                	for(new t=0;t<_:MAX_TEXT_DRAWS;t++){ if(Text:t != INVALID_TEXT_DRAW) TextDrawHideForPlayer(extraid,Text:t); }
+					for(new t=0;t<_:MAX_PLAYER_TEXT_DRAWS;t++){ if(Text:t != INVALID_TEXT_DRAW) PlayerTextDrawHide(extraid,PlayerText:t); }
 					SCM(extraid,SAMP_WEISS,"Verbindung unterbrochen...");
 				 	if(floatround(timebanned/86400) > 0)//tage
 				 	{
@@ -81420,7 +81426,7 @@ stock DestroyVars(playerid)
 	{
 		Spieler[playerid][pAnticheatWeap][wslot] = 0;
 		Spieler[playerid][pAnticheatWeapAmmo][wslot] = 0;
-		Spieler[playerid][pPlayerWeapon][wslot] = 0;
+		Spieler[playerid][pPlayerWeapon][wslot] = WEAPON_FIST;
 		Spieler[playerid][pPlayerWeaponAmmo][wslot] = 0;
 	}
 	for(new markerid=0;markerid<MAX_ADMINMARKER;markerid++)
@@ -81616,7 +81622,7 @@ stock PutPlayerInVehicleEx(playerid,vehicleid,seatid)
 	Spieler[playerid][pAntiVehicleEnter] = gettime() + 3;
 	Spieler[playerid][pAntiVehicleEnterVehicleID] = vehicleid;
 	PutPlayerInVehicle(playerid,vehicleid,seatid);
-	SetPlayerArmedWeapon(playerid,0);
+	SetPlayerArmedWeapon(playerid,WEAPON_FIST);
 	return 1;
 }
 stock SetACMoney(playerid,money)
@@ -81665,7 +81671,7 @@ stock SetSpawnInfoEx(playerid,team,skinid,Float:x,Float:y,Float:z,Float:angle,we
     Spieler[playerid][CurrentPos][0] = x;
 	Spieler[playerid][CurrentPos][1] = y;
 	Spieler[playerid][CurrentPos][2] = z;
-	return SetSpawnInfo(playerid,team,skinid,x,y,z,angle,weap1,ammo1,weap2,ammo2,weap3,ammo3);
+	return SetSpawnInfo(playerid,team,skinid,x,y,z,angle,WEAPON:weap1,ammo1,WEAPON:weap2,ammo2,WEAPON:weap3,ammo3);
 }
 
 stock SetPlayerPosEx(playerid,Float:x,Float:y,Float:z)
@@ -82303,10 +82309,10 @@ stock GiveWeapon(playerid,waffe,munition,bool:saveguns)
     new slot = Script_GetWeaponSlot(waffe);
     if(slot<0||slot>12)return 1;
     Spieler[playerid][pAcPause][AC_WEAPONPAUSE] = gettime() + 10;
-	Spieler[playerid][pAnticheatWeap][slot] = waffe,Spieler[playerid][pAnticheatWeapAmmo][slot] += munition,GivePlayerWeapon(playerid,waffe,munition);
+	Spieler[playerid][pAnticheatWeap][slot] = waffe,Spieler[playerid][pAnticheatWeapAmmo][slot] += munition,GivePlayerWeapon(playerid,WEAPON:waffe,munition);
     if(saveguns == true)
     {
-	    Spieler[playerid][pPlayerWeapon][slot] = waffe;
+	    Spieler[playerid][pPlayerWeapon][slot] = WEAPON:waffe;
 		Spieler[playerid][pPlayerWeaponAmmo][slot] = munition;
     }
     return waffe;
@@ -82325,7 +82331,7 @@ stock ResetWeapons(playerid,bool:saveguns)
 	{
 		for(new slot=0;slot<13;slot++)
 		{
-			Spieler[playerid][pPlayerWeapon][slot] = 0;
+			Spieler[playerid][pPlayerWeapon][slot] = WEAPON_FIST;
 			Spieler[playerid][pPlayerWeaponAmmo][slot] = 0;
 		}
 	}
@@ -82334,12 +82340,12 @@ stock ResetWeapons(playerid,bool:saveguns)
 
 stock Script_RemovePlayerWeapon(playerid,weaponid)
 {
-	new plyWeapons[13] = 0,plyAmmo[13] = 0;
+	new WEAPON:plyWeapons[13],plyAmmo[13] = 0;
 	for(new sslot=0;sslot<13;sslot++)
 	{
-		new wep,ammo;
+		new WEAPON:wep,ammo;
 		GetPlayerWeaponData(playerid,WEAPON_SLOT:sslot,wep,ammo);
-		if(wep != weaponid && ammo != 0) GetPlayerWeaponData(playerid,WEAPON_SLOT:sslot,plyWeapons[sslot],plyAmmo[sslot]);
+		if(wep != WEAPON:weaponid && ammo != 0) GetPlayerWeaponData(playerid,WEAPON_SLOT:sslot,plyWeapons[sslot],plyAmmo[sslot]);
 	}
 	ResetWeapons(playerid,true);
 	for(new sslot=0;sslot<13;sslot++) if(plyAmmo[sslot] != 0) GiveWeapon(playerid,plyWeapons[sslot],plyAmmo[sslot],true);
@@ -82423,21 +82429,21 @@ stock DeleteOfflineInfo(oi)
 	return 1;
 }
 
-stock OnePlayAnim(playerid,animlib[],animname[],Float:Speed,looping,lockx,locky,lock,lp)
+stock OnePlayAnim(playerid,const animlib[],const animname[],Float:Speed,looping,lockx,locky,lock,lp)
 {
     gPlayerUsingLoopingAnim[playerid] = true;
-	ApplyAnimation(playerid,animlib,animname,Speed,looping,lockx,locky,lock,lp,SYNC_ALL);
+	ApplyAnimation(playerid,animlib,animname,Speed,bool:looping,bool:lockx,bool:locky,bool:lock,lp,SYNC_ALL);
 	return 1;
 }
 
-stock LoopingAnim(playerid,animlib[],animname[],Float:Speed,looping,lockx,locky,lock,lp)
+stock LoopingAnim(playerid,const animlib[],const animname[],Float:Speed,looping,lockx,locky,lock,lp)
 {
     gPlayerUsingLoopingAnim[playerid] = true;
-    ApplyAnimation(playerid,animlib,animname,Speed,looping,lockx,locky,lock,lp,SYNC_ALL);
+    ApplyAnimation(playerid,animlib,animname,Speed,bool:looping,bool:lockx,bool:locky,bool:lock,lp,SYNC_ALL);
     return 1;
 }
 
-stock PreloadAnimLib(playerid,animlib[])
+stock PreloadAnimLib(playerid,const animlib[])
 {
 	ApplyAnimation(playerid,animlib,"null",0.0,false,false,false,false,0);
 	return 1;
@@ -82469,12 +82475,12 @@ stock SPD_Safe(playerid,dialogid,style,const caption[],const info[],const button
 	}
 	return SPD_Native(playerid,dialogid,style,caption,info,button1,button2);
 }
-stock SetAccountPasswortHash(playerid,klartext[])
+stock SetAccountPasswortHash(playerid,const klartext[])
 {
 	SetPVarString(playerid,"AccPwHash",ScriptPW_CreateStr(klartext));
 	return 1;
 }
-stock IstAccountPasswort(playerid,eingabe[])
+stock IstAccountPasswort(playerid,const eingabe[])
 {
 	new gespeichert[SCRIPT_PW_BUF];
 	GetPVarString(playerid,"AccPwHash",gespeichert,sizeof(gespeichert));
@@ -82511,7 +82517,7 @@ stock LoginSperre_Setzen(playerid)
 	LoginSperreBis[platz] = gettime() + LOGIN_SPERRZEIT;
 	return 1;
 }
-stock Log(log[],text[])
+stock Log(const log[],const text[])
 {
 	new string[1000],File:hFile;
 	if(fexist(log))
@@ -82538,7 +82544,7 @@ stock SpielerWaffenName(waffenid)
 	format(string,sizeof(string),"%s",WeaponName[waffenid]);
 	return string;
 }
-stock WaffenidbyName(waffenname[])
+stock WaffenidbyName(const waffenname[])
 {
 	for(new i=0;i<sizeof(WeaponName);i++)
 	{
@@ -82827,7 +82833,7 @@ stock CreateAccount(playerid)
     mysql_function_query(MySQL_R394,query,true,"l_script_ssafe","i",playerid);
 	return 1;
 }
-stock mysql_SetInt(Table[],Field[],To,Where[],Where2[])
+stock mysql_SetInt(const Table[],const Field[],To,const Where[],const Where2[])
 {
     new query[512];
     new sTable[64],sField[64],sWhere[64],sWhere2[64];
@@ -82839,7 +82845,7 @@ stock mysql_SetInt(Table[],Field[],To,Where[],Where2[])
     mysql_function_query(MySQL_R394,query,false,"","");
     return 1;
 }
-stock mysql_SetString(Table[],Field[],To[],Where[],Where2[])
+stock mysql_SetString(const Table[],const Field[],const To[],const Where[],const Where2[])
 {
     new query[512];
     new sTable[64],sField[64],sWhere[64],sWhere2[64],sTo[64];
@@ -82852,7 +82858,7 @@ stock mysql_SetString(Table[],Field[],To[],Where[],Where2[])
     mysql_function_query(MySQL_R394,query,false,"","");
     return 1;
 }
-stock mysql_SetFloat(Table[],Field[],Float:To,Where[],Where2[])
+stock mysql_SetFloat(const Table[],const Field[],Float:To,const Where[],const Where2[])
 {
     new query[512];
     new sTable[64],sField[64],sWhere[64],sWhere2[64];
@@ -83738,7 +83744,7 @@ stock SaveAccount(playerid)
 	    new mainquery[9000],query[9000],Float:Pos[3];
 	    for (new i = 0; i < 13; i++)
 		{
-		    GetPlayerWeaponData(playerid, i, Spieler[playerid][pPlayerWeapon][i], Spieler[playerid][pPlayerWeaponAmmo][i]);
+		    GetPlayerWeaponData(playerid, WEAPON_SLOT:i, Spieler[playerid][pPlayerWeapon][i], Spieler[playerid][pPlayerWeaponAmmo][i]);
 		}
 	    GetPlayerPos(playerid,Pos[0],Pos[1],Pos[2]);
 		format(query,sizeof(query),"UPDATE spieler SET Tutorial='%d',Admin='%d',Verwarnungen='%d',FLeaderRechte='%d',Fraktion='%d',FraktionsRang='%d',FraktionsURang='%d',FraktionsSperre='%d',FraktionsGehalt='%d',Job='%d',JobWarns='%d',JobSperre='%d',ArbeitslosenGeld='%d',",
@@ -84402,7 +84408,7 @@ stock BizName(biz)
 	}
 	return bizname;
 }
-stock CreateOrganisation(organisation[],playerid)
+stock CreateOrganisation(const organisation[],playerid)
 {
 	new query[700];
     for(new org=1;org<MAX_ORGANISATIONS;org++)
@@ -84426,7 +84432,7 @@ stock CreateOrganisation(organisation[],playerid)
 	}
 	return SCM(playerid,SAMP_WEISS,""IINFO" es wurde bereits die Maximale Anzahl von Organisationen erstellt.");
 }
-stock CreatePartei(parteis[],playerid)
+stock CreatePartei(const parteis[],playerid)
 {
 	new query[700];
     for(new p=1;p<MAX_PARTEI;p++)
@@ -84498,7 +84504,7 @@ stock CreateToten(playerid)
 	}
 	return 1;
 }
-stock CreateBlitzer(playerid,geschwinigkeit,ortschaft[])
+stock CreateBlitzer(playerid,geschwinigkeit,const ortschaft[])
 {
 	new string[650],query[512];
     for(new i=0;i<MAX_BLITZER;i++)
@@ -85230,7 +85236,7 @@ stock UpdateAntiCheat(playerid)
 {
     new
 	string[500],
-	keys,ud,lr,
+	KEY:keys,ud,lr,
 	Float:Pos[3],
     Float:antihp,
     Float:antiarm,
@@ -85359,7 +85365,7 @@ stock UpdateAntiCheat(playerid)
 		GetPlayerPos(playerid,Pos[0],Pos[1],Pos[2]);
 		if(gettime() > Spieler[playerid][pAntiWarning])
 		{
-			if(GetPlayerWeapon(playerid) != 44)
+			if(GetPlayerWeapon(playerid) != WEAPON_NIGHT_VISION_GOGGLES)//BEFUND: die Kommentare unten meinen den Fallschirm, der ist WEAPON_PARACHUTE (46), nicht 44. Wert bewusst unveraendert.
 			{
                 if(!isPlayerAnAdmin(playerid,5))
 				if(GetPlayerSpeed(playerid) > 170 && Pos[2] > 10 && GetPlayerSurfingVehicleID(playerid) == INVALID_VEHICLE_ID)//ohne fallschirm 170 Km/h
@@ -85555,7 +85561,7 @@ stock UpdateAntiCheat2(playerid)
 		PlayerTextDrawShow(playerid,Keine_DM_Zone[playerid][0]);
 		format(string,sizeof(string),"~w~Du befindest dich gerade in ~r~%s~w~ und hier ist DM Verboten!",NODMZONES[nodmzone][NoDM_Zone_Name]);
 		PlayerTextDrawSetString(playerid,Keine_DM_Zone[playerid][0],string);
-		SetPlayerArmedWeapon(playerid,0);
+		SetPlayerArmedWeapon(playerid,WEAPON_FIST);
 	}
 	else PlayerTextDrawHide(playerid,Keine_DM_Zone[playerid][0]),PlayerTextDrawHide(playerid,Keine_DM_Zone[playerid][1]);
 	if(Spieler[playerid][pAFKKeyStates] >= 240 && IsPlayerInRangeOfPoint(playerid,MAX_AFKRANGE,Spieler[playerid][pAFKPos][0],Spieler[playerid][pAFKPos][1],Spieler[playerid][pAFKPos][2]) && Spieler[playerid][pAWAYFROMKEYBOARD] == 0 && GetPlayerState(playerid) != PLAYER_STATE_SPECTATING)
@@ -85700,7 +85706,7 @@ stock VehicleTuning(playerid,slot)
 	}
 	return 1;
 }
-stock CreatePlayerVehicle(playerid,vehiclemodelid,Float:xpos,Float:ypos,Float:zpos,Float:angle,nummernschild[],preis)
+stock CreatePlayerVehicle(playerid,vehiclemodelid,Float:xpos,Float:ypos,Float:zpos,Float:angle,const nummernschild[],preis)
 {
 	new query[512];
     for(new slot=0;slot<MAX_PLAYER_VEHS;slot++)
@@ -86261,7 +86267,7 @@ stock ReturnBizID(playerid)
 	return -1;
 }
 
-stock GetBusinessOwner(playerid,bizbesitzer[])
+stock GetBusinessOwner(playerid,const bizbesitzer[])
 {
     for(new biz=1;biz<MAX_BIZ;biz++)
 	{
@@ -86277,7 +86283,7 @@ stock GetBusinessOwner(playerid,bizbesitzer[])
 	return -1;
 }
 
-stock GetBusinessOwnerOrCoOwner(playerid,bizownercoowner[])
+stock GetBusinessOwnerOrCoOwner(playerid,const bizownercoowner[])
 {
     for(new biz=1;biz<MAX_BIZ;biz++)
 	{
@@ -86293,7 +86299,7 @@ stock GetBusinessOwnerOrCoOwner(playerid,bizownercoowner[])
 	return -1;
 }
 
-stock IsPlayerAnyBusinessOwner(bizbesitzer[])
+stock IsPlayerAnyBusinessOwner(const bizbesitzer[])
 {
 	new count = 0;
 	for(new biz=1;biz<MAX_BIZ;biz++)
@@ -86307,7 +86313,7 @@ stock IsPlayerAnyBusinessOwner(bizbesitzer[])
 	return count;
 }
 
-stock IsPlayerAnyBusinessCoOwner(bizteilhaber[])
+stock IsPlayerAnyBusinessCoOwner(const bizteilhaber[])
 {
 	new count = 0;
 	for(new biz=1;biz<MAX_BIZ;biz++)
@@ -86341,7 +86347,7 @@ stock IsWeaponEnable(weapon)
 	return -1;
 }
 
-stock UseCheatCodes(text[])
+stock UseCheatCodes(const text[])
 {
 	for (new i=0;i<sizeof(SingleplayerCheats);++i)
 	{
@@ -86373,7 +86379,7 @@ stock ReturnNoDMZone(playerid)
 	return -1;
 }
 
-stock UpdateFraktionsMotdMessage(fraktionsid,motd[])
+stock UpdateFraktionsMotdMessage(fraktionsid,const motd[])
 {
 	new query[128];
     format(query,sizeof(query),"SELECT * FROM server_fnachicht WHERE fID='%d'",fraktionsid);
@@ -86462,7 +86468,7 @@ stock GetDayName(d=0,m=0,y=0) {
     return d%7+1;
 }
 
-stock EncodeURL(string[])
+stock EncodeURL(const string[])
 {
     new ret[64],i = 0,p = 0,s = 0;
     ret[0] = 0;
@@ -86951,7 +86957,7 @@ stock ServiceCall(playerid,service)//service 1 = sapd,2 = medic,3 = feuerwehr,4 
 	return 1;
 }
 
-stock GivePlayerWPS(wantedplayer,WPSAnzahl,reason[])
+stock GivePlayerWPS(wantedplayer,WPSAnzahl,const reason[])
 {
 	new string[200];
 	if((Spieler[wantedplayer][pWantedPoints] + WPSAnzahl) < 60)
@@ -87709,7 +87715,7 @@ stock MoveCamera(playerid)
 	return 1;
 }
 
-stock GetNextCameraPosition(move_mode,Float:CP[3],Float:FV[3],&Float:X,&Float:Y,&Float:Z)
+stock GetNextCameraPosition(move_mode,const Float:CP[3],const Float:FV[3],&Float:X,&Float:Y,&Float:Z)
 {
     // Calculate the cameras next position based on their current position and the direction their camera is facing
     #define OFFSET_X (FV[0]*6000.0)
@@ -88317,7 +88323,7 @@ stock Aiming_at_Flame(playerid)
 	GetPlayerCameraFrontVector(playerid,fx,fy,fz);
 	ForEachPlayer(i)
 	{
-	    if(IsPlayerConnected(i) && PlayerOnFire[i] && (IsInWaterCar(playerid) || GetPlayerWeapon(playerid) == 42 || GetPlayerWeapon(playerid) == 41) && PlayerOnFire[i])
+	    if(IsPlayerConnected(i) && PlayerOnFire[i] && (IsInWaterCar(playerid) || GetPlayerWeapon(playerid) == WEAPON_FIREEXTINGUISHER || GetPlayerWeapon(playerid) == WEAPON_SPRAYCAN) && PlayerOnFire[i])
 	    {
 	        GetPlayerPos(i,px,py,pz);
 	        dis2 = DistanceCameraTargetToLocation(cx,cy,cz,px,py,pz,fx,fy,fz);
@@ -88333,7 +88339,7 @@ stock Aiming_at_Flame(playerid)
 	{
 		if(Flame[i][Flame_Exists])
 		{
-		    if(IsInWaterCar(playerid) || GetPlayerWeapon(playerid) == 42 || GetPlayerWeapon(playerid) == 41)
+		    if(IsInWaterCar(playerid) || GetPlayerWeapon(playerid) == WEAPON_FIREEXTINGUISHER || GetPlayerWeapon(playerid) == WEAPON_SPRAYCAN)
 		    {
 				dis2 = DistanceCameraTargetToLocation(cx,cy,cz,Flame[i][Flame_x],Flame[i][Flame_y],Flame[i][Flame_z]+Z_DIFFERENCE,fx,fy,fz);
 				if(IsPlayerInAnyVehicle(playerid) && dis2 < CAR_RADIUS && dis2 < dis && GetPlayerVirtualWorld(playerid) == Flame[i][Flame_world])
@@ -88357,9 +88363,9 @@ stock Aiming_at_Flame(playerid)
 	return id;
 }
 
-stock Pressing(playerid)
+stock KEY:Pressing(playerid)
 {
-	new keys,updown,leftright;
+	new KEY:keys,updown,leftright;
 	GetPlayerKeys(playerid,keys,updown,leftright);
 	return keys;
 }
@@ -88522,7 +88528,7 @@ stock ClearProperty(playerid)
 {
 	return 1;
 }
-stock BanUser(playerid,admin[],reason[],zeit = -1)
+stock BanUser(playerid,const admin[],const reason[],zeit = -1)
 {
     new query[512],LOGILOGI[256];
     gettime(stunde,minute,sekunde);
@@ -88544,7 +88550,7 @@ public KickDenSpieler(playerid)
 	Kick(playerid);
  	return 1;
 }
-stock KickUser(playerid, admin[], reason[])
+stock KickUser(playerid, const admin[], const reason[])
 {
 	new query[256];
 	format(query,sizeof(query),"["ClanTag"_AC]: %s  / betreff: %s / Grund: %s",admin,Spieler[playerid][pName],reason);
@@ -90219,8 +90225,8 @@ public OnBanCheck(playerid)
  	SetTimerEx("KickDenSpieler",2000,false,"i",playerid);
 	return 1;
 }
-forward SendLevelMessage(color, string[]);
-public SendLevelMessage(color, string[])
+forward SendLevelMessage(color, const string[]);
+public SendLevelMessage(color, const string[])
 {
   	for(new i = 0; i < MAX_PLAYERS; i++)
  	{
@@ -90471,13 +90477,13 @@ public LoadHausmoebel()
 	}
 	return 1;
 }
-forward CheckSpielerExists(playerid,namestring[]);
+forward CheckSpielerExists(playerid,const namestring[]);
 forward ShowFreundeListe(playerid);
 forward DelFreundInListe(playerid,listitem);
-forward OnFreundeListeSave(playerid,name[]);
-forward OnFreundeListeLoad(playerid,name[]);
-forward AddFriendList(playerid,namestring[]);
-public OnFreundeListeLoad(playerid,name[])
+forward OnFreundeListeSave(playerid,const name[]);
+forward OnFreundeListeLoad(playerid,const name[]);
+forward AddFriendList(playerid,const namestring[]);
+public OnFreundeListeLoad(playerid,const name[])
 {
     new count=0,rows,fields,string[128],query[94],result[MAX_PLAYER_NAME];
 	cache_get_data(rows,fields,MySQL_R394);
@@ -90501,7 +90507,7 @@ public OnFreundeListeLoad(playerid,name[])
 	}
 	return 1;
 }
-public OnFreundeListeSave(playerid,name[])
+public OnFreundeListeSave(playerid,const name[])
 {
     new count=0,rows,fields,string[128],query[94],result[MAX_PLAYER_NAME];
 	cache_get_data(rows,fields,MySQL_R394);
@@ -90526,7 +90532,7 @@ public OnFreundeListeSave(playerid,name[])
 	return 1;
 }
 #define MAX_FREE_FRIENDS 10
-public AddFriendList(playerid,namestring[])
+public AddFriendList(playerid,const namestring[])
 {
 	new count=0,rows,fields,string[128],query[128],connected,result[MAX_PLAYER_NAME];
 	cache_get_data(rows,fields);
@@ -90626,7 +90632,7 @@ public DelFreundInListe(playerid,listitem)
 	}
     return 1;
 }
-public CheckSpielerExists(playerid,namestring[])
+public CheckSpielerExists(playerid,const namestring[])
 {
 	new rows,fields,query[124],string[125],usrname[MAX_PLAYER_NAME];
     cache_get_data(rows,fields);
