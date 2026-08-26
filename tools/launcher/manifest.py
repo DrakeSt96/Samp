@@ -48,6 +48,53 @@ def sha256_datei(pfad, block=1024 * 1024):
     return h.hexdigest()
 
 
+MARKE_SEC = "ed25519-secret"
+MARKE_PUB = "ed25519-public"
+
+
+def schluessel_schreiben(pfad, marke, roh, force):
+    """Schreibt eine Schluesseldatei mit Typmarke.
+
+    Der geheime Schluessel wird mit os.open und Rechten 600 angelegt, nicht
+    erst geschrieben und danach per chmod eingeschraenkt. Sonst steht er
+    zwischen open() und chmod() mit 0644 auf der Platte - wer ihn in diesem
+    Fenster oeffnet, behaelt den Lesezugriff auch nach dem chmod."""
+    geheim = (marke == MARKE_SEC)
+    inhalt = "%s:%s\n" % (marke, roh.hex())
+    flags = os.O_WRONLY | os.O_CREAT | (os.O_TRUNC if force else os.O_EXCL)
+    fd = os.open(pfad, flags, 0o600 if geheim else 0o644)
+    try:
+        os.write(fd, inhalt.encode("ascii"))
+    finally:
+        os.close(fd)
+
+
+def schluessel_lesen(pfad, erwartete_marke):
+    """Liest eine Schluesseldatei und prueft ihren Typ.
+
+    Ohne Typmarke waeren .sec und .pub nicht unterscheidbar - beide sind 64
+    Hexzeichen. Wer versehentlich den oeffentlichen Schluessel an --key
+    uebergibt, bekaeme ein Manifest, das mit einem voellig anderen
+    Schluesselpaar signiert ist, und die Meldung 'Signiert: ja' dazu. Der
+    Fehler faellt erst auf, wenn draussen kein Launcher mehr startet."""
+    with open(pfad) as f:
+        text = f.read().strip()
+    if ":" not in text:
+        raise ValueError(
+            "%s traegt keine Typmarke. Erwartet wird '%s:<hex>'. "
+            "Alte Schluesseldateien bitte mit 'keygen' neu erzeugen." % (pfad, erwartete_marke))
+    marke, _, hexteil = text.partition(":")
+    marke = marke.strip()
+    hexteil = hexteil.strip()
+    if marke != erwartete_marke:
+        raise ValueError("%s enthaelt einen '%s'-Schluessel, erwartet wird '%s'."
+                         % (pfad, marke, erwartete_marke))
+    roh = bytes.fromhex(hexteil)
+    if len(roh) != 32:
+        raise ValueError("%s: Schluessel ist %d statt 32 Byte lang." % (pfad, len(roh)))
+    return roh
+
+
 def kanonisch(daten):
     """Feste Darstellung fuer die Signatur - Reihenfolge und Trennzeichen fix."""
     return json.dumps(daten, sort_keys=True, separators=(",", ":"),
@@ -71,17 +118,21 @@ def cmd_keygen(args):
         print("FEHLER: %s existiert bereits. Mit --force ueberschreiben." % sec)
         return 1
 
-    with open(sec, "w") as f:
-        f.write(sk.hex() + "\n")
-    os.chmod(sec, 0o600)
-    with open(pub, "w") as f:
-        f.write(pk.hex() + "\n")
+    try:
+        schluessel_schreiben(sec, MARKE_SEC, sk, args.force)
+        schluessel_schreiben(pub, MARKE_PUB, pk, True)
+    except FileExistsError:
+        print("FEHLER: %s existiert bereits. Mit --force ueberschreiben." % sec)
+        return 1
 
     print("Geheimer Schluessel : %s   (Rechte 600, niemals weitergeben)" % sec)
     print("Oeffentlicher       : %s" % pub)
     print()
     print("Diesen Wert in den Launcher einbauen:")
     print("  %s" % pk.hex())
+    print()
+    print("Beide Dateien tragen eine Typmarke, damit sie nicht verwechselt")
+    print("werden koennen - 'build --key' nimmt nur die .sec an.")
     return 0
 
 
@@ -114,8 +165,11 @@ def cmd_build(args):
     }
 
     if args.key:
-        with open(args.key) as f:
-            sk = bytes.fromhex(f.read().strip())
+        try:
+            sk = schluessel_lesen(args.key, MARKE_SEC)
+        except (OSError, ValueError) as e:
+            print("FEHLER: %s" % e)
+            return 1
         manifest["signatur"] = ed.signieren(signaturkoerper(manifest), sk).hex()
     else:
         print("WARNUNG: ohne --key wird das Manifest NICHT signiert.")
@@ -138,8 +192,11 @@ def cmd_verify(args):
     if "signatur" not in m:
         print("FEHLER: Manifest traegt keine Signatur.")
         return 1
-    with open(args.pub) as f:
-        pk = bytes.fromhex(f.read().strip())
+    try:
+        pk = schluessel_lesen(args.pub, MARKE_PUB)
+    except (OSError, ValueError) as e:
+        print("FEHLER: %s" % e)
+        return 1
 
     ok = ed.pruefen(signaturkoerper(m), bytes.fromhex(m["signatur"]), pk)
     print("Signatur: %s" % ("gueltig" if ok else "UNGUELTIG"))

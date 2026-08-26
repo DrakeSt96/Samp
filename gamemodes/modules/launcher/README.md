@@ -24,6 +24,12 @@ Die Reihenfolge ist wichtig. Schritt 3 nicht ueberspringen.
    Modul zu kicken - auch dann, wenn `LAUNCHER_ENFORCE` auf `1` steht. Das ist
    Absicht.
 
+   Der Schluessel darf jedes Zeichen enthalten. Er wird vor dem Versenden
+   prozentkodiert, ebenso wie alle anderen Felder - ein mit
+   `openssl rand -base64` erzeugter Wert mit `+` oder `/` funktioniert also
+   ohne Weiteres. Laenger als 64 Zeichen darf er nicht sein; das Modul sagt
+   beim Start Bescheid und schaltet sich in dem Fall selbst scharf ab.
+
 3. **Beobachten** — `LAUNCHER_ENABLED` auf `1`, `LAUNCHER_ENFORCE` auf `0`.
    Neu uebersetzen, Server starten. Jetzt wird geprueft und gezaehlt, aber
    niemand ausgesperrt. Nach ein paar Tagen `/launcherstatus` ansehen:

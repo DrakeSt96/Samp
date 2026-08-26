@@ -52,6 +52,23 @@ Baurechner. Er gehoert **nicht** auf den Spielserver und **nicht** ins
 Git-Repository. Der oeffentliche Schluessel wird fest in den Launcher
 eingebaut.
 
+Beide Dateien tragen eine Typmarke:
+
+```
+launcher_key.sec:  ed25519-secret:2edac850...
+launcher_key.pub:  ed25519-public:9f31b7c2...
+```
+
+Ohne die waeren sie nicht unterscheidbar — beide sind 64 Hexzeichen. Wer
+versehentlich die `.pub` an `build --key` uebergibt, bekaeme sonst ein
+Manifest, das mit einem voellig anderen Schluesselpaar signiert ist, samt der
+Meldung `Signiert: ja`. Der Fehler faellt erst auf, wenn draussen kein
+Launcher mehr startet. Mit Typmarke bricht `build` sofort ab.
+
+Die `.sec` wird mit `os.open(..., 0o600)` angelegt, nicht erst geschrieben und
+danach per `chmod` eingeschraenkt — sonst stuende der Schluessel zwischen
+beiden Schritten mit 0644 auf der Platte.
+
 ### 2. Dateipack und Manifest
 
 Leg die auszuliefernden Dateien so ab, wie sie beim Spieler landen sollen:
@@ -90,6 +107,8 @@ Beim ersten Start wird eine Vorlage angelegt. Anzupassen:
 | `mindest_version` | ab welcher Manifestversion ein Launcher als aktuell gilt |
 | `sitzung_ttl_sekunden` | wie lange zwischen Anmeldung und Verbinden liegen darf |
 | `vertraue_proxy` / `proxy_ips` | nur setzen, wenn ein Reverse Proxy davor steht |
+| `max_sitzungen` | Obergrenze der Sitzungstabelle |
+| `log_datei` | Pfad des Protokolls, leer lassen schaltet es ab |
 
 Zwei getrennte Schluessel sind Absicht: wer den Serverschluessel abgreift,
 kann damit nur *fragen*, keine Sitzungen *anlegen*.
@@ -133,6 +152,24 @@ ihn in C#, Rust oder Delphi nachbaut, braucht genau diese sechs Schritte:
 
 Schritt 4 ist der Grund fuer die Datei `*.teil`: bricht der Download ab,
 bleibt keine halbe Datei liegen, die beim naechsten Start als vorhanden gilt.
+
+Vier Dinge, die beim Nachbauen leicht vergessen werden und die in
+`launcher_client.py` alle drinstecken:
+
+- **Rueckstufung ablehnen.** Die zuletzt installierte Version steht in
+  `.launcher_stand.json` im Spielverzeichnis. Ein aelteres Manifest wird
+  abgelehnt, auch wenn seine Signatur gueltig ist — sonst koennte jemand
+  einen alten Stand zurueckspielen und damit behobene Fehler wiederbeleben.
+- **Pfade pruefen.** Jeder Pfad aus dem Manifest wird abgelehnt, wenn er
+  absolut ist, einen Laufwerksbuchstaben oder `..` enthaelt. Ohne das
+  schreibt der Launcher dorthin, wohin das Manifest zeigt — die Signatur
+  schuetzt vor Fremden, nicht vor einem uebernommenen Baurechner.
+- **Antworten begrenzen.** Manifest hoechstens 8 MB, jede Nutzdatei
+  hoechstens so gross, wie das signierte Manifest ansagt. Sonst frisst eine
+  endlose Antwort den Arbeitsspeicher — und zwar bevor eine Signatur
+  geprueft ist.
+- **Nie mit einem Stapelabzug enden.** Kaputtes JSON, kaputte Signatur,
+  fehlende Felder: alles ergibt eine Meldung, keinen Absturz.
 
 ## Selbsttest
 

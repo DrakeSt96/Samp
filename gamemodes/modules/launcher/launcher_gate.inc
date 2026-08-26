@@ -23,7 +23,10 @@
         - Zwischen Anfrage und Antwort kann der Spieler die Verbindung trennen
           und ein anderer denselben Slot bekommen. Darum traegt jede Anfrage
           eine laufende Nummer, die beim Rueckkommen verglichen wird.
-        - Alles, was in den Anfragekoerper wandert, wird vorher gefiltert.
+        - Alles, was in den Anfragekoerper wandert, wird prozentkodiert -
+          der API-Schluessel eingeschlossen. Ohne das zerlegt die Gegenseite
+          einen Schluessel mit "+", "&" oder "%" falsch und die Pruefung
+          scheitert fuer jeden Spieler.
         - Solange API-Adresse oder Schluessel auf dem Auslieferungswert stehen,
           weigert sich das Modul zu kicken, egal was in der Konfiguration steht.
 */
@@ -78,28 +81,40 @@ forward Launcher_Timeout(playerid, nonce);
 //  Hilfsfunktionen
 // ---------------------------------------------------------------------------
 
-// Kopiert nur harmlose Zeichen. Alles andere wird zu '_'. Damit kann kein Name
-// und keine Seriennummer den Anfragekoerper aufbrechen ('&' und '=' fallen weg).
-static stock Launcher_Saeubern(const quelle[], ziel[], groesse)
+// Prozentkodierung nach RFC 3986 fuer Werte im Anfragekoerper.
+//
+// Warum nicht einfach Sonderzeichen ersetzen: der Koerper geht als
+// application/x-www-form-urlencoded raus (open.mp setzt diesen Typ fest, siehe
+// core_impl.hpp, HTTPAsyncIO::threadProc). Die Gegenseite zerlegt ihn mit
+// parse_qs. Ein Wert mit '+' wird dort zum Leerzeichen, '%XX' wird dekodiert,
+// '&' und '=' beginnen ein neues Feld. Ein mit "openssl rand -base64" erzeugter
+// Schluessel enthaelt haeufig ein '+' - ungekodiert wuerde die Pruefung dann
+// fuer JEDEN Spieler scheitern, obwohl beide Seiten zeichengleich konfiguriert
+// sind. Kodieren loest das vollstaendig und verliert dabei nichts.
+static stock Launcher_Kodieren(const quelle[], ziel[], groesse)
 {
-    new i = 0, c;
-    while(i < groesse - 1 && quelle[i] != EOS)
+    new const hexziffern[] = "0123456789ABCDEF";
+    new i = 0, n = 0, c;
+    ziel[0] = EOS;
+    while(quelle[i] != EOS && n < groesse - 1)
     {
-        c = quelle[i];
+        c = quelle[i] & 0xFF;
         if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
-        || c == '_' || c == '-' || c == '.' || c == '[' || c == ']'
-        || c == '(' || c == ')' || c == '$' || c == '@')
+        || c == '-' || c == '_' || c == '.' || c == '~')
         {
-            ziel[i] = c;
+            ziel[n++] = c;
         }
         else
         {
-            ziel[i] = '_';
+            if(n + 3 > groesse - 1) break;
+            ziel[n++] = '%';
+            ziel[n++] = hexziffern[(c >> 4) & 0x0F];
+            ziel[n++] = hexziffern[c & 0x0F];
         }
         i++;
     }
-    ziel[i] = EOS;
-    return i;
+    ziel[n] = EOS;
+    return n;
 }
 
 // Zerlegt eine Antwort wie "OK 17" in wort = "OK" und zahl = 17.
@@ -217,6 +232,14 @@ stock Launcher_OnGameModeInit()
     lgDarfKicken = (schluesselGesetzt && adresseGesetzt);
 
     print("[Launcher] Modul uebersetzt und aktiv.");
+
+    // Ein sehr langer Schluessel wuerde beim Kodieren abgeschnitten und damit
+    // jede Pruefung scheitern lassen. Lieber einmal laut sagen.
+    if(strlen(LAUNCHER_API_KEY) > 64)
+    {
+        print("[Launcher] WARNUNG: LAUNCHER_API_KEY ist laenger als 64 Zeichen und wird abgeschnitten.");
+        lgDarfKicken = false;
+    }
     if(!schluesselGesetzt) print("[Launcher] WARNUNG: LAUNCHER_API_KEY steht noch auf dem Auslieferungswert.");
     if(!adresseGesetzt)    print("[Launcher] WARNUNG: LAUNCHER_API_URL ist nicht gesetzt oder unvollstaendig.");
 
@@ -258,19 +281,27 @@ stock Launcher_OnPlayerConnect(playerid)
         return 1;
     }
 
-    new serialRoh[64], serial[64], name[MAX_PLAYER_NAME + 1], version[32], sauber[64];
+    new serialRoh[64], versionRoh[32];
     gpci(playerid, serialRoh, sizeof(serialRoh));
-    Launcher_Saeubern(serialRoh, serial, sizeof(serial));
-    Launcher_Saeubern(SpielerName(playerid), name, sizeof(name));
-    GetPlayerVersion(playerid, version, sizeof(version));
-    Launcher_Saeubern(version, sauber, sizeof(sauber));
+    GetPlayerVersion(playerid, versionRoh, sizeof(versionRoh));
+
+    // Jeder Wert wird kodiert, der Schluessel eingeschlossen. Die Puffer sind
+    // auf das Dreifache ausgelegt, weil ein Zeichen im schlimmsten Fall zu
+    // "%XX" wird.
+    new schluessel[3 * 64 + 1], ipEnc[3 * 16 + 1], serialEnc[3 * 64 + 1];
+    new nameEnc[3 * (MAX_PLAYER_NAME + 1) + 1], versionEnc[3 * 32 + 1];
+    Launcher_Kodieren(LAUNCHER_API_KEY, schluessel, sizeof(schluessel));
+    Launcher_Kodieren(ip, ipEnc, sizeof(ipEnc));
+    Launcher_Kodieren(serialRoh, serialEnc, sizeof(serialEnc));
+    Launcher_Kodieren(SpielerName(playerid), nameEnc, sizeof(nameEnc));
+    Launcher_Kodieren(versionRoh, versionEnc, sizeof(versionEnc));
 
     // Namen mit Praefix: "url", "data" und "index" stammen aus den Native-
     // Deklarationen und wuerden hier als Ueberdeckung gemeldet.
-    new lgUrl[256], lgKoerper[512];
+    new lgUrl[256], lgKoerper[1024];
     format(lgUrl, sizeof(lgUrl), "%s/verify", LAUNCHER_API_URL);
     format(lgKoerper, sizeof(lgKoerper), "key=%s&ip=%s&serial=%s&name=%s&ver=%s&omp=%d",
-        LAUNCHER_API_KEY, ip, serial, name, sauber, IsPlayerUsingOmp(playerid) ? 1 : 0);
+        schluessel, ipEnc, serialEnc, nameEnc, versionEnc, IsPlayerUsingOmp(playerid) ? 1 : 0);
 
     new lgIndex = (lgNonce[playerid] << LG_PID_BITS) | (playerid & LG_PID_MASKE);
 

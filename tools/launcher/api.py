@@ -50,7 +50,6 @@ STANDARD_CONFIG = {
     "port": 8080,
     "launcher_key": "BITTE-AENDERN-LAUNCHER",
     "server_key": "BITTE-AENDERN-SERVER",
-    "aktuelle_version": 1,
     "mindest_version": 1,
     "sitzung_ttl_sekunden": 120,
     "manifest_datei": "manifest.json",
@@ -108,6 +107,11 @@ class Handler(BaseHTTPRequestHandler):
     server_version = "LauncherAPI/1.0"
     protocol_version = "HTTP/1.1"
 
+    # Ohne Zeitlimit haelt eine Verbindung, die nie zu Ende sendet, dauerhaft
+    # einen Thread fest. Wenige Dutzend davon legen die API lahm, und zwar
+    # ohne jede Anmeldung. socketserver setzt das an den Socket durch.
+    timeout = 15
+
     # -- Hilfsmittel --------------------------------------------------------
 
     def _cfg(self):
@@ -133,19 +137,44 @@ class Handler(BaseHTTPRequestHandler):
         return direkt
 
     def _formular(self):
+        """Liest den Formularkoerper. None heisst: Anfrage nicht verwertbar.
+
+        Wichtig: bei einer abgelehnten Anfrage bleiben die angekuendigten Bytes
+        sonst im Puffer stehen und werden bei Keep-Alive als NAECHSTE Anfrage
+        gelesen. Darum wird in dem Fall die Verbindung geschlossen statt
+        weiterverwendet."""
         try:
             laenge = int(self.headers.get("Content-Length", "0"))
         except ValueError:
+            self.close_connection = True
             return None
         if laenge <= 0 or laenge > MAX_KOERPER:
+            self.close_connection = True
             return None
-        roh = self.rfile.read(laenge).decode("utf-8", "replace")
-        return {k: v[0] for k, v in parse_qs(roh, keep_blank_values=True).items()}
+        try:
+            roh = self.rfile.read(laenge)
+        except OSError:
+            self.close_connection = True
+            return None
+        if len(roh) != laenge:
+            self.close_connection = True
+            return None
+        text = roh.decode("utf-8", "replace")
+        return {k: v[0] for k, v in parse_qs(text, keep_blank_values=True).items()}
 
     def _schluessel_stimmt(self, geliefert, erwartet):
+        # Bytes statt str: compare_digest lehnt str-Argumente mit Zeichen ueber
+        # U+00FF mit einem TypeError ab. Der gelieferte Wert kommt ungeprueft
+        # aus dem Anfragekoerper - ein einziges Sonderzeichen wuerde die
+        # Anfrage sonst unbeantwortet lassen statt sie abzulehnen.
         if not geliefert or not erwartet:
             return False
-        return hmac.compare_digest(str(geliefert), str(erwartet))
+        try:
+            a = str(geliefert).encode("utf-8", "surrogatepass")
+            b = str(erwartet).encode("utf-8", "surrogatepass")
+        except (UnicodeError, ValueError):
+            return False
+        return hmac.compare_digest(a, b)
 
     def log_message(self, fmt, *args):
         # Standardausgabe der Bibliothek unterdruecken, wir loggen selbst.
@@ -166,6 +195,29 @@ class Handler(BaseHTTPRequestHandler):
     # -- Endpunkte ----------------------------------------------------------
 
     def do_GET(self):
+        try:
+            self._do_GET()
+        except Exception as e:               # noqa: BLE001 - bewusst alles
+            self._notbremse(e)
+
+    def do_POST(self):
+        try:
+            self._do_POST()
+        except Exception as e:               # noqa: BLE001 - bewusst alles
+            self._notbremse(e)
+
+    def _notbremse(self, e):
+        """Eine Anfrage darf nie unbeantwortet bleiben - sonst haengt der
+        Spielserver bis in sein eigenes Zeitlimit und der Spieler mit ihm."""
+        self._log("FEHLER unbehandelt bei %s: %s: %s"
+                  % (self.path, type(e).__name__, e))
+        try:
+            self.close_connection = True
+            self._antwort(500, "FEHLER")
+        except OSError:
+            pass
+
+    def _do_GET(self):
         pfad = urlparse(self.path).path
         if pfad == "/health":
             self._antwort(200, "OK %d Sitzungen" % self.server.sitzungen.anzahl())
@@ -185,7 +237,7 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self._antwort(404, "unbekannt")
 
-    def do_POST(self):
+    def _do_POST(self):
         pfad = urlparse(self.path).path
         if pfad == "/session":
             self._session()
