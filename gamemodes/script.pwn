@@ -80971,7 +80971,11 @@ stock OnGameModeSave()
 		gutscheinn = 1,
 		fvr = 1,
 		org = 1,
-		partei = 1;
+		partei = 1,
+		// Zaehlt je Schleife die tatsaechlich geschriebenen Datensaetze.
+		// Frueher wurde dafuer der Schleifenindex ausgegeben - der stimmte
+		// nur, solange kein Eintrag uebersprungen wurde.
+		gespeichert = 0;
 	while(gw<sizeof(GangwarZones))
 	{
 		format(mainquery,sizeof(mainquery),"UPDATE server_gangwars SET GangWarZoneOwner='%d',GangWarZoneAttacker='%d',War_OwnerPoints='%d',War_AttackerPoints='%d',War_Started='%d',War_Time='%d' WHERE GangZoneID='%d'",
@@ -80981,22 +80985,34 @@ stock OnGameModeSave()
     }
     printf("- Gangzonen gespeichert %i/%i -",gw,sizeof(GangwarZones));
 	strdel(mainquery,0,sizeof(mainquery));
-	while(drg<MAX_DRUGS && DrugInfo[drg][drgfraktid] != 0)
+	gespeichert = 0;
+	while(drg < MAX_DRUGS)
 	{
+		// Luecken ueberspringen statt die Schleife zu beenden. Wird ein
+		// Eintrag geloescht, bleibt sein Platz im Array leer stehen - mit
+		// der alten Abbruchbedingung wurde ab dort nichts mehr gespeichert.
+		if(DrugInfo[drg][drgfraktid] == 0) { drg++; continue; }
+		gespeichert++;
 		format(mainquery,sizeof(mainquery),"UPDATE server_drogen SET drgfraktid='%d',drgArt='%d',drgXpos='%f',drgYpos='%f',drgZpos='%f',drginterior='%d',drgvirtualworld='%d',drgProduceDrugs='%d',drgNextDrugsIn='%d',drgWasserzustand='%d',drgOwner='%s' WHERE pflanze='%d'",
 		DrugInfo[drg][drgfraktid],DrugInfo[drg][drgArt],DrugInfo[drg][drgXpos],DrugInfo[drg][drgYpos],DrugInfo[drg][drgZpos],DrugInfo[drg][drginterior],DrugInfo[drg][drgvirtualworld],DrugInfo[drg][drgProduceDrugs],DrugInfo[drg][drgNextDrugsIn],DrugInfo[drg][drgWasserzustand],DrugInfo[drg][drgOwner],drg);
 		mysql_function_query(MySQL_R394,mainquery,false,"","");
 		drg++;
     }
-    printf("- Drogenpflanzen gespeichert %i/%i -",drg,MAX_DRUGS);
+    printf("- Drogenpflanzen gespeichert %i/%i -",gespeichert,MAX_DRUGS);
 	strdel(mainquery,0,sizeof(mainquery));
-	while(msten<MAX_MASTEN && FMastenInfo[msten][Erstellt] == 1)
+	gespeichert = 0;
+	while(msten < MAX_MASTEN)
 	{
+		// Luecken ueberspringen statt die Schleife zu beenden. Wird ein
+		// Eintrag geloescht, bleibt sein Platz im Array leer stehen - mit
+		// der alten Abbruchbedingung wurde ab dort nichts mehr gespeichert.
+		if(FMastenInfo[msten][Erstellt] != 1) { msten++; continue; }
+		gespeichert++;
 		format(mainquery,sizeof(mainquery),"UPDATE server_netzwerk SET X='%f',Y='%f',Z='%f',HP='%d' WHERE id='%d'",FMastenInfo[msten][sperreX],FMastenInfo[msten][sperreY],FMastenInfo[msten][sperreZ],FMastenInfo[msten][EGmBhHp],msten);
 		mysql_function_query(MySQL_R394,mainquery,false,"","");
 		msten++;
 	}
-	printf("- Funkmasten gespeichert %d/%d -",msten,MAX_MASTEN);
+	printf("- Funkmasten gespeichert %d/%d -",gespeichert,MAX_MASTEN);
 	strdel(mainquery,0,sizeof(mainquery));
 	while(wtafel<sizeof(Werbetafeln))
 	{
@@ -81226,8 +81242,14 @@ stock OnGameModeSave()
 	}
 	printf("- Rennen gespeichert %d/%d -",r,MAX_RACES);
 	strdel(mainquery,0,sizeof(mainquery));*/
-	while(sm<MAX_SMARKETS && SmarkInfo[sm][screatet] != 0)
+	gespeichert = 0;
+	while(sm < MAX_SMARKETS)
 	{
+		// Luecken ueberspringen statt die Schleife zu beenden. Wird ein
+		// Eintrag geloescht, bleibt sein Platz im Array leer stehen - mit
+		// der alten Abbruchbedingung wurde ab dort nichts mehr gespeichert.
+		if(SmarkInfo[sm][screatet] == 0) { sm++; continue; }
+		gespeichert++;
 		mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_schwarzmarkt SET sfraktid='%d',sbdfraktid='%d',sx='%f',sy='%f',sz='%f',slocked='%d',smaterials='%d',swerbetext='%e',sprice='%d',skasse='%d',",
 		SmarkInfo[sm][sfraktid],SmarkInfo[sm][sbdfraktid],SmarkInfo[sm][sx],SmarkInfo[sm][sy],SmarkInfo[sm][sz],SmarkInfo[sm][slocked],SmarkInfo[sm][smaterials],SmarkInfo[sm][swerbetext],SmarkInfo[sm][sprice],SmarkInfo[sm][skasse]);
 	    strcat(mainquery,query);
@@ -81240,7 +81262,7 @@ stock OnGameModeSave()
 		strdel(query,0,sizeof(query));
 		sm++;
 	}
-	printf("- Schwarzmärkte gespeichert %d/%d -",sm,MAX_SMARKETS);
+	printf("- Schwarzmärkte gespeichert %d/%d -",gespeichert,MAX_SMARKETS);
 	strdel(mainquery,0,sizeof(mainquery));
 	format(query,sizeof(query),"UPDATE server_stuff SET ADPreis='%d', PlayerRekord='%d',Lottojackpot='%d',RentVehsPreis='%d',TerrorSpawn='%d',Lohnsteuer='%f',Kirchensteuer='%f',Mwst='%f',Grundsteuer='%f',OamtStandGebuer='%d',Solidsteuer='%f',WLS='%d',WSF='%d',WLV='%d',PreisLicCar='%d',PreisLicBike='%d',PreisLicRoller='%d',PreisLicPlane='%d',PreisLicHeli='%d',PreisLicBoat='%d',TerrorContractRang='%d',FMeldePreis='%d',",
 	fsteuern[ADPreis],fsteuern[PlayerRekord],fsteuern[Lottojackpot],fsteuern[RentVehsPreis],fsteuern[TerrorSpawn],fsteuern[Lohnsteuer],fsteuern[Kirchensteuer],fsteuern[Mwst],fsteuern[Grundsteuer],fsteuern[OamtStandGebuer],fsteuern[Solidsteuer],UseBadWeather[0],UseBadWeather[1],UseBadWeather[2],fsteuern[PreisLicCar],fsteuern[PreisLicBike],fsteuern[PreisLicRoller],fsteuern[PreisLicPlane],fsteuern[PreisLicHeli],fsteuern[PreisLicBoat],fsteuern[TerrorContractRang],fsteuern[FMeldePreis]);
@@ -81271,8 +81293,14 @@ stock OnGameModeSave()
 	}
 	printf("- Fraktionsvewaltungen gespeichert %d/%d -",fvr-1,MAX_FRAKTIONNEN-1);
 	strdel(mainquery,0,sizeof(mainquery));
- 	while(gutscheinn<MAX_GUTSCHEIN && Gutschein[gutscheinn][gutscheincreatet] != 0)
+	gespeichert = 0;
+	while(gutscheinn < MAX_GUTSCHEIN)
 	{
+		// Luecken ueberspringen statt die Schleife zu beenden. Wird ein
+		// Eintrag geloescht, bleibt sein Platz im Array leer stehen - mit
+		// der alten Abbruchbedingung wurde ab dort nichts mehr gespeichert.
+		if(Gutschein[gutscheinn][gutscheincreatet] == 0) { gutscheinn++; continue; }
+		gespeichert++;
 	    mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_gutscheine SET gutscheincode='%e',gutscheinname='%e',gutscheindesc='%e',gutscheintyp='%d',gutscheinmenge='%d',gutscheinanzahl='%d' WHERE id='%d'",
 		Gutschein[gutscheinn][gutscheincode],Gutschein[gutscheinn][gutscheinname],Gutschein[gutscheinn][gutscheindesc],Gutschein[gutscheinn][gutscheintyp],Gutschein[gutscheinn][gutscheinmenge],Gutschein[gutscheinn][gutscheinanzahl],gutscheinn);
 		strcat(mainquery,query);
@@ -81283,8 +81311,14 @@ stock OnGameModeSave()
 	}
 	strdel(mainquery,0,sizeof(mainquery));
 	strdel(query,0,sizeof(query));
-	while(haus<MAX_HAUS && HausInfo[haus][hauscreatet] != 0)
+	gespeichert = 0;
+	while(haus < MAX_HAUS)
 	{
+		// Luecken ueberspringen statt die Schleife zu beenden. Wird ein
+		// Eintrag geloescht, bleibt sein Platz im Array leer stehen - mit
+		// der alten Abbruchbedingung wurde ab dort nichts mehr gespeichert.
+		if(HausInfo[haus][hauscreatet] == 0) { haus++; continue; }
+		gespeichert++;
 	    mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_haus SET haus_besitzer='%e',haus_Owned='%d',haus_innenraum='%d',haus_miete='%d',haus_beschreibung='%e',haus_locked='%d',haus_slots='%d',haus_eingemitetenzaehler='%d',haus_x='%f',haus_y='%f',haus_z='%f',",
 		HausInfo[haus][haus_besitzer],HausInfo[haus][haus_Owned],HausInfo[haus][haus_innenraum],HausInfo[haus][haus_miete],HausInfo[haus][haus_beschreibung],HausInfo[haus][haus_locked],HausInfo[haus][haus_slots],HausInfo[haus][haus_eingemitetenzaehler],HausInfo[haus][haus_x],HausInfo[haus][haus_y],HausInfo[haus][haus_z]);
 		strcat(mainquery,query);
@@ -81303,11 +81337,17 @@ stock OnGameModeSave()
 		strdel(query,0,sizeof(query));
 		haus++;
 	}
-	printf("- Häuser gespeichert %d/%d -",haus,MAX_HAUS);
+	printf("- Häuser gespeichert %d/%d -",gespeichert,MAX_HAUS);
 	strdel(mainquery,0,sizeof(mainquery));
 	strdel(query,0,sizeof(query));
-	while(fv<MAX_FVEHS && Fahrzeug[fv][modelid] >= 400 && Fahrzeug[fv][modelid] <= 611)
+	gespeichert = 0;
+	while(fv < MAX_FVEHS)
 	{
+		// Luecken ueberspringen statt die Schleife zu beenden. Wird ein
+		// Eintrag geloescht, bleibt sein Platz im Array leer stehen - mit
+		// der alten Abbruchbedingung wurde ab dort nichts mehr gespeichert.
+		if(Fahrzeug[fv][modelid] < 400 || Fahrzeug[fv][modelid] > 611) { fv++; continue; }
+		gespeichert++;
 		GetVehicleHealth(Fahrzeug[fv][Vehicle],Fahrzeug[fv][HP]);
 		format(query,sizeof(query),"UPDATE server_ffahrzeuge SET Fraktion='%d',Rang='%d',modelid='%d',Farbe1='%d',Farbe2='%d',Paintjob='%d',HP='%f',posx='%f',posy='%f',posz='%f',posa='%f',Abgeschlossen='%d',Abgeschleppt='%d',Interior='%d',VirtualWorld='%d',",
 		Fahrzeug[fv][Fraktion],Fahrzeug[fv][FraktionsRang],Fahrzeug[fv][modelid],Fahrzeug[fv][Colour1],Fahrzeug[fv][Colour2],Fahrzeug[fv][Paintjob],Fahrzeug[fv][HP],Fahrzeug[fv][posx],Fahrzeug[fv][posy],Fahrzeug[fv][posz],Fahrzeug[fv][posa],Fahrzeug[fv][Abgeschlossen],vFahrzeug[Fahrzeug[fv][Vehicle]][Abgeschleppt],Fahrzeug[fv][Interior],Fahrzeug[fv][VirtualWorld]);
@@ -81325,11 +81365,17 @@ stock OnGameModeSave()
     	strdel(query,0,sizeof(query));
 		fv++;
 	}
-	printf("- Fraktionsfahrzeuge gespeichert %d/%d -",fv,MAX_FVEHS);
+	printf("- Fraktionsfahrzeuge gespeichert %d/%d -",gespeichert,MAX_FVEHS);
 	strdel(mainquery,0,sizeof(mainquery));
 	strdel(query,0,sizeof(query));
-	while(biz<MAX_BIZ && BizInfo[biz][bizcreatet] != 0)
+	gespeichert = 0;
+	while(biz < MAX_BIZ)
 	{
+		// Luecken ueberspringen statt die Schleife zu beenden. Wird ein
+		// Eintrag geloescht, bleibt sein Platz im Array leer stehen - mit
+		// der alten Abbruchbedingung wurde ab dort nichts mehr gespeichert.
+		if(BizInfo[biz][bizcreatet] == 0) { biz++; continue; }
+		gespeichert++;
 		mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_bizes SET biz_Owned='%d',biz_art='%d',biz_preis='%d',biz_level='%d',biz_geldkasse='%d',biz_locked='%d',biz_besitzer='%e',biz_teilhaber='%e',biz_beschreibung='%e',biz_artikel0='%d',biz_artikel1='%d',biz_artikel2='%d',biz_artikel3='%d',biz_artikel4='%d',biz_artikel5='%d',",
 		BizInfo[biz][biz_Owned],BizInfo[biz][biz_art],BizInfo[biz][biz_preis],BizInfo[biz][biz_level],BizInfo[biz][biz_geldkasse],BizInfo[biz][biz_locked],BizInfo[biz][biz_besitzer],BizInfo[biz][biz_teilhaber],BizInfo[biz][biz_beschreibung],BizInfo[biz][biz_artikel][0],BizInfo[biz][biz_artikel][1],BizInfo[biz][biz_artikel][2],BizInfo[biz][biz_artikel][3],BizInfo[biz][biz_artikel][4],BizInfo[biz][biz_artikel][5]);
 		strcat(mainquery,query);
@@ -81342,25 +81388,37 @@ stock OnGameModeSave()
 		strdel(query,0,sizeof(query));
 		biz++;
 	}
-	printf("- Businesse gespeichert %d/%d -",biz,MAX_BIZ);
+	printf("- Businesse gespeichert %d/%d -",gespeichert,MAX_BIZ);
 	strdel(mainquery,0,sizeof(mainquery));
 	strdel(query,0,sizeof(query));
-	while(org<MAX_ORGANISATIONS && OrgInfo[org][OrgCreatet] != 0)
+	gespeichert = 0;
+	while(org < MAX_ORGANISATIONS)
 	{
+		// Luecken ueberspringen statt die Schleife zu beenden. Wird ein
+		// Eintrag geloescht, bleibt sein Platz im Array leer stehen - mit
+		// der alten Abbruchbedingung wurde ab dort nichts mehr gespeichert.
+		if(OrgInfo[org][OrgCreatet] == 0) { org++; continue; }
+		gespeichert++;
 		mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_firmen SET OrgName='%e',OrgOwner='%s',OrgMotto='%e',OrgKasse='%d',OrgMBeitrag='%d' WHERE id='%d'",OrgInfo[org][OrgName],OrgInfo[org][OrgOwner],OrgInfo[org][OrgMotto],OrgInfo[org][OrgKasse],OrgInfo[org][OrgMBeitrag],org);
 		mysql_function_query(MySQL_R394,query,false,"","");
 		org++;
 	}
-	printf("- Firmen Gespeichert %d/%d -",org-1,MAX_ORGANISATIONS);
+	printf("- Firmen Gespeichert %d/%d -",gespeichert,MAX_ORGANISATIONS);
 	strdel(mainquery,0,sizeof(mainquery));
 	strdel(query,0,sizeof(query));
-	while(partei<MAX_PARTEI && PartInfo[partei][ParteiCreatet] != 0)
+	gespeichert = 0;
+	while(partei < MAX_PARTEI)
 	{
+		// Luecken ueberspringen statt die Schleife zu beenden. Wird ein
+		// Eintrag geloescht, bleibt sein Platz im Array leer stehen - mit
+		// der alten Abbruchbedingung wurde ab dort nichts mehr gespeichert.
+		if(PartInfo[partei][ParteiCreatet] == 0) { partei++; continue; }
+		gespeichert++;
 		mysql_format(MySQL_R394,query,sizeof(query),"UPDATE server_patei SET ParteiName='%e',ParteiOwner='%s',ParteiMotto='%e',ParteiKasse='%d',ParteiMBeitrag='%d' WHERE id='%d'",PartInfo[partei][ParteiName],PartInfo[partei][ParteiOwner],PartInfo[partei][ParteiMotto],PartInfo[partei][ParteiKasse],PartInfo[partei][ParteiMBeitrag],partei);
 		mysql_function_query(MySQL_R394,query,false,"","");
 		partei++;
 	}
-	printf("- Partei gespeichert %d/%d -",partei-1,MAX_PARTEI);
+	printf("- Partei gespeichert %d/%d -",gespeichert,MAX_PARTEI);
 	strdel(query,0,sizeof(query));
 	return 1;
 }
