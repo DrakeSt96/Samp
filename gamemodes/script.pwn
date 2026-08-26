@@ -5127,10 +5127,16 @@ main(){}
 //-[Anti-Cheat-Protokoll]-//
 #include "modules/anticheat/ac_log.inc"
 
+//-[Launcher-Pruefung]-//
+#include "modules/launcher/launcher.inc"
+
 public OnGameModeInit()
 {
 	Streamer_VisibleItems(STREAMER_TYPE_OBJECT,1000);
 	VoiceInitSystem();
+	#if LAUNCHER_ENABLED
+		Launcher_OnGameModeInit();
+	#endif
 	/*
    	new Server_Bind_Str[500];
 	GetServerVarAsString("bind",Server_Bind_Str,sizeof(Server_Bind_Str));
@@ -11250,6 +11256,9 @@ public LoginRegisterLoginTD(playerid)
 public OnPlayerConnect(playerid)
 {
 	VoiceOnPlayerConnect(playerid);
+	#if LAUNCHER_ENABLED
+		Launcher_OnPlayerConnect(playerid);
+	#endif
 	ShowLoad(playerid);
     mapicon(playerid);
     AddPlayer(playerid);
@@ -11706,6 +11715,9 @@ public OnPlayerConnect(playerid)
 public OnPlayerDisconnect(playerid,reason)
 {
 	VoiceOnPlayerDisconnect(playerid);
+	#if LAUNCHER_ENABLED
+		Launcher_OnPlayerDisconnect(playerid);
+	#endif
  	if(Spieler[playerid][JobDuty] == 1){
 		SetPlayerSkin(playerid,Spieler[playerid][pSkin]);
 	}
