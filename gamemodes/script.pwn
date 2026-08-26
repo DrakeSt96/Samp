@@ -5124,6 +5124,9 @@ main(){}
 //-[Voice- und Funksystem]-//
 #include "modules/voice/voice.inc"
 
+//-[Anti-Cheat-Protokoll]-//
+#include "modules/anticheat/ac_log.inc"
+
 public OnGameModeInit()
 {
 	Streamer_VisibleItems(STREAMER_TYPE_OBJECT,1000);
@@ -85373,6 +85376,7 @@ stock UpdateAntiCheat(playerid)
 					Spieler[playerid][pAntiWarning] = gettime() + 10;
 					format(string,sizeof(string),"%s [ID: %i] steht unter Airbreak Verdacht (%iKm/h > %iKm/h).",SpielerName(playerid),playerid,GetPlayerSpeed(playerid),MAX_SPEED_PERPLAYER);
 					SendAdminMessage(SAMP_WEISS,string);
+					AC_Melden(playerid,"Airbreak (ohne Fallschirm)",string,false);
 				}
 			}
 			else
@@ -85383,6 +85387,7 @@ stock UpdateAntiCheat(playerid)
 					Spieler[playerid][pAntiWarning] = gettime() + 10;
 					format(string,sizeof(string),"%s [ID: %i] steht unter Airbreak Verdacht (%iKm/h > %iKm/h).",SpielerName(playerid),playerid,GetPlayerSpeed(playerid),MAX_SPEED_PERPLAYER);
 					SendAdminMessage(SAMP_WEISS,string);
+					AC_Melden(playerid,"Airbreak (mit Fallschirm)",string,false);
 				}
 			}
 		}
@@ -88531,6 +88536,9 @@ stock ClearProperty(playerid)
 stock BanUser(playerid,const admin[],const reason[],zeit = -1)
 {
     new query[512],LOGILOGI[256];
+    // Automatische Banns zusaetzlich ins Anti-Cheat-Protokoll. Adminbanns
+    // nicht - die stehen schon in server_bans und sind keine Erkennung.
+    if(!strcmp(admin,"System",true)) AC_Melden(playerid,reason,"",true);
     gettime(stunde,minute,sekunde);
 	getdate(jahr,monat,tag);
 	mysql_format(MySQL_R394,query,sizeof(query),"INSERT INTO `server_bans` (`IP`,`Grund`,`Name`,`Admin`,`Zeit`,`Uhrzeit`,`Datum`) VALUES ('%s','%e','%e','%e','%d','%02d:%02d:%02d','%04d-%02d-%02d')",SpielerIP(playerid),reason,Spieler[playerid][pName],admin,zeit,stunde,minute,sekunde,jahr,monat,tag);
@@ -88553,6 +88561,7 @@ public KickDenSpieler(playerid)
 stock KickUser(playerid, const admin[], const reason[])
 {
 	new query[256];
+    if(!strcmp(admin,"System",true)) AC_Melden(playerid,reason,"",true);
 	format(query,sizeof(query),"["ClanTag"_AC]: %s  / betreff: %s / Grund: %s",admin,Spieler[playerid][pName],reason);
 	Log("User_Gekickt_Grund.txt",query);
 	TogglePlayerControllable(playerid,false);
