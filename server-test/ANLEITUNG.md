@@ -104,7 +104,38 @@ Beim Bestellen bei netcup zwei Sachen beachten:
 1. **Standort ausdrücklich auf Nürnberg stellen.** Die Voreinstellung ist
    „Keine Präferenz Europa" und kann in Österreich oder den Niederlanden
    landen — das kostet deutsche Spieler Ping ohne Gegenwert.
-2. **Ubuntu 24.04 LTS im Kundenpanel prüfen**, bevor du installierst.
+2. **Dieses Image nehmen:** `Ubuntu 24.04.4 UEFI amd64` — Variante **Minimal**.
+
+   * **24.04.4 statt 26.04:** Genau diese Punktversion ist durchgetestet. Auf
+     26.04 ist nichts geprüft, insbesondere nicht, ob die vier
+     `lib32`-Pakete dort genauso heißen. Unterstützung bis 2029 reicht;
+     hochziehen geht später jederzeit.
+   * **UEFI statt BIOS:** netcup stellt neue Images ohnehin auf UEFI um.
+     Unserem Stapel ist es egal — also die Richtung nehmen, in die es geht.
+   * **Minimal statt cloudimg:** Die cloudimg-Varianten erwarten cloud-init,
+     also Provisionierung per Konfiguration. Du richtest von Hand nach dieser
+     Anleitung ein; dafür ist das schlanke Image richtig.
+   * **Nicht** die Variante `openclaw`: unbekannter Vorinstallationsstand.
+     Auf einen Server mit Spielerdaten kommt nichts, was man nicht kennt.
+
+### Drei Schalter im netcup-Panel
+
+Im SCP gibt es unter den Servereinstellungen drei Felder, die leicht falsch
+verstanden werden. Das Betriebssystem wählst du dort **nicht** — das passiert
+in der Image-/Installationsverwaltung an anderer Stelle.
+
+| Feld | Einstellung | Warum |
+|---|---|---|
+| **Betriebssystem-Optimierung** | `Linux` | Keine OS-Auswahl, sondern eine Hypervisor-Einstellung: welche Optimierungen der Wirt für deinen Gast fährt. `Linux (Legacy)` ist für alte Kernel ohne moderne virtio-Treiber — Ubuntu 24.04 hat Kernel 6.8, also nicht. |
+| **Autostart** | **an** | Startet das Wirtssystem neu (Wartung), kommt dein Server nur damit von selbst wieder hoch. Sonst ist der Gameserver offline, bis du es merkst. |
+| **UEFI-Boot** | **an** — vor der Installation | Muss zum Image passen: `Ubuntu 24.04.4 **UEFI** amd64` verlangt den Schalter an. Nachträglich umschalten macht den Server unbootbar. |
+
+Autostart und `systemctl enable omp` aus Abschnitt&nbsp;9 ergeben zusammen eine
+durchgehende Kette: Wirt startet → dein Server startet → MariaDB startet →
+open.mp startet.
+
+Falls doch einmal nichts bootet: dafür ist die **Fernwartungskonsole** da. Sie
+rettet dich auch, wenn du dich mit `ufw` aus dem SSH aussperrst.
 
 **Zum Prozessor:** Der EPYC 9645 ist die dichte Zen-5c-Variante — 96 Kerne bei
 2,3 GHz Basis und 3,7 GHz Boost. Dichte Kerne tauschen Takt gegen Anzahl, und
