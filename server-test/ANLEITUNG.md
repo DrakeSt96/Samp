@@ -414,6 +414,39 @@ LD_LIBRARY_PATH=qawno qawno/pawncc gamemodes/script.pwn \
 Ergebnis: rund 10 MB, **0 Fehler**, 346 Warnungen. Die Warnungen sind Bestand
 und kein Hindernis — mehr dazu im Anhang.
 
+### Vor dem Neustart prüfen, ob die Zugangsdaten drin sind
+
+Der häufigste Stolperstein im Betrieb: `config.inc` geändert, das Übersetzen
+vergessen. Der Server startet dann und fährt sich sofort wieder herunter,
+obwohl die Datenbank läuft und das Passwort stimmt — denn die Zugangsdaten
+kommen aus der **AMX**, nicht aus der `config.inc`.
+
+```bash
+python3 tools/amx_zugang_pruefen.py gamemodes/script.amx
+```
+
+Ausgabe im guten Fall:
+
+```
+Kein 'CONFIG_FEHLT' gefunden - es sind Zugangsdaten einkompiliert.
+
+  Host        127.0.0.1
+  Benutzer    samp
+  Datenbank   samp1
+  Passwort    (gesetzt, wird nicht angezeigt)
+```
+
+Und im schlechten:
+
+```
+ZUGANGSDATEN FEHLEN
+'CONFIG_FEHLT' steht 4x in der AMX.
+```
+
+Das Passwort gibt das Werkzeug bewusst nicht aus — es zeigt nur, ob eines
+gesetzt ist. Rückgabewert 1 bei fehlenden Daten, damit es sich in ein
+Startskript einbauen lässt.
+
 **Nicht `pawno/pawno.exe` benutzen.** Der Compiler in diesem Ordner ist 3.2.3664
 von 2011 und scheitert an den open.mp-Includes.
 
@@ -698,7 +731,7 @@ Die 44 Tag-Warnungen sind geprüft: alle Zahlen treffen die richtige Konstante
 | Voiceport bei jedem Start anders | `sampvoice.port` fehlt in `config.json` |
 | `cannot read from file: "open.mp"` | Beide `-i`-Pfade fehlen, oder es lief der 3.2er-Compiler |
 | `cannot read from file: "voice_config.inc"` | Die Modulordner fehlen im Suchpfad (Schritt 15) |
-| `MySQL ERROR! Der Server wird jetzt heruntergefahren` | Die AMX wurde ohne echte `config.inc` gebaut. Erst `cat gamemodes/config.inc` prüfen, dann Zugangsdaten mit `mariadb -u samp -p samp1 -e "SELECT 1"` testen, dann neu übersetzen (Schritt 15) |
+| `MySQL ERROR! Der Server wird jetzt heruntergefahren` | `python3 tools/amx_zugang_pruefen.py gamemodes/script.amx` sagt dir sofort, ob es an der AMX liegt. Sonst die Zugangsdaten mit `mariadb -u samp -p samp1 -e "SELECT 1"` testen |
 | Dienst startet im Kreis, dann `start-limit-hit` | Fast immer dasselbe: kein Datenbankzugang. Der Gamemode fährt sich selbst herunter, `Restart=on-failure` startet neu, nach fünf Versuchen stoppt `StartLimitBurst` die Schleife |
 | `code=dumped, status=11/SEGV` beim Herunterfahren | Bekannter Absturz beim Beenden, **Folge** und nicht Ursache. Im Log darüber steht der echte Grund |
 | `CreateDynamicObject: Expecting 11 parameter(s), but found 14` | Streamer-Plugin ist zu alt. `plugins/streamer.*` muss 2.9.6 sein — neu ziehen |
