@@ -417,6 +417,51 @@ und kein Hindernis — mehr dazu im Anhang.
 **Nicht `pawno/pawno.exe` benutzen.** Der Compiler in diesem Ordner ist 3.2.3664
 von 2011 und scheitert an den open.mp-Includes.
 
+### Auf dem Server übersetzen, nicht auf dem eigenen Rechner
+
+Man kann den Gamemode unter Windows bauen und die `script.amx` hochladen — die
+Datei ist plattformunabhängig. **Tu es trotzdem nicht.**
+
+Die Zugangsdaten aus `config.inc` werden beim Übersetzen in die AMX
+einbetoniert, und sie sind dort **im Klartext lesbar**. Die AMX ist zwar
+kompakt kodiert (Header-Flag `0x04`), weshalb `strings` nichts findet — aber
+das Auspacken ist keine Hürde. Nachgemacht an einer Testübersetzung mit dem
+Passwort `Testpasswort123`:
+
+```
+...[Script wird gestartet]...127.0.0.1.samp.samp1.Testpasswort123...
+```
+
+Host, Benutzer, Datenbank und Passwort direkt nebeneinander. Rund zwanzig
+Zeilen Python, kein Spezialwerkzeug.
+
+Daraus folgen zwei Regeln:
+
+| | |
+|---|---|
+| **Auf dem Server übersetzen** | Dann existieren die Zugangsdaten an genau einer Stelle — `config.inc` auf dem Server — und die AMX, die sie trägt, verlässt die Maschine nie. |
+| **Die AMX gehört nie in ein Repository** | `gamemodes/*.amx` steht deshalb in `.gitignore`. Eine AMX auf GitHub ist ein veröffentlichtes Datenbankpasswort. |
+
+Dasselbe gilt für jeden Weg, auf dem die AMX herumgereicht wird — Discord,
+Cloudspeicher, USB-Stick.
+
+### Dateien zum Server übertragen
+
+Brauchst du früher oder später ohnehin. Aus PowerShell, mit demselben
+Schlüssel wie `ssh`:
+
+```powershell
+scp "C:\Pfad\zur\datei" root@SERVER-IP:/home/omp/samp/gamemodes/
+scp -r "C:\Pfad\zum\Ordner" root@SERVER-IP:/home/omp/samp/
+scp root@SERVER-IP:/var/backups/samp/samp1-2026-08-27.sql.gz .
+```
+
+Danach auf dem Server die Besitzrechte richten:
+
+```bash
+chown omp:omp /home/omp/samp/gamemodes/script.amx
+```
+
 ---
 
 # Teil 6 — In Betrieb nehmen
@@ -612,6 +657,7 @@ Die 44 Tag-Warnungen sind geprüft: alle Zahlen treffen die richtige Konstante
 | Voiceport bei jedem Start anders | `sampvoice.port` fehlt in `config.json` |
 | `cannot read from file: "open.mp"` | Beide `-i`-Pfade fehlen, oder es lief der 3.2er-Compiler |
 | `cannot read from file: "voice_config.inc"` | Die Modulordner fehlen im Suchpfad (Schritt 15) |
+| `MySQL ERROR! Der Server wird jetzt heruntergefahren` | Die AMX wurde ohne echte `config.inc` gebaut. Auf dem Server neu übersetzen (Schritt 15) |
 
 ---
 
