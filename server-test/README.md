@@ -6,9 +6,9 @@ aktuellen Stand des Gamemodes und dem Voicesystem.
 Ein Befehl, dann fehlt nur noch die Datenbank.
 
 > **Du mietest gerade einen Server?** Dann nimm nicht diese Seite, sondern
-> **[ANLEITUNG.md](ANLEITUNG.md)** — die geht von der Bestellung beim Hoster
-> bis zum ersten Spieler durch: Betriebssystem, Hardware, 32-Bit-Bibliotheken,
-> MariaDB, Firewall, systemd-Dienst, Sicherung.
+> **[ANLEITUNG.md](ANLEITUNG.md)** — zwanzig Schritte von der Bestellung bei
+> netcup bis zum ersten Spieler: SSH-Schlüssel, SCP-Einstellungen, Ubuntu,
+> Härtung, 32-Bit-Bibliotheken, MariaDB, Firewall, systemd, Sicherung.
 
 ```powershell
 # Windows, in PowerShell im Repository-Ordner

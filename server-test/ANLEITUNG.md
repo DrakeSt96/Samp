@@ -1,229 +1,249 @@
-# Server aufsetzen — komplette Anleitung
+# open.mp-Server auf netcup — komplette Anleitung
 
-Von der Bestellung beim Hoster bis zum ersten Spieler auf dem Server.
+Von der Bestellung bis zum ersten Spieler. Ein durchgehender Weg, in dieser
+Reihenfolge abarbeitbar.
 
-Alles hier ist auf **Ubuntu 24.04 LTS** einmal komplett durchgelaufen: der
+Alle Zahlen und Befehle hier sind auf **Ubuntu 24.04.4 LTS** durchgespielt: der
 Server startet, verbindet sich zur Datenbank, das Voicesystem bindet, die
-Netzwerkports stehen. Die Zahlen weiter unten sind gemessen, nicht geschätzt.
+Netzwerkports stehen. Was ich nicht selbst ausgeführt habe, steht ausdrücklich
+dabei.
 
 ---
 
-## 1. Was du bestellst
+# Teil 1 — Vorbereiten und bestellen
 
-### Betriebssystem: Ubuntu 24.04 LTS
+## 1. SSH-Schlüssel erzeugen (vor der Bestellung)
 
-**Nimm Ubuntu 24.04 LTS (Noble Numbat), 64 Bit.**
+Mach das zuerst. netcup kann den Schlüssel **während der Installation** in den
+Server legen — dann brauchst du nie ein Passwort-Login, und der häufigste
+Angriffsweg auf einen frischen Server ist von vornherein zu.
 
-Der Grund ist unspektakulär und genau deshalb belastbar: der komplette Stapel
-ist darauf durchgetestet worden. Server, alle 22 Komponenten, das Voiceplugin,
-alle vier Legacy-Plugins, der Gamemode, die Datenbank — auf genau dieser
-Version, Ende bis Ende.
+Unter Windows in PowerShell (OpenSSH ist bei Windows 10/11 dabei):
 
-Die drei Dinge, die die Wahl wirklich einschränken:
-
-| Anforderung | Warum |
-|---|---|
-| **32-Bit-Bibliotheken verfügbar** | `omp-server` und *jede* `.so` sind `ELF 32-bit, Intel 80386`. Ohne 32-Bit-Laufzeit startet nichts. |
-| **glibc ≥ 2.17** | Höchste Anforderung im ganzen Stapel. Jedes System ab ~2014 erfüllt das. |
-| **Lange Sicherheitsunterstützung** | Ubuntu 24.04 bis 2029 (kostenlos), bis 2034 mit Ubuntu Pro. |
-
-Was auch ginge: **Debian 12**. Gleiche Paketnamen, gleiche Bibliotheken,
-Sicherheitsunterstützung bis Juni 2028. Ich habe es nicht getestet — Ubuntu
-schon. Nimm im Zweifel das Getestete.
-
-Was **nicht** geht: CentOS 7 (Ende erreicht), Alpine (musl statt glibc — die
-Binärdateien starten schlicht nicht), Windows Server (teure Lizenz für
-keinen Vorteil, und `pawncc` läuft auf Linux genauso).
-
-### Hardware
-
-Gemessen mit vollem Gamemode, angeschlossener Datenbank, `max_players: 500`,
-null Spieler drauf:
-
-| | gemessen |
-|---|---|
-| Arbeitsspeicher (Spitze) | **120 MB** |
-| Prozessorlast im Leerlauf | **2,4 % eines Kerns** |
-| Threads | 7 |
-| Plattenplatz Serverordner | 165 MB |
-| Datenbank frisch eingespielt | 0,2 MB |
-
-**Arbeitsspeicher ist nicht dein Engpass.** Der Gamemode ist 10 MB Bytecode
-und belegt keine 120 MB. Was zählt, ist etwas anderes:
-
-> **Die Pawn-Hauptschleife läuft auf genau einem Kern.**
-> Jeder Sync-Pakete, jeder Timer, jedes `OnPlayerUpdate` von jedem Spieler
-> geht durch diesen einen Thread. Vier langsame Kerne sind für einen
-> Rollenspielserver schlechter als zwei schnelle.
-
-Danach bestellst du:
-
-**Empfehlung für 200–500 Spieler:**
-
-```
-4 vCPU  —  DEDIZIERT, nicht geteilt  —  möglichst hoher Takt
-8 GB RAM
-40 GB NVMe
-Standort Deutschland (Ping)
-DDoS-Schutz inklusive
+```powershell
+ssh-keygen -t ed25519 -C "gameserver"
 ```
 
-Die beiden Punkte, an denen billige Angebote scheitern:
+Dreimal Enter (Standardpfad, Passphrase nach Belieben — eine Passphrase ist
+sinnvoll). Danach liegen zwei Dateien in `C:\Users\DEINNAME\.ssh\`:
 
-1. **„vCPU" heißt oft „geteilt".** Auf überbuchten Knoten schwankt die
-   Taktrate, und genau das merkst du als Ruckeln — nicht als niedrige
-   Auslastung. Achte auf **dedizierte** Kerne.
-2. **DDoS-Schutz.** Ein Gameserver mit offenem UDP-Port ist ein Ziel. Nicht
-   irgendwann — sondern sobald jemand sauer ist. netcup, Hetzner und OVH haben
-   ihn ohne Aufpreis, andere verlangen dafür Geld oder haben ihn gar nicht.
+| Datei | |
+|---|---|
+| `id_ed25519` | **Der private Schlüssel. Bleibt bei dir. Niemals irgendwohin hochladen.** |
+| `id_ed25519.pub` | Der öffentliche. Der kommt zu netcup. |
 
-Konkrete Angebote, Stand August 2026, alle Preise inkl. 19 % MwSt. — Preise
-ändern sich, prüf sie vor dem Bestellen selbst nach:
+Inhalt des öffentlichen anzeigen — das ist eine einzige Zeile:
 
-| Anbieter | Modell | Dedizierte Kerne | RAM | NVMe | pro Monat |
-|---|---|---|---|---|---|
-| **netcup** | RS 1000 G12, Root-Server | **4** | 8 GB ECC | 256 GB | **12,79 €** bei 12 Monaten<br>**17,70 €** monatlich kündbar |
-| Hetzner | CCX13 | 2 | 8 GB | 80 GB | ≈ 51,16 € (42,99 € netto) |
-| Hetzner | CCX23 | 4 | 16 GB | 160 GB | ≈ 102,33 € (85,99 € netto) |
+```powershell
+Get-Content $env:USERPROFILE\.ssh\id_ed25519.pub
+```
 
-**netcup gewinnt das derzeit deutlich** — doppelt so viele Kerne wie das
-Hetzner-Gegenstück, dreimal so viel Platte, zu einem Drittel des Preises.
-DDoS-Schutz ist bei netcup inklusive (bis 2 Tbit/s, Anexia DDoS Guard,
-Filterung bis Layer 4), die Root-Server-Linie hat garantierte Kerne unter KVM,
-und Nürnberg ist als Standort wählbar.
+## 2. Server bestellen
 
-> **Achtung, das hat sich geändert:** Hetzner hat am **15. Juni 2026** die
-> Preise der dedizierten CCX-Linie rund verdreifacht — CCX13 von 15,99 € auf
-> 42,99 € netto, CCX23 von 31,49 € auf 85,99 €. Die geteilten CX-Linien stiegen
-> nur moderat. Ältere Empfehlungen für Hetzner CCX stammen von vor diesem
-> Datum. Bestandsserver behalten ihren Preis; eine Umstellung der Größe
-> rechnet neu ab.
+**RS 1000 G12** aus der **Root-Server**-Linie — nicht aus der VPS-Linie, dort
+sind die Kerne geteilt.
 
-Beim Bestellen bei netcup zwei Sachen beachten:
+```
+4 vCPU, dediziert (AMD EPYC 9645)
+8 GB DDR5 ECC
+256 GB NVMe
+Standort: Nuernberg          <- ausdruecklich waehlen!
+```
 
-1. **Standort ausdrücklich auf Nürnberg stellen.** Die Voreinstellung ist
-   „Keine Präferenz Europa" und kann in Österreich oder den Niederlanden
-   landen — das kostet deutsche Spieler Ping ohne Gegenwert.
-2. **Dieses Image nehmen:** `Ubuntu 24.04.4 UEFI amd64` — Variante **Minimal**.
+**Der Standort ist die eine Stelle, an der man sich vertut.** Die Voreinstellung
+heißt „Keine Präferenz Europa" und kann in Österreich oder den Niederlanden
+landen. Für deutsche Spieler kostet das Ping ohne Gegenwert.
 
-   * **24.04.4 statt 26.04:** Genau diese Punktversion ist durchgetestet. Auf
-     26.04 ist nichts geprüft, insbesondere nicht, ob die vier
-     `lib32`-Pakete dort genauso heißen. Unterstützung bis 2029 reicht;
-     hochziehen geht später jederzeit.
-   * **UEFI statt BIOS:** netcup stellt neue Images ohnehin auf UEFI um.
-     Unserem Stapel ist es egal — also die Richtung nehmen, in die es geht.
-   * **Minimal statt cloudimg:** Die cloudimg-Varianten erwarten cloud-init,
-     also Provisionierung per Konfiguration. Du richtest von Hand nach dieser
-     Anleitung ein; dafür ist das schlanke Image richtig.
-   * **Nicht** die Variante `openclaw`: unbekannter Vorinstallationsstand.
-     Auf einen Server mit Spielerdaten kommt nichts, was man nicht kennt.
+Laufzeit: 12 Monate für 12,79 €/Monat, monatlich kündbar für 17,70 €. Der
+Break-even liegt bei `153,48 / 17,70 = 8,7 Monaten` — solange der Server noch
+nie mit echten Spielern gelaufen ist, ist monatlich das Richtige.
 
-### Drei Schalter im netcup-Panel
+## 3. Die zwei E-Mails
 
-Im SCP gibt es unter den Servereinstellungen drei Felder, die leicht falsch
-verstanden werden. Das Betriebssystem wählst du dort **nicht** — das passiert
-in der Image-/Installationsverwaltung an anderer Stelle.
+Nach der Bestellung kommen **zwei** Mails mit **getrennten** Zugängen:
+
+| Portal | Adresse | Wofür |
+|---|---|---|
+| **CCP** | `ccp.netcup.net` | Bestellungen, Rechnungen, Vertrag |
+| **SCP** | `servercontrolpanel.de` | Der Server selbst: Image, Konsole, Schalter |
+
+Die Zugangsdaten sind voneinander unabhängig. Das SCP-Passwort wird im **CCP**
+zurückgesetzt, nicht im SCP — merk dir das für den Tag, an dem du es brauchst.
+
+Ab hier arbeitest du im **SCP**.
+
+---
+
+# Teil 2 — Server aufsetzen
+
+## 4. SSH-Schlüssel im SCP hinterlegen
+
+SCP → **Optionen → SSH-Schlüssel** → den Inhalt von `id_ed25519.pub` einfügen.
+
+Einmal hinterlegt, kannst du ihn bei jeder Installation aus einer Auswahlliste
+wählen, und er landet automatisch in `authorized_keys`.
+
+## 5. Die drei Schalter — VOR der Installation
+
+SCP → Servereinstellungen. Hier wählst du **nicht** das Betriebssystem, auch
+wenn es so aussieht.
 
 | Feld | Einstellung | Warum |
 |---|---|---|
 | **Betriebssystem-Optimierung** | `Linux` | Keine OS-Auswahl, sondern eine Hypervisor-Einstellung: welche Optimierungen der Wirt für deinen Gast fährt. `Linux (Legacy)` ist für alte Kernel ohne moderne virtio-Treiber — Ubuntu 24.04 hat Kernel 6.8, also nicht. |
 | **Autostart** | **an** | Startet das Wirtssystem neu (Wartung), kommt dein Server nur damit von selbst wieder hoch. Sonst ist der Gameserver offline, bis du es merkst. |
-| **UEFI-Boot** | **an** — vor der Installation | Muss zum Image passen: `Ubuntu 24.04.4 **UEFI** amd64` verlangt den Schalter an. Nachträglich umschalten macht den Server unbootbar. |
+| **UEFI-Boot** | **an** | Muss zum Image passen. **Nachträglich umschalten macht den Server unbootbar.** |
 
-Autostart und `systemctl enable omp` aus Abschnitt&nbsp;9 ergeben zusammen eine
-durchgehende Kette: Wirt startet → dein Server startet → MariaDB startet →
-open.mp startet.
+**Reihenfolge ist hier alles:** Schalter zuerst, Installation danach. Andersherum
+kostet es einen Neuaufsetzer.
 
-Falls doch einmal nichts bootet: dafür ist die **Fernwartungskonsole** da. Sie
-rettet dich auch, wenn du dich mit `ufw` aus dem SSH aussperrst.
+## 6. Ubuntu installieren
 
-**Zum Prozessor:** Der EPYC 9645 ist die dichte Zen-5c-Variante — 96 Kerne bei
-2,3 GHz Basis und 3,7 GHz Boost. Dichte Kerne tauschen Takt gegen Anzahl, und
-Takt ist genau das, worauf es bei der Single-Thread-Schleife ankommt. Für
-diesen Gamemode reicht es trotzdem klar: Zen 5 hat hohe IPC, und gemessen sind
-2,4 % eines Kerns im Leerlauf. Unter 500 echten Spielern habe ich es nicht
-gemessen — das sage ich lieber dazu.
+SCP → **Medien → Images**. Nimm genau dieses:
 
-Contabo würde ich für einen Gameserver **nicht** nehmen: viel RAM fürs Geld,
-aber schwache Einzelkernleistung und stark überbuchte Knoten — genau die
-falsche Kombination für eine Single-Thread-Schleife. OVHs Standard-VPS-Linie
-fällt aus einem anderen Grund raus: die vCores sind dort nicht dediziert.
+```
+Ubuntu 24.04.4 UEFI amd64      Variante: Minimal
+```
 
-**Größer bestellen bringt nichts.** Mehr Kerne machen die Pawn-Schleife nicht
-schneller, und bei 120 MB gemessenem Verbrauch sind 8 GB schon reichlich
-Reserve. Der Takt ist über die ganze Reihe derselbe.
+Und im selben Dialog **deinen SSH-Schlüssel auswählen**.
 
-**Monatlich oder Jahresvertrag?** Bei netcup kostet die monatliche Kündbarkeit
-4,91 € Aufpreis. Der Break-even liegt bei 153,48 / 17,70 = **8,7 Monaten**:
-länger als neun Monate, und der Jahresvertrag war billiger. Solange der Server
-noch nie mit echten Spielern gelaufen ist, ist monatlich das Richtige — später
-wechseln geht immer.
+Warum genau dieses Image:
+
+* **24.04.4, nicht 26.04** — genau diese Punktversion ist durchgetestet. Auf
+  26.04 ist nichts geprüft, insbesondere nicht, ob die vier `lib32`-Pakete dort
+  genauso heißen. Unterstützung bis 2029 reicht; hochziehen geht später.
+* **UEFI, nicht BIOS** — passend zum Schalter aus Schritt 5, und netcup stellt
+  neue Images ohnehin auf UEFI um.
+* **Minimal, nicht cloudimg** — die cloudimg-Varianten erwarten cloud-init, also
+  Provisionierung per Konfiguration. Du richtest von Hand ein.
+* **Nicht `openclaw`** — unbekannter Vorinstallationsstand. Auf einen Server mit
+  Spielerdaten kommt nichts, was man nicht kennt.
+
+Die Installation dauert ein paar Minuten.
+
+## 7. Erster Login
+
+```powershell
+ssh root@DEINE-SERVER-IP
+```
+
+Kommt keine Passwortabfrage, sondern du bist direkt drin: der Schlüssel sitzt.
 
 ---
 
-## 2. System vorbereiten
+# Teil 3 — Grundsystem
 
-Nach dem Einloggen als `root`:
+## 8. Härten, bevor irgendetwas anderes passiert
+
+Der Server steht ab jetzt im Internet und wird binnen Minuten auf Port 22
+abgeklopft. Das ist normal — solange kein Passwort-Login möglich ist, läuft es
+ins Leere.
+
+Passwort-Login abschalten — **nur, wenn der Schlüssel-Login eben funktioniert
+hat.** Als eigene Datei, die **zuerst** einsortiert wird:
 
 ```bash
-apt update && apt upgrade -y
+cat > /etc/ssh/sshd_config.d/00-haertung.conf <<'EOF'
+PasswordAuthentication no
+PermitRootLogin prohibit-password
+KbdInteractiveAuthentication no
+EOF
 ```
 
-### Die 32-Bit-Bibliotheken — der Schritt, den alle vergessen
+> ### Warum `00-` und keine Änderung an `sshd_config`
+>
+> In `/etc/ssh/sshd_config` steht in **Zeile 12**:
+>
+> ```
+> Include /etc/ssh/sshd_config.d/*.conf
+> ```
+>
+> Bei SSH gewinnt der **erste** Treffer für ein Schlüsselwort, nicht der letzte.
+> Alles in der Hauptdatei steht *nach* dieser Zeile — eine Änderung dort wird
+> also von jeder Drop-in-Datei überstimmt. Und die Drop-ins werden alphabetisch
+> gelesen, `00-` gewinnt gegen alles andere. Gemessen:
+>
+> ```
+> 01-hoster.conf (yes) + 99-haertung.conf (no)  ->  yes   Haertung wirkungslos
+> 00-haertung.conf (no) + 01-hoster.conf (yes)  ->  no    greift
+> ```
 
-Ohne diesen Schritt bekommst du beim Start nur:
+**Vor dem Neustart prüfen, was wirklich gelten wird:**
+
+```bash
+sshd -T | grep -E '^passwordauthentication|^permitrootlogin'
+```
+
+Muss `passwordauthentication no` und `permitrootlogin without-password`
+ausgeben. Erst dann:
+
+```bash
+systemctl restart ssh
+```
+
+> **Und jetzt der wichtigste Satz der ganzen Anleitung:** lass das erste
+> SSH-Fenster **offen** und öffne ein zweites zur Kontrolle. Erst wenn das
+> zweite Fenster drin ist, darfst du das erste schließen. Sperrst du dich aus,
+> kommst du über die **Fernwartungskonsole** im SCP wieder rein — aber der Umweg
+> ist unnötig.
+
+Zeitzone und Aktualisierungen:
+
+```bash
+timedatectl set-timezone Europe/Berlin
+apt update && apt upgrade -y
+apt install -y unattended-upgrades && dpkg-reconfigure -plow unattended-upgrades
+```
+
+## 9. Die 32-Bit-Bibliotheken
+
+**Der Schritt, den alle vergessen.** Ohne ihn bekommst du beim Serverstart nur:
 
 ```
 bash: ./omp-server: No such file or directory
 ```
 
-Eine Lüge des Loaders: die Datei ist da, aber `/lib/ld-linux.so.2` fehlt.
+Eine Lüge des Loaders: die Datei ist da. Es fehlt `/lib/ld-linux.so.2`.
 
 ```bash
 apt install -y libc6-i386 lib32stdc++6 lib32gcc-s1 lib32atomic1
 ```
 
-Vier Pakete, mehr nicht. Das reicht für **alles**: Server, alle Komponenten,
-sampvoice und alle vier Plugins. Der komplette Bedarf des Stapels:
+Vier Pakete, mehr nicht. `omp-server` und **jede** `.so` im Stapel sind
+`ELF 32-bit, Intel 80386`. Der komplette Bedarf:
 
 ```
-ld-linux.so.2   libatomic.so.1   libc.so.6      libdl.so.2   libgcc_s.so.1
-libm.so.6       libpthread.so.0  librt.so.1     libstdc++.so.6
+ld-linux.so.2   libatomic.so.1   libc.so.6       libdl.so.2
+libgcc_s.so.1   libm.so.6        libpthread.so.0 librt.so.1
+libstdc++.so.6
 ```
 
-`libmysqlclient` steht bewusst **nicht** dabei — das MySQL-Plugin ist
-statisch gelinkt und braucht auf dem Server keine MySQL-Clientbibliothek.
+`libmysqlclient` steht bewusst nicht dabei — das MySQL-Plugin ist statisch
+gelinkt. Du brauchst auch **kein** `dpkg --add-architecture i386`; die vier
+`lib32`-Pakete tun dasselbe, ohne die halbe Paketverwaltung zu verdoppeln.
 
-> Du brauchst **kein** `dpkg --add-architecture i386`. Die vier `lib32`-Pakete
-> tun dasselbe, ohne dir die halbe Paketverwaltung zu verdoppeln.
-
-### Werkzeuge
+## 10. Werkzeuge und ein eigener Benutzer
 
 ```bash
 apt install -y git curl unzip mariadb-server ufw
-```
-
-### Eigener Benutzer
-
-Der Server hat keinen Grund, als `root` zu laufen.
-
-```bash
 adduser --disabled-password --gecos "" omp
 ```
 
+Der Server hat keinen Grund, als `root` zu laufen.
+
 ---
 
-## 3. Datenbank
+# Teil 4 — Datenbank
+
+## 11. MariaDB einrichten
 
 ```bash
 systemctl enable --now mariadb
 mariadb-secure-installation
 ```
 
-Bei `mariadb-secure-installation`: Root-Passwort setzen, anonyme Benutzer weg,
-Root-Login aus der Ferne aus, Testdatenbank weg. Viermal Enter für „ja".
-
-Dann Datenbank und Benutzer anlegen — **ein eigener Benutzer, niemals `root`:**
+Root-Passwort setzen, anonyme Benutzer weg, Root-Login aus der Ferne aus,
+Testdatenbank weg.
 
 ```bash
 mariadb -u root -p
@@ -237,48 +257,50 @@ FLUSH PRIVILEGES;
 EXIT;
 ```
 
-`CHARACTER SET latin1` ist Absicht: der Gamemode ist durchgehend
-ISO-8859-1. Mit `utf8mb4` werden aus Umlauten Fragezeichen.
-
-Kein `GRANT ALL` — der Gamemode legt im Betrieb keine Tabellen an und braucht
-weder `DROP` noch `ALTER`.
-
-**MySQL bleibt auf `localhost`.** Der Standard von MariaDB unter Ubuntu ist
-schon `bind-address = 127.0.0.1`. Lass ihn so. Port 3306 gehört nie ins
-Internet.
+* `CHARACTER SET latin1` ist Absicht: der Gamemode ist durchgehend ISO-8859-1.
+  Mit `utf8mb4` werden aus Umlauten Fragezeichen.
+* Kein `GRANT ALL` — der Gamemode legt im Betrieb keine Tabellen an und braucht
+  weder `DROP` noch `ALTER`.
+* **Kein `root` als Serverbenutzer.** Nie.
+* MariaDB steht unter Ubuntu schon auf `127.0.0.1`. Lass es so. Port 3306
+  gehört nie ins Internet.
 
 ---
 
-## 4. Serverdateien holen
+# Teil 5 — Den Gameserver aufsetzen
+
+## 12. Repository holen und einrichten
 
 Als Benutzer `omp`:
 
 ```bash
 su - omp
-git clone <DEINE-REPOSITORY-URL> samp
+git clone https://github.com/DrakeSt96/Samp.git samp
 cd samp
 git checkout claude/script-pwn-analysis-o9mnc7
-```
-
-Dann das Einrichtungsskript. Es lädt open.mp und sampvoice von den offiziellen
-Veröffentlichungen, prüft beide gegen fest eingetragene SHA-256-Summen und legt
-sie an die richtigen Stellen:
-
-```bash
 ./server-test/einrichten.sh
 ```
+
+Das Skript lädt **open.mp v1.5.8.3079** und **sampvoice v3.2.0-omp** von den
+offiziellen Veröffentlichungen, prüft beide gegen fest eingetragene
+SHA-256-Summen, legt sie an die richtigen Stellen, installiert den passenden
+**Pawn-Compiler 3.10.11** nach `qawno/` und übersetzt den Gamemode.
 
 Stimmt eine Prüfsumme nicht, bricht es ab, statt etwas Unbekanntes zu
 installieren.
 
----
+> **sampvoice ist eine Komponente, kein Plugin.** Es gehört nach `components/`
+> und **nicht** in `legacy_plugins`. Steht es falsch, überspringt der Server es
+> und jeder `Sv*`-Aufruf im Script endet in Laufzeitfehler 19 im Sekundentakt.
+> Das Skript legt es richtig ab und weigert sich zu starten, wenn es falsch in
+> der Konfiguration steht.
 
-## 5. Zugangsdaten eintragen
+## 13. Zugangsdaten eintragen
 
-Zwei Dateien, beide von `.gitignore` ausgeschlossen — sie dürfen nie in einem
+Zwei Dateien, beide von `.gitignore` ausgeschlossen. Sie dürfen nie in einem
 Commit landen.
 
-### `gamemodes/config.inc` — der Datenbankzugang
+**`gamemodes/config.inc`** — der Datenbankzugang:
 
 ```bash
 cp gamemodes/config.inc.example gamemodes/config.inc
@@ -288,62 +310,48 @@ nano gamemodes/config.inc
 ```pawn
 #define MySQL_Host      "127.0.0.1"
 #define MySQL_User      "samp"
-#define MySQL_Passwort  "DEIN-PASSWORT-VON-OBEN"
+#define MySQL_Passwort  "DEIN-PASSWORT-AUS-SCHRITT-11"
 #define MySQL_Datenbank "samp1"
 ```
 
 Diese Werte werden **beim Übersetzen** in die `script.amx` eingebacken. Änderst
 du sie später, musst du neu übersetzen.
 
-### `config.json` — die Serverkonfiguration
+**`config.json`** — die Serverkonfiguration:
 
 ```bash
-cp config.json.example config.json     # legt einrichten.sh sonst selbst an
 nano config.json
 ```
 
-Was du mindestens anfassen musst:
-
 ```jsonc
 {
-    "name": "Dein Servername",              // steht in der Serverliste
+    "name": "Dein Servername",
     "max_players": 500,
-    "network": { "port": 7777 },
+    "network":   { "port": 7777 },
     "sampvoice": { "port": 7778, "threads": 2, "updaterate": 10 },
-    "rcon": { "enable": false, "password": "LANGES-ZUFALLSPASSWORT" }
+    "rcon":      { "enable": false, "password": "LANGES-ZUFALLSPASSWORT" }
 }
 ```
 
 > ### `sampvoice.port` ist Pflicht
 >
-> Fehlt der Wert, macht sampvoice das hier
-> (`server/NetHandler.cpp:162`):
+> Fehlt der Wert, macht sampvoice das hier (`server/NetHandler.cpp:162`):
 >
 > ```cpp
-> if (_port == NULL) { bindAddr.sin_port = NULL; }   // → das Betriebssystem würfelt
+> if (_port == NULL) { bindAddr.sin_port = NULL; }   // das Betriebssystem wuerfelt
 > ```
 >
-> Der Voiceport ist dann **bei jedem Neustart ein anderer**. In meinem ersten
-> Testlauf war es 40283. Den kannst du in keiner Firewall freigeben, und die
-> Spieler hören nichts. Trag ihn fest ein.
+> Der Voiceport ist dann **bei jedem Neustart ein anderer**. Im ersten Testlauf
+> war es 40283. Den kannst du in keiner Firewall freigeben, und die Spieler
+> hören nichts.
 
 `"rcon": { "enable": false }` ist die richtige Voreinstellung. RCON läuft über
-UDP im Klartext — schalte es nur ein, wenn du es wirklich brauchst, und dann
-mit einem Passwort, das nirgends sonst vorkommt.
+UDP im Klartext.
 
-### Falls eine `server.cfg` herumliegt: weg damit
+**Falls eine `server.cfg` herumliegt: umbenennen.** open.mp liest sie **nach**
+der `config.json` und überschreibt deren Werte kommentarlos.
 
-```bash
-mv server.cfg server.cfg.alt 2>/dev/null
-```
-
-open.mp liest die `server.cfg` **nach** der `config.json` und überschreibt
-deren Werte kommentarlos. Du suchst sonst stundenlang, warum der Port nicht
-stimmt.
-
----
-
-## 6. Datenbank einspielen
+## 14. Datenbank einspielen
 
 Drei Dateien, **in dieser Reihenfolge**:
 
@@ -353,7 +361,7 @@ mariadb -u samp -p samp1 < gamemodes/modules/anticheat/ac_log.sql
 mariadb -u samp -p samp1 < gamemodes/modules/voice/voice_mutes.sql
 ```
 
-Danach stehen **38 Tabellen** in `samp1`. Prüfen:
+Danach stehen **38 Tabellen** in `samp1`:
 
 ```bash
 mariadb -u samp -p -N -e \
@@ -364,15 +372,13 @@ Die hinteren beiden legen die Tabellen für das Anti-Cheat-Protokoll und die
 Voice-Stummschaltungen an. Ohne sie startet der Server trotzdem — nur diese
 beiden Funktionen bleiben still.
 
----
+## 15. Gamemode übersetzen
 
-## 7. Gamemode übersetzen
-
-`./server-test/einrichten.sh` macht das mit — es holt den Compiler aus
-derselben open.mp-Veröffentlichung wie den Server. Von Hand:
+`einrichten.sh` hat das schon gemacht. Nach jeder Änderung an `config.inc` oder
+am Script erneut:
 
 ```bash
-cd ~/samp                     # WICHTIG: aus dem Wurzelverzeichnis, nicht aus gamemodes/
+cd ~/samp                # aus dem WURZELVERZEICHNIS, nicht aus gamemodes/
 LD_LIBRARY_PATH=qawno qawno/pawncc gamemodes/script.pwn \
     -i"pawno/include" -i"pawno/include/Gloabe Includes" \
     -i"gamemodes/modules/voice" -i"gamemodes/modules/anticheat" \
@@ -380,96 +386,23 @@ LD_LIBRARY_PATH=qawno qawno/pawncc gamemodes/script.pwn \
     -o"gamemodes/script.amx"
 ```
 
-Unter Windows reicht ein Doppelklick auf **`uebersetzen.bat`** im
-Wurzelverzeichnis — die setzt die Pfade selbst und lässt das Fenster offen.
-Von Hand geht es auch:
+Ergebnis: rund 10 MB, **0 Fehler**, 346 Warnungen. Die Warnungen sind Bestand
+und kein Hindernis — mehr dazu im Anhang.
 
-```powershell
-.\qawno\pawncc.exe gamemodes\script.pwn `
-    -i"pawno\include" -i"pawno\include\Gloabe Includes" `
-    -i"gamemodes\modules\voice" -i"gamemodes\modules\anticheat" `
-    -i"gamemodes\modules\launcher" `
-    -o"gamemodes\script.amx"
-```
+**Nicht `pawno/pawno.exe` benutzen.** Der Compiler in diesem Ordner ist 3.2.3664
+von 2011 und scheitert an den open.mp-Includes.
 
-Die fertige `script.amx` ist plattformunabhängig — du kannst sie unter Windows
-bauen und einfach auf den Linux-Server legen.
+---
 
-Ergebnis: `gamemodes/script.amx`, rund 10 MB, **0 Fehler**. Die rund 346
-Warnungen sind Bestand und kein Hindernis; die volle Ausgabe legt das Skript
-in `uebersetzen.log` ab.
+# Teil 6 — In Betrieb nehmen
 
-### Vier Fallen, und die ersten drei kosten Stunden
+## 16. Firewall
 
-**1. Nicht `pawno\pawno.exe` benutzen.** Der Compiler in diesem Ordner ist
-`pawnc.dll` **3.2.3664 von 2011**. Der Gamemode braucht 3.10. Wer es trotzdem
-versucht, sieht zuerst
+Nachgesehen, was der Server tatsächlich aufmacht:
 
 ```
-ScriptInc.inc(10) : fatal error 100: cannot read from file: "open.mp"
-Pawn compiler 3.2.3664
-```
-
-und nach dem Beheben des Pfades den nächsten Fehler, weil `_open_mp.inc:265`
-`#pragma warning push` benutzt — eine Anweisung, die es in 3.2 noch nicht gibt.
-
-Der richtige Compiler ist **3.10.11** und liegt der open.mp-Veröffentlichung
-unter `qawno/` bei. Beide Einrichtungsskripte legen ihn dorthin. Der Ordner
-`pawno/` bleibt nur noch wegen der Includes darin liegen — dort steht auch eine
-`LIES_MICH.txt` mit demselben Hinweis.
-
-**2. Aus dem Wurzelverzeichnis übersetzen, nicht aus `gamemodes/`.** Der
-Compiler löst `#include "…"` relativ zum Aufrufort auf. Startest du ihn in
-`gamemodes/`, bekommst du
-
-```
-modules/voice/voice.inc(20) : fatal error 100: cannot read from file: "voice_config.inc"
-```
-
-**Beide Include-Pfade werden gebraucht.** `open.mp.inc` liegt im Unterordner
-`Gloabe Includes`, und den durchsucht der Compiler nicht von selbst — daher die
-zwei `-i`-Angaben. Genau das fehlt, wenn man `pawno.exe` einfach doppelklickt.
-
-**3. Die Modulordner müssen in den Suchpfad — sonst scheitert es unter Windows.**
-`script.pwn` bindet die Module mit **Schrägstrichen** ein:
-
-```pawn
-#include "modules/voice/voice.inc"
-```
-
-Innerhalb von `voice.inc` steht dann `#include "voice_config.inc"` — ein
-Dateiname ohne Pfad, den pawncc relativ zum aktuellen Verzeichnis auflöst. Unter
-Windows schneidet es dieses Verzeichnis am **letzten Backslash** ab, und der
-steht in `…\gamemodes\modules/voice/voice.inc` vor `modules`:
-
-```
-...\gamemodes\modules/voice/voice.inc(20) : fatal error 100:
-     cannot read from file: "voice_config.inc"
-        ↑ Backslash      ↑ ab hier Schrägstriche
-```
-
-Es sucht die Datei also in `gamemodes\`, wo sie nicht liegt. Unter Linux fällt
-das nicht auf, weil dort durchgehend Schrägstriche stehen.
-
-Die drei zusätzlichen `-i`-Angaben oben lösen das: findet pawncc die Datei
-relativ nicht, greift der Suchpfad. Beide Einrichtungsskripte und
-`uebersetzen.bat` sammeln die Modulordner selbst ein, neue Module kommen also
-automatisch mit.
-
-**4. `pawncc.exe` nicht doppelklicken.** Es ist ein Kommandozeilenprogramm.
-Ein Doppelklick startet es ohne Argumente: es druckt seine Hilfe und beendet
-sich sofort. Man sieht ein schwarzes Fenster für den Bruchteil einer Sekunde
-und denkt, es sei abgestürzt. Es hat nur nichts zu tun bekommen — Argumente
-kann man beim Doppelklick nicht mitgeben. Genau dafür ist `uebersetzen.bat` da.
-
-## 8. Firewall
-
-Hier wird es angenehm kurz, weil ich nachgesehen habe, was der Server
-tatsächlich aufmacht:
-
-```
-UNCONN   0.0.0.0:7777   users:(("omp-server",fd=10))    ← Spiel + Query
-UNCONN   0.0.0.0:7778   users:(("omp-server",fd=5))     ← sampvoice
+UNCONN   0.0.0.0:7777   users:(("omp-server",fd=10))    <- Spiel + Query
+UNCONN   0.0.0.0:7778   users:(("omp-server",fd=5))     <- sampvoice
 ```
 
 Zwei UDP-Sockets. **Kein einziger TCP-Listener.**
@@ -477,7 +410,7 @@ Zwei UDP-Sockets. **Kein einziger TCP-Listener.**
 ```bash
 ufw default deny incoming
 ufw default allow outgoing
-ufw allow 22/tcp          # SSH — nicht aussperren!
+ufw allow 22/tcp          # SSH - nicht aussperren!
 ufw allow 7777/udp        # Spiel und Serverliste
 ufw allow 7778/udp        # Voicechat
 ufw enable
@@ -491,15 +424,12 @@ ufw enable
 | 443 | TCP | **raus** | Eintrag in der Serverliste (`api.open.mp`) |
 | 3306 | TCP | **gar nicht** | MySQL bleibt auf localhost |
 
-Du liest oft, man müsse „7777 TCP und UDP" öffnen. Das ist falsch — RakNet
-ist reines UDP. TCP 7777 offen zu haben bringt nichts außer einer Zeile mehr
-in der Angriffsfläche.
+Man liest oft, man müsse „7777 TCP und UDP" öffnen. Das ist falsch — RakNet ist
+reines UDP.
 
----
+## 17. Als Dienst einrichten
 
-## 9. Als Dienst einrichten
-
-`/etc/systemd/system/omp.service` (als `root` anlegen):
+Als `root`, `/etc/systemd/system/omp.service`:
 
 ```ini
 [Unit]
@@ -534,22 +464,17 @@ WantedBy=multi-user.target
 ```bash
 systemctl daemon-reload
 systemctl enable --now omp
-systemctl status omp
 journalctl -u omp -f
 ```
 
-`Requires=mariadb.service` ist wichtig: der Gamemode fährt sich selbst
-herunter, wenn beim Start keine Datenbankverbindung zustande kommt. Ohne die
-Abhängigkeit verlierst du nach jedem Neustart des Wirtssystems ein Wettrennen.
+`Requires=mariadb.service` ist wichtig: der Gamemode fährt sich selbst herunter,
+wenn beim Start keine Datenbankverbindung zustande kommt. Zusammen mit
+**Autostart** aus Schritt 5 ergibt das eine durchgehende Kette: Wirt startet →
+dein Server startet → MariaDB startet → open.mp startet.
 
-`StartLimitBurst=5` verhindert, dass er bei kaputter Datenbank endlos
-neustartet.
+## 18. Der erste Start
 
----
-
-## 10. Was beim ersten Start herauskommt
-
-So sieht ein geglückter Start aus — das ist echte Ausgabe, keine Vorlage:
+Echte Ausgabe aus dem Testlauf, keine Vorlage:
 
 ```
 Loading component sampvoice.so
@@ -566,80 +491,16 @@ Script: Es wurden erfolgreich 100 Objekte geladen!
 Legacy Network started on port 7777
 ```
 
-Steht `voice server running on port 7778` mit **deinem** Port da — nicht mit
-einer Zufallszahl —, dann sitzt die Konfiguration.
+**Die eine Zeile, auf die du schaust:** steht `voice server running on port 7778`
+mit *deinem* Port da — nicht mit einer Zufallszahl —, dann sitzt die
+Konfiguration.
 
----
-
-## 11. Was du beim ersten Start trotzdem im Log findest
-
-Ehrlichkeitshalber: das hier taucht auf und ist **kein** Fehler deiner
-Installation, sondern Bestand des Scripts.
-
-**1. Eine Tabelle fehlt im Schema.**
-
-```
-MySQL-Fehler 1146 | Table 'samp1.server_firmfahrzeuge' doesn't exist
-```
-
-`script.pwn:11116` liest sie, `Datenbank/samp_server.sql` legt sie nicht an.
-Folge: Firmenfahrzeuge werden nicht geladen. Der Rest läuft.
-
-**2. Eine abgeschnittene Abfrage.**
-
-```
-MySQL-Fehler 1064 | ... near '' at line 1 | SELECT * FROM LoS_account_main WHERE
-```
-
-`script.pwn:80063` — die Abfrage endet mitten im `WHERE`. Sie feuert einmal
-beim Start, tut nichts und erzeugt diesen Fehler. Alter Bestand.
-
-**3. Die sieben Bots verbinden sich unter Linux nicht.**
-
-```
-Warning: Bot executable not found: samp-npc
-```
-
-Der Gamemode ruft siebenmal `ConnectNPC()` auf — `[BOT]Bank`, `[BOT]Bank2`,
-`[BOT]BSN`, `[BOT]HandyLaden`, `[BOT]Stadthalle1`, `[BOT]Stadthalle2`,
-`[BOT]Tutorial`. Das braucht ein externes Programm `samp-npc`, und die
-Linux-Veröffentlichung von open.mp **liefert keins mit** (im Repository liegt
-nur `samp-npc.exe` für Windows).
-
-Zwei Wege: die Linux-`samp-npc` aus dem alten SA-MP-Serverpaket dazulegen —
-oder auf die eigenen NPC-Funktionen von open.mp umstellen, die brauchen kein
-externes Programm. open.mp warnt beim Start ohnehin schon, dass `ConnectNPC()`
-ausläuft.
-
-**4. Streamer-Version passt nicht zum Include.**
-
-Das Plugin ist 2.6.1, das Include erwartet 2.9.6. In Randfällen kann sich das
-anders verhalten als erwartet. Entweder `plugins/streamer.*` auf 2.9.6 heben
-oder das Include auf 2.6.1 zurücknehmen.
-
----
-
-## 12. Für die Spieler
-
-Der Server allein reicht nicht. **Jeder Spieler braucht den
-sampvoice-Client**, sonst hört und spricht niemand:
-
-<https://github.com/AmyrAhmady/sampvoice/releases>
-
-Ohne Client läuft der Server normal weiter — das Voice-Modul erkennt das und
-schaltet für diesen Spieler ab.
-
-Verbinden können sich Clients der Versionen **0.3.7 (4057)** und
-**0.3.DL (4062)**. Andere weist open.mp ab.
-
----
-
-## 13. Sicherung
+## 19. Sicherung
 
 Das Einzige, was nicht ersetzbar ist, ist die Datenbank. Alles andere ist ein
 `git clone` und ein `einrichten.sh`.
 
-`/etc/cron.daily/samp-sicherung`, ausführbar machen:
+`/etc/cron.daily/samp-sicherung`:
 
 ```bash
 #!/bin/sh
@@ -655,31 +516,155 @@ chmod 700 /etc/cron.daily/samp-sicherung
 chmod 600 /etc/cron.daily/samp-sicherung   # das Passwort steht drin
 ```
 
-Sauberer als das Passwort in der Datei: eine `~/.my.cnf` mit `chmod 600` und
-`-p` weglassen.
+Sauberer als das Passwort in der Datei: eine `~/.my.cnf` mit `chmod 600`.
 
-**Und dann spiel eine Sicherung einmal zurück.** Eine ungetestete Sicherung
-ist keine.
+**Und dann spiel eine Sicherung einmal zurück.** Eine ungetestete Sicherung ist
+keine. netcups **Snapshots** im SCP sind eine gute Ergänzung, aber kein Ersatz:
+sie liegen auf derselben Infrastruktur.
+
+## 20. Für die Spieler
+
+**Jeder Spieler braucht den sampvoice-Client**, sonst hört und spricht niemand:
+
+<https://github.com/AmyrAhmady/sampvoice/releases>
+
+Ohne Client läuft der Server normal weiter — das Voice-Modul erkennt das und
+schaltet für diesen Spieler ab. Verbinden können sich Clients der Versionen
+**0.3.7 (4057)** und **0.3.DL (4062)**; andere weist open.mp ab.
 
 ---
 
-## Checkliste
+# Anhang A — Was im Log auftaucht und kein Fehler deiner Installation ist
+
+**1. Eine Tabelle fehlt im Schema.**
+`Table 'samp1.server_firmfahrzeuge' doesn't exist` — Fehler 1146.
+`script.pwn:11116` liest sie, `Datenbank/samp_server.sql` legt sie nicht an.
+Folge: Firmenfahrzeuge werden nicht geladen. Der Rest läuft.
+
+**2. Eine abgeschnittene Abfrage.** `script.pwn:80063` endet mitten im `WHERE`
+→ Fehler 1064. Feuert einmal beim Start und tut nichts.
+
+**3. Die sieben Bots verbinden sich nicht.** `Bot executable not found: samp-npc`.
+`ConnectNPC()` braucht ein externes Programm, und die Linux-Veröffentlichung von
+open.mp liefert keins mit. Entweder die Linux-`samp-npc` aus dem alten
+SA-MP-Serverpaket dazulegen — oder auf open.mps eigene NPC-Funktionen umstellen,
+die brauchen kein externes Programm.
+
+**4. Streamer-Version passt nicht zum Include.** Plugin 2.6.1, Include erwartet
+2.9.6. Entweder `plugins/streamer.*` heben oder das Include zurücknehmen.
+
+**5. Zwei Timer zeigen ins Leere.** `SetTimer("bot", ...)` in `script.pwn:11133`
+und `RotateFerrisWheel` — von letzterem gibt es nur ein `forward` in Zeile 588.
+
+**6. Die 346 Warnungen beim Übersetzen.** Sie kommen vom Compiler, nicht vom
+Code: 3.10.10 meldet null, 3.10.11 meldet 346 bei identischem Quelltext.
+
+| Anzahl | Warnung | |
+|---:|---|---|
+| 288 | 240 — assigned value is never used | Gibt es in 3.10.10 gar nicht |
+| 44 | 213 — tag mismatch | `switch` über getypte Werte mit nackten Zahlen |
+| 13 | 204 — symbol assigned a value that is never used | Tote Zuweisungen |
+| 1 | 225 — unreachable code | |
+
+Die 44 Tag-Warnungen sind geprüft: alle Zahlen treffen die richtige Konstante
+(`case 4:` = `FIGHT_STYLE_NORMAL` = 4 und so weiter). Kein Zahlendreher.
+**346 Hinweise, kein Problem.**
+
+---
+
+# Anhang B — Wenn etwas klemmt
+
+| Lage | Weg |
+|---|---|
+| Aus SSH ausgesperrt | **Fernwartungskonsole** im SCP |
+| Härtung wirkt nicht | `sshd -T` zeigt, was gilt. Datei muss `00-` heißen — erster Treffer gewinnt |
+| Server bootet nicht | Fernwartungskonsole; danach **Rescue-System** im SCP |
+| SCP-Passwort weg | Zurücksetzen im **CCP**, nicht im SCP |
+| Nach Image-Wechsel kein Boot | Prüfen, ob **UEFI-Boot** zum Image passt |
+| `./omp-server: No such file or directory` | Die vier `lib32`-Pakete fehlen (Schritt 9) |
+| Jeder `Sv*`-Aufruf: Laufzeitfehler 19 | sampvoice liegt in `plugins/` statt `components/` |
+| Voiceport bei jedem Start anders | `sampvoice.port` fehlt in `config.json` |
+| `cannot read from file: "open.mp"` | Beide `-i`-Pfade fehlen, oder es lief der 3.2er-Compiler |
+| `cannot read from file: "voice_config.inc"` | Die Modulordner fehlen im Suchpfad (Schritt 15) |
+
+---
+
+# Anhang C — Warum netcup
+
+Stand August 2026, alle Preise inkl. 19 % MwSt.:
+
+| Anbieter | Modell | Dedizierte Kerne | RAM | NVMe | pro Monat |
+|---|---|---|---|---|---|
+| **netcup** | RS 1000 G12 | **4** | 8 GB ECC | 256 GB | **12,79 €** / **17,70 €** |
+| Hetzner | CCX13 | 2 | 8 GB | 80 GB | ≈ 51,16 € |
+| Hetzner | CCX23 | 4 | 16 GB | 160 GB | ≈ 102,33 € |
+
+Doppelt so viele Kerne wie das Hetzner-Gegenstück, dreimal so viel Platte, zu
+einem Drittel des Preises. DDoS-Schutz bis 2 Tbit/s ist inklusive.
+
+**Das hat sich am 15. Juni 2026 geändert:** Hetzner hat die dedizierte CCX-Linie
+rund verdreifacht. Ältere Empfehlungen für Hetzner CCX rechnen mit alten Preisen.
+
+**Was die Hardware bestimmt:** Die Pawn-Hauptschleife läuft auf genau einem Kern.
+Jedes Sync-Paket, jeder Timer, jedes `OnPlayerUpdate` geht durch diesen einen
+Thread. Gemessen bei vollem Gamemode, angeschlossener Datenbank und
+`max_players: 500`:
+
+| | |
+|---|---|
+| Arbeitsspeicher, Spitze | **120 MB** |
+| Prozessorlast im Leerlauf | **2,4 % eines Kerns** |
+| Threads | 7 |
+| Datenbank frisch | 0,2 MB |
+
+Arbeitsspeicher ist nicht dein Engpass. **Größer bestellen bringt nichts** —
+mehr Kerne machen die Schleife nicht schneller, und der Takt ist über die ganze
+Reihe derselbe.
+
+Der EPYC 9645 ist die dichte Zen-5c-Variante: 96 Kerne bei 2,3 GHz Basis und
+3,7 GHz Boost. Dichte Kerne tauschen Takt gegen Anzahl. Für diesen Gamemode
+reicht es klar — unter 500 echten Spielern ist es allerdings nicht gemessen.
+
+---
+
+# Checkliste
 
 ```
-[ ] Server bestellt: Ubuntu 24.04 LTS, dedizierte vCPU, DDoS-Schutz
-[ ] apt install libc6-i386 lib32stdc++6 lib32gcc-s1 lib32atomic1
-[ ] apt install git curl unzip mariadb-server ufw
+VORBEREITEN
+[ ] SSH-Schluessel erzeugt (ssh-keygen -t ed25519)
+[ ] RS 1000 G12 bestellt, Standort Nuernberg
+[ ] Beide Mails da: CCP und SCP
+
+SCP
+[ ] SSH-Schluessel unter Optionen hinterlegt
+[ ] Betriebssystem-Optimierung = Linux
+[ ] Autostart = an
+[ ] UEFI-Boot = an          <- VOR der Installation
+[ ] Ubuntu 24.04.4 UEFI amd64 Minimal installiert, mit SSH-Schluessel
+[ ] Login per Schluessel klappt
+
+SYSTEM
+[ ] PasswordAuthentication no, im zweiten Fenster geprueft
+[ ] Zeitzone Europe/Berlin, apt upgrade, unattended-upgrades
+[ ] libc6-i386 lib32stdc++6 lib32gcc-s1 lib32atomic1
+[ ] git curl unzip mariadb-server ufw
+[ ] Benutzer omp angelegt
+
+DATENBANK
 [ ] mariadb-secure-installation gelaufen
-[ ] Datenbank samp1 (latin1) + eigener Benutzer, kein root
+[ ] Datenbank samp1 (latin1) + Benutzer samp, kein root
+
+GAMESERVER
 [ ] Repository geklont, Branch ausgecheckt
 [ ] ./server-test/einrichten.sh gelaufen
-[ ] gamemodes/config.inc ausgefüllt
+[ ] gamemodes/config.inc ausgefuellt
 [ ] config.json: name, port, sampvoice.port, rcon
-[ ] server.cfg umbenannt, falls vorhanden
-[ ] Drei SQL-Dateien in der richtigen Reihenfolge -> 38 Tabellen
-[ ] Gamemode übersetzt (aus dem Wurzelverzeichnis!)
+[ ] Drei SQL-Dateien der Reihe nach -> 38 Tabellen
+[ ] Neu uebersetzt nach der config.inc
+
+BETRIEB
 [ ] ufw: 22/tcp, 7777/udp, 7778/udp
 [ ] omp.service eingerichtet und aktiviert
 [ ] Log zeigt den festen Voiceport, nicht irgendeinen
-[ ] Sicherung eingerichtet UND einmal zurückgespielt
+[ ] Sicherung eingerichtet UND einmal zurueckgespielt
 ```
