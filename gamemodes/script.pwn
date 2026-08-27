@@ -80067,7 +80067,14 @@ public sql_array2(const index[],sqlresultid,extraid,SconnectionHandle)
 				if(HausInfo[haus+1][haus_Owned] == 1)
 			    {
 			    	HausInfo[haus+1][haus_pickup] = CreateDynamicPickup(Server_Haus_Besetzt_Pickup,1,HausInfo[haus+1][haus_x],HausInfo[haus+1][haus_y],HausInfo[haus+1][haus_z],0);
-                    mysql_function_query(MySQL_R394,"SELECT * FROM "#SERVERTAG"_account_main WHERE",true,"sql_array2","siii","SELECT * FROM "#SERVERTAG"_account_main WHERE",a_script_hauszeit,haus+1,MySQL_R394);
+                    // Frueher stand hier "SELECT * FROM "#SERVERTAG"_account_main WHERE"
+                    // - eine Tabelle aus einem anderen Script, dazu ohne Bedingung
+                    // hinter dem WHERE. Die Abfrage war damit syntaktisch ungueltig
+                    // und die Hausraeumung hat nie stattgefunden. Der Spielertisch
+                    // heisst hier spieler, und gesucht wird gezielt der Besitzer
+                    // dieses Hauses statt einer beliebigen Zeile.
+                    mysql_format(MySQL_R394,query,sizeof(query),"SELECT Name,PropertyClearTime FROM spieler WHERE Name='%e'",HausInfo[haus+1][haus_besitzer]);
+                    mysql_function_query(MySQL_R394,query,true,"sql_array2","siii",query,a_script_hauszeit,haus+1,MySQL_R394);
 				}
 			    else if(HausInfo[haus+1][haus_Owned] == 0)
 			    {
@@ -80370,7 +80377,12 @@ public sql_array2(const index[],sqlresultid,extraid,SconnectionHandle)
 			cache_get_field_content(0,"Name",ppname);
 			cache_get_field_content(0,"PropertyClearTime",result);
 			zeit = strval(result);
-			if(!strcmp(ppname,HausInfo[extraid][haus_besitzer],true) && gettime() > zeit)
+			// zeit > 0 ist Absicht: PropertyClearTime wird erst beim Einloggen
+			// gesetzt. Bei einem Konto, das seither nie eingeloggt war, steht 0
+			// darin - und 0 ist kleiner als jede Uhrzeit. Ohne diese Pruefung
+			// wuerde so ein Besitzer sein Haus sofort verlieren, obwohl die
+			// zwei Wochen nie angelaufen sind.
+			if(zeit > 0 && !strcmp(ppname,HausInfo[extraid][haus_besitzer],true) && gettime() > zeit)
 			{
 		    DestroyDynamicPickup(HausInfo[extraid][haus_pickup]);
 			HausInfo[extraid][haus_Owned] = 0;
