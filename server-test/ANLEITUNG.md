@@ -581,7 +581,7 @@ Loading plugin: mysql
 [Voice] Sprachsystem bereit - 20000 Bit/s, Proximity bis 30.0 Einheiten.
 [IL]: Der Server hat erfolgreich der Verbindung zum MySQL Server hergstellt.
 [IL]: Das Script wurde gesteartet und ist nun Online.
-Script: Es wurden erfolgreich 100 Objekte geladen!
+Script: Es wurden erfolgreich 5094 Objekte geladen!
 Legacy Network started on port 7777
 ```
 
@@ -644,8 +644,25 @@ open.mp liefert keins mit. Entweder die Linux-`samp-npc` aus dem alten
 SA-MP-Serverpaket dazulegen — oder auf open.mps eigene NPC-Funktionen umstellen,
 die brauchen kein externes Programm.
 
-**4. Streamer-Version passt nicht zum Include.** Plugin 2.6.1, Include erwartet
-2.9.6. Entweder `plugins/streamer.*` heben oder das Include zurücknehmen.
+**4. ~~Streamer-Version passt nicht zum Include.~~ Behoben.** Bis August 2026
+war das Include 2.9.6 und das Plugin 2.6.1 — eingeführt bei der
+open.mp-Portierung, die nur das Include tauschte. `CreateDynamicObject` übergibt
+im 2.9.6-Include 14 Parameter, das 2.6.1-Plugin kennt 11 und lehnte **jeden**
+Aufruf ab:
+
+```
+*** CreateDynamicObject: Expecting 11 parameter(s), but found 14
+```
+
+Gemessen an einem echten Serverlauf:
+
+| | Parameterfehler | geladene Objekte |
+|---|---:|---:|
+| Plugin 2.6.1 | 5012 | 100 |
+| Plugin 2.9.6 | **0** | **5094** |
+
+Die Map war also praktisch leer. Seit `plugins/streamer.*` auf 2.9.6 steht,
+passt es zusammen. Wer einen älteren Stand geklont hat: neu ziehen.
 
 **5. Zwei Timer zeigen ins Leere.** `SetTimer("bot", ...)` in `script.pwn:11133`
 und `RotateFerrisWheel` — von letzterem gibt es nur ein `forward` in Zeile 588.
@@ -682,6 +699,8 @@ Die 44 Tag-Warnungen sind geprüft: alle Zahlen treffen die richtige Konstante
 | `cannot read from file: "open.mp"` | Beide `-i`-Pfade fehlen, oder es lief der 3.2er-Compiler |
 | `cannot read from file: "voice_config.inc"` | Die Modulordner fehlen im Suchpfad (Schritt 15) |
 | `MySQL ERROR! Der Server wird jetzt heruntergefahren` | Die AMX wurde ohne echte `config.inc` gebaut. Auf dem Server neu übersetzen (Schritt 15) |
+| `CreateDynamicObject: Expecting 11 parameter(s), but found 14` | Streamer-Plugin ist zu alt. `plugins/streamer.*` muss 2.9.6 sein — neu ziehen |
+| Map ist leer, nur ~100 Objekte laden | Dasselbe. Bei 2.9.6 sind es 5094 |
 | `scp` sagt `Permission denied (publickey)` | Der Befehl wurde auf dem **Server** getippt statt auf dem PC. `scp` kopiert von der Maschine, auf der du ihn eingibst |
 | `/etc/systemd/system/omp.service: No such file or directory` | Der Pfad wurde als Befehl eingegeben. Die Datei muss erst angelegt werden — `cat > … <<'EOF'` (Schritt 17) |
 
