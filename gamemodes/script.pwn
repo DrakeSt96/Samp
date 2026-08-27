@@ -11133,7 +11133,15 @@ public OnGameModeInit()
 	SetTimer("bot",1000,false);
 	SetTimer("SaveAllAccounts",900000,true);
 	SetTimer("DB_SAVE",900000,true);
-	SetTimer("ServerNamenChangerSystemNeu",3000,true);
+	// Die drei Werte aendern sich nie und gehoeren deshalb hierher, nicht in
+	// den Timer. Frueher standen sie in ServerNamenChangerSystemNeu() hinter
+	// einer if(st == 0)-Abfrage, die sie einmalig setzen sollte - st war aber
+	// lokal und damit bei jedem Aufruf wieder 0, sodass sie alle 3 Sekunden
+	// neu gesetzt wurden. open.mp schrieb dafuer je drei Warnzeilen ins Log.
+	SendRconCommand("gamemodetext Reallife");
+	SendRconCommand("mapname Los Santos");
+	SendRconCommand("maxnpc 65");
+	SetTimer("ServerNamenChangerSystemNeu",30000,true);
 	
 	Friedhofszone = GangZoneCreate(805.9981,-1055.6499,952.6713,-1129.9589);
 	DriveinMenu[0] = CreateMenu("~r~Drivein",1,50.0,180.0,200.0,200.0);
@@ -53313,7 +53321,7 @@ public OnObjectMoved(objectid)
 forward ServerNamenChangerSystemNeu();
 public ServerNamenChangerSystemNeu()
 {
-	new SVN = random(4),st;
+	new SVN = random(4);
 	switch(SVN)
 	{
 	    case 0: SendRconCommand("hostname «| "ServerNameOhneFarbe" |»");
@@ -53321,13 +53329,6 @@ public ServerNamenChangerSystemNeu()
 	    case 2: SendRconCommand("hostname «| Wir suchen derzeit Leader! |»");
 	    case 3: SendRconCommand("hostname «| Ein Brand neuer Server! |»");
 	    case 4: SendRconCommand("hostname «| "ServerNameOhneFarbe" |»");
-	}
-	if(st == 0){
-	    st = 1;
-		SendRconCommand("gamemodetext Reallife");
-		SendRconCommand("mapname Los Santos");
-		SendRconCommand("maxnpc 65");
-		//SendRconCommand("password require");
 	}
 	return 1;
 }
