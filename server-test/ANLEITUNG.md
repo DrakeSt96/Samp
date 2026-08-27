@@ -456,6 +456,19 @@ scp -r "C:\Pfad\zum\Ordner" root@SERVER-IP:/home/omp/samp/
 scp root@SERVER-IP:/var/backups/samp/samp1-2026-08-27.sql.gz .
 ```
 
+> **In ein neues PowerShell-Fenster auf dem PC**, nicht in die laufende
+> SSH-Sitzung. `scp` kopiert von der Maschine, auf der du ihn tippst. Woran du
+> siehst, wo du gerade bist:
+>
+> | Eingabeaufforderung | Maschine |
+> |---|---|
+> | `PS C:\Users\DEINNAME>` | dein PC |
+> | `root@v2202...:~#` | der Server |
+>
+> Im Server getippt, sucht er `C:\Users\...` bei sich selbst, findet nichts und
+> will sich bei sich selbst anmelden — dafuer hat er keinen Schluessel, daher
+> `Permission denied (publickey)`.
+
 Danach auf dem Server die Besitzrechte richten:
 
 ```bash
@@ -658,6 +671,7 @@ Die 44 Tag-Warnungen sind geprüft: alle Zahlen treffen die richtige Konstante
 | `cannot read from file: "open.mp"` | Beide `-i`-Pfade fehlen, oder es lief der 3.2er-Compiler |
 | `cannot read from file: "voice_config.inc"` | Die Modulordner fehlen im Suchpfad (Schritt 15) |
 | `MySQL ERROR! Der Server wird jetzt heruntergefahren` | Die AMX wurde ohne echte `config.inc` gebaut. Auf dem Server neu übersetzen (Schritt 15) |
+| `scp` sagt `Permission denied (publickey)` | Der Befehl wurde auf dem **Server** getippt statt auf dem PC. `scp` kopiert von der Maschine, auf der du ihn eingibst |
 
 ---
 
