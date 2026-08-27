@@ -62,6 +62,14 @@ Get-ChildItem (Join-Path $quelle "components") -Filter *.dll |
     Copy-Item -Destination (Join-Path $Wurzel "components") -Force
 $n = (Get-ChildItem (Join-Path $Wurzel "components") -Filter *.dll).Count
 Ok "omp-server.exe und $n Komponenten installiert"
+# Der Pawn-Compiler aus derselben Veroeffentlichung. Der in pawno\ ist
+# 3.2.3664 von 2011 und kann die open.mp-Includes nicht uebersetzen:
+# _open_mp.inc benutzt #pragma warning, das kennt erst 3.10.
+$qawno = Join-Path $Wurzel "qawno"
+New-Item -ItemType Directory -Path $qawno -Force | Out-Null
+Copy-Item (Join-Path $quelle "qawno\pawncc.exe") -Destination $qawno -Force
+Copy-Item (Join-Path $quelle "qawno\pawnc.dll")  -Destination $qawno -Force
+Ok "qawno\pawncc.exe installiert (3.10.11)"
 
 # --- 2 ---------------------------------------------------------------------
 Schritt 2 "Voice-Plugin holen ($SvVersion)"
@@ -110,17 +118,32 @@ if (Test-Path (Join-Path $Wurzel "server.cfg")) {
 
 # --- 4 ---------------------------------------------------------------------
 Schritt 4 "Gamemode uebersetzen"
-$pawncc = Join-Path $Wurzel "pawno\pawncc.exe"
-if (Test-Path $pawncc) {
-    $inc1 = Join-Path $Wurzel "pawno\include"
-    $inc2 = Join-Path $Wurzel "pawno\include\Gloabe Includes"
-    $aus  = Join-Path $Wurzel "gamemodes\script.amx"
-    & $pawncc (Join-Path $Wurzel "gamemodes\script.pwn") "-i$inc1" "-i$inc2" "-o$aus" 2>&1 |
-        Where-Object { $_ -and $_ -notmatch "Pawn compiler|Copyright" } | ForEach-Object { Write-Host "      $_" }
-    if (-not (Test-Path $aus) -or (Get-Item $aus).Length -eq 0) { Fehler "Uebersetzen fehlgeschlagen" }
-    Ok "gamemodes\script.amx ($((Get-Item $aus).Length) Bytes)"
-} else {
-    Warnung "pawno\pawncc.exe nicht gefunden - Gamemode nicht uebersetzt."
+# NICHT pawno\pawncc.exe verwenden - das ist 3.2.3664 und scheitert an den
+# open.mp-Includes. Nur der aus der open.mp-Veroeffentlichung taugt.
+$pawncc = Join-Path $Wurzel "qawno\pawncc.exe"
+if (-not (Test-Path $pawncc)) { Fehler "qawno\pawncc.exe fehlt - Schritt 1 ist nicht durchgelaufen." }
+$inc1 = Join-Path $Wurzel "pawno\include"
+$inc2 = Join-Path $Wurzel "pawno\include\Gloabe Includes"
+$aus  = Join-Path $Wurzel "gamemodes\script.amx"
+$log  = Join-Path $Wurzel "uebersetzen.log"
+Remove-Item $aus -EA SilentlyContinue
+# Volle Ausgabe in die Datei, auf den Bildschirm nur Fehler und eine
+# Zusammenfassung. Warnungen werden nicht unterdrueckt, nur gebuendelt.
+& $pawncc (Join-Path $Wurzel "gamemodes\script.pwn") "-i$inc1" "-i$inc2" "-o$aus" 2>&1 |
+    Out-File -FilePath $log -Encoding utf8
+$zeilen  = Get-Content $log -EA SilentlyContinue
+$fehler  = @($zeilen | Where-Object { $_ -match ": (fatal )?error \d+" })
+if ($fehler.Count -gt 0) {
+    $fehler | Select-Object -First 20 | ForEach-Object { Write-Host "      $_" }
+    Fehler "Uebersetzen fehlgeschlagen. Volle Ausgabe: uebersetzen.log"
+}
+if (-not (Test-Path $aus) -or (Get-Item $aus).Length -eq 0) {
+    Fehler "Keine script.amx erzeugt. Siehe uebersetzen.log"
+}
+$warn = @($zeilen | Where-Object { $_ -match ": warning \d+" }).Count
+Ok "gamemodes\script.amx ($((Get-Item $aus).Length) Bytes), 0 Fehler"
+if ($warn -gt 0) {
+    Warnung "$warn Warnungen - Bestand, kein Hindernis. Nachlesen: uebersetzen.log"
 }
 
 # --- 5 ---------------------------------------------------------------------

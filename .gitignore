@@ -31,3 +31,7 @@ log.txt
 mysql_log.txt
 svlog.txt
 sampvoice*.log
+
+# Pawn-Compiler aus der open.mp-Veroeffentlichung (nicht ins Repo)
+qawno/
+uebersetzen.log

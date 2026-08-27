@@ -368,27 +368,58 @@ beiden Funktionen bleiben still.
 
 ## 7. Gamemode übersetzen
 
-```bash
-./server-test/einrichten.sh
-```
-
-macht das mit. Von Hand:
+`./server-test/einrichten.sh` macht das mit — es holt den Compiler aus
+derselben open.mp-Veröffentlichung wie den Server. Von Hand:
 
 ```bash
 cd ~/samp                     # WICHTIG: aus dem Wurzelverzeichnis, nicht aus gamemodes/
-./pawncc gamemodes/script.pwn \
+LD_LIBRARY_PATH=qawno qawno/pawncc gamemodes/script.pwn \
     -i"pawno/include" -i"pawno/include/Gloabe Includes" \
     -o"gamemodes/script.amx"
 ```
 
-> **Aus dem Wurzelverzeichnis, nicht aus `gamemodes/`.** Der Compiler löst
-> `#include "..."` relativ zum Aufrufort auf. Startest du ihn in `gamemodes/`,
-> bekommst du
-> `fatal error 100: cannot read from file: "voice_config.inc"`.
+Unter Windows, im Wurzelverzeichnis:
 
-Ergebnis: `gamemodes/script.amx`, rund 10 MB, **null Fehler, null Warnungen**.
+```powershell
+.\qawno\pawncc.exe gamemodes\script.pwn `
+    -i"pawno\include" -i"pawno\include\Gloabe Includes" `
+    -o"gamemodes\script.amx"
+```
 
----
+Ergebnis: `gamemodes/script.amx`, rund 10 MB, **0 Fehler**. Die rund 346
+Warnungen sind Bestand und kein Hindernis; die volle Ausgabe legt das Skript
+in `uebersetzen.log` ab.
+
+### Zwei Fallen, und beide kosten Stunden
+
+**1. Nicht `pawno\pawno.exe` benutzen.** Der Compiler in diesem Ordner ist
+`pawnc.dll` **3.2.3664 von 2011**. Der Gamemode braucht 3.10. Wer es trotzdem
+versucht, sieht zuerst
+
+```
+ScriptInc.inc(10) : fatal error 100: cannot read from file: "open.mp"
+Pawn compiler 3.2.3664
+```
+
+und nach dem Beheben des Pfades den nächsten Fehler, weil `_open_mp.inc:265`
+`#pragma warning push` benutzt — eine Anweisung, die es in 3.2 noch nicht gibt.
+
+Der richtige Compiler ist **3.10.11** und liegt der open.mp-Veröffentlichung
+unter `qawno/` bei. Beide Einrichtungsskripte legen ihn dorthin. Der Ordner
+`pawno/` bleibt nur noch wegen der Includes darin liegen — dort steht auch eine
+`LIES_MICH.txt` mit demselben Hinweis.
+
+**2. Aus dem Wurzelverzeichnis übersetzen, nicht aus `gamemodes/`.** Der
+Compiler löst `#include "…"` relativ zum Aufrufort auf. Startest du ihn in
+`gamemodes/`, bekommst du
+
+```
+modules/voice/voice.inc(20) : fatal error 100: cannot read from file: "voice_config.inc"
+```
+
+**Beide Include-Pfade werden gebraucht.** `open.mp.inc` liegt im Unterordner
+`Gloabe Includes`, und den durchsucht der Compiler nicht von selbst — daher die
+zwei `-i`-Angaben. Genau das fehlt, wenn man `pawno.exe` einfach doppelklickt.
 
 ## 8. Firewall
 

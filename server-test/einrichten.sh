@@ -55,6 +55,13 @@ cp "$QUELLE/omp-server" .
 chmod +x omp-server
 mkdir -p components && cp "$QUELLE/components/"*.so components/
 ok "omp-server und $(ls components/*.so | wc -l) Komponenten installiert"
+# Der Pawn-Compiler aus derselben Veroeffentlichung. Der im Ordner pawno/ ist
+# 3.2.3664 von 2011 und kann die open.mp-Includes nicht uebersetzen -
+# _open_mp.inc benutzt #pragma warning, das kennt erst 3.10.
+mkdir -p qawno
+cp "$QUELLE/qawno/pawncc" "$QUELLE/qawno/libpawnc.so" qawno/
+chmod +x qawno/pawncc
+ok "qawno/pawncc installiert ($(LD_LIBRARY_PATH=qawno qawno/pawncc 2>&1 | head -1 | grep -oE '3\.[0-9.]+'))"
 
 # --- 2 ---------------------------------------------------------------------
 schritt 2 "Voice-Plugin holen (${SV_VERSION})"
@@ -100,19 +107,28 @@ fi
 
 # --- 4 ---------------------------------------------------------------------
 schritt 4 "Gamemode uebersetzen"
-PAWNCC=""
-for k in ./pawncc pawno/pawncc pawno/pawncc.exe; do
-  [ -x "$k" ] && PAWNCC="$k" && break
-done
-if [ -n "$PAWNCC" ]; then
-  "$PAWNCC" gamemodes/script.pwn \
-    -i"pawno/include" -i"pawno/include/Gloabe Includes" \
-    -o"gamemodes/script.amx" 2>&1 | grep -vE "^$|Pawn compiler|Copyright" || true
-  [ -s gamemodes/script.amx ] || fehler "Uebersetzen fehlgeschlagen"
-  ok "gamemodes/script.amx ($(stat -c%s gamemodes/script.amx) Bytes)"
-else
-  warn "Kein Pawn-Compiler fuer Linux gefunden."
-  warn "Unter Windows uebersetzt pawno/pawncc.exe, sonst script.amx mitbringen."
+# NICHT pawno/pawncc verwenden - das ist 3.2.3664 und scheitert an den
+# open.mp-Includes. Nur der aus der open.mp-Veroeffentlichung taugt.
+if [ ! -x qawno/pawncc ]; then
+  fehler "qawno/pawncc fehlt - Schritt 1 ist nicht durchgelaufen."
+fi
+# Die volle Ausgabe kommt in eine Datei, auf den Bildschirm nur Fehler und
+# eine Zusammenfassung. Warnungen werden nicht unterdrueckt, nur gebuendelt -
+# wer sie sehen will, liest uebersetzen.log.
+rm -f gamemodes/script.amx
+LD_LIBRARY_PATH=qawno qawno/pawncc gamemodes/script.pwn \
+  -i"pawno/include" -i"pawno/include/Gloabe Includes" \
+  -o"gamemodes/script.amx" > uebersetzen.log 2>&1 || true
+FEHLERZEILEN="$(grep -E ": (fatal )?error [0-9]+" uebersetzen.log || true)"
+if [ -n "$FEHLERZEILEN" ]; then
+  printf '%s\n' "$FEHLERZEILEN" | head -20 | sed 's/^/      /'
+  fehler "Uebersetzen fehlgeschlagen. Volle Ausgabe: uebersetzen.log"
+fi
+[ -s gamemodes/script.amx ] || fehler "Keine script.amx erzeugt. Siehe uebersetzen.log"
+WARNUNGEN="$(grep -cE ": warning [0-9]+" uebersetzen.log || true)"
+ok "gamemodes/script.amx ($(stat -c%s gamemodes/script.amx) Bytes), 0 Fehler"
+if [ "${WARNUNGEN:-0}" -gt 0 ]; then
+  warn "$WARNUNGEN Warnungen - Bestand, kein Hindernis. Nachlesen: uebersetzen.log"
 fi
 
 # --- 5 ---------------------------------------------------------------------

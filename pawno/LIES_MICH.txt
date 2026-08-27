@@ -1,0 +1,45 @@
+DIESER COMPILER IST ZU ALT - NICHT BENUTZEN
+==========================================
+
+pawno.exe und pawncc.exe in diesem Ordner benutzen pawnc.dll in der
+Version 3.2.3664 von 2011. Der Gamemode braucht 3.10.
+
+Wer den Gamemode mit pawno.exe uebersetzt, bekommt zuerst
+
+    ScriptInc.inc(10) : fatal error 100: cannot read from file: "open.mp"
+
+und nach dem Beheben des Include-Pfades den naechsten Fehler, weil
+_open_mp.inc in Zeile 265 "#pragma warning push" benutzt - eine
+Anweisung, die es in 3.2 noch nicht gibt.
+
+
+SO GEHT ES RICHTIG
+------------------
+
+Der passende Compiler liegt der open.mp-Veroeffentlichung bei und wird
+vom Einrichtungsskript automatisch nach qawno\ gelegt:
+
+    Windows:   .\server-test\einrichten.ps1
+    Linux:     ./server-test/einrichten.sh
+
+Von Hand, aus dem WURZELVERZEICHNIS des Repositories (nicht aus
+gamemodes\ heraus - der Compiler loest #include relativ zum Aufrufort
+auf):
+
+    Windows:
+        .\qawno\pawncc.exe gamemodes\script.pwn ^
+            -i"pawno\include" -i"pawno\include\Gloabe Includes" ^
+            -o"gamemodes\script.amx"
+
+    Linux:
+        LD_LIBRARY_PATH=qawno qawno/pawncc gamemodes/script.pwn \
+            -i"pawno/include" -i"pawno/include/Gloabe Includes" \
+            -o"gamemodes/script.amx"
+
+Beide Include-Pfade werden gebraucht. open.mp.inc liegt im Unterordner
+"Gloabe Includes", und den durchsucht der Compiler nicht von selbst.
+
+Ergebnis: gamemodes/script.amx, rund 10 MB, 0 Fehler.
+Die rund 346 Warnungen sind Bestand und kein Hindernis.
+
+Der Ordner pawno\ bleibt nur wegen der Includes darin liegen.
