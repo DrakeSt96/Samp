@@ -84,12 +84,24 @@ if (-not (Test-Path $cfg)) {
     Warnung "RCON-Passwort und MySQL-Zugang MUESSEN noch eingetragen werden."
 } else { Ok "config.json vorhanden" }
 
-if ((Get-Content $cfg -Raw) -match '"sampvoice"') {
-    Ok "sampvoice steht in legacy_plugins"
+$cfgRoh = (Get-Content $cfg -Raw) -replace "`r?`n", ""
+if ($cfgRoh -match '"legacy_plugins"\s*:\s*\[([^\]]*)\]' -and $Matches[1] -match 'sampvoice') {
+    Fehler @'
+sampvoice steht in legacy_plugins in der config.json.
+      Das ist falsch: sampvoice ist eine KOMPONENTE, kein Plugin. Der Server
+      ueberspringt es dort und alle Sv*-Befehle im Script schlagen fehl.
+      Bitte den Eintrag "sampvoice" aus legacy_plugins entfernen.
+'@
 } else {
-    Warnung 'sampvoice fehlt in config.json. Trage es in "legacy_plugins" ein:'
-    Warnung '    "legacy_plugins": [ "crashdetect", "streamer", "mysql", "sscanf", "sampvoice" ]'
-    Warnung '    (sampvoice muss NACH den anderen stehen)'
+    Ok "legacy_plugins ist korrekt (ohne sampvoice)"
+}
+if ($cfgRoh -match '"sampvoice"\s*:\s*\{[^}]*"port"\s*:\s*[1-9]') {
+    Ok "sampvoice.port ist fest gesetzt"
+} else {
+    Warnung 'In config.json fehlt ein fester Voiceport. Ohne ihn sucht sich'
+    Warnung 'sampvoice bei JEDEM Start einen zufaelligen Port - der laesst sich'
+    Warnung 'in keiner Firewall freigeben. Bitte ergaenzen:'
+    Warnung '    "sampvoice": { "port": 7778, "threads": 2, "updaterate": 10 },'
 }
 if (Test-Path (Join-Path $Wurzel "server.cfg")) {
     Warnung "Eine server.cfg liegt hier. open.mp liest sie NACH config.json und"

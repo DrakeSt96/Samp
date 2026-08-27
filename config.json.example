@@ -13,6 +13,10 @@
 // Typen sind streng: 1000 und 1000.0 sind nicht dasselbe. Ein falscher Typ
 // wird kommentarlos auf den Standardwert zurueckgesetzt, ein Syntaxfehler
 // verwirft die ganze Datei zugunsten der Werkseinstellungen.
+//
+// WICHTIG: "sampvoice.port" MUSS gesetzt sein. Fehlt der Wert, bindet
+// sampvoice sich an einen zufaelligen Port, der sich bei jedem Neustart
+// aendert - dann laesst er sich in keiner Firewall freigeben.
 {
     "name": "« Lade Script! »",
     "language": "German",
@@ -61,6 +65,11 @@
         "log_connection_messages": true,
         "log_queries": false,
         "log_cookies": false
+    },
+    "sampvoice": {
+        "port": 7778,
+        "threads": 2,
+        "updaterate": 10
     },
     "artwork": {
         "enable": false

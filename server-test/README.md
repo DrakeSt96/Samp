@@ -5,6 +5,11 @@ aktuellen Stand des Gamemodes und dem Voicesystem.
 
 Ein Befehl, dann fehlt nur noch die Datenbank.
 
+> **Du mietest gerade einen Server?** Dann nimm nicht diese Seite, sondern
+> **[ANLEITUNG.md](ANLEITUNG.md)** — die geht von der Bestellung beim Hoster
+> bis zum ersten Spieler durch: Betriebssystem, Hardware, 32-Bit-Bibliotheken,
+> MariaDB, Firewall, systemd-Dienst, Sicherung.
+
 ```powershell
 # Windows, in PowerShell im Repository-Ordner
 .\server-test\einrichten.ps1
@@ -68,6 +73,19 @@ Laufzeitfehler 19, „File or function is not found", im Sekundentakt.
 Das Skript legt es richtig ab und weigert sich zu starten, wenn `sampvoice`
 fälschlich in `legacy_plugins` steht.
 
+## Der Voiceport muss fest stehen
+
+Der zweitteuerste Fehler. Fehlt `sampvoice.port` in der `config.json`, bindet
+sich das Voiceteil an einen **zufälligen** Port, der sich bei jedem Neustart
+ändert — im ersten Testlauf war es 40283. In keiner Firewall freizugeben, und
+niemand hört etwas.
+
+```jsonc
+"sampvoice": { "port": 7778, "threads": 2, "updaterate": 10 },
+```
+
+Steht in `config.json.example` schon drin; das Skript warnt, wenn er fehlt.
+
 ## Für die Spieler
 
 Der Server allein reicht nicht: **jeder Spieler braucht den sampvoice-Client**,
@@ -81,41 +99,59 @@ schaltet für diesen Spieler ab.
 
 ## Was beim Testlauf herauskam
 
-Der Ablauf ist auf Linux einmal komplett durchgespielt worden. Ergebnis:
-
-**Läuft:**
+Inzwischen ist der Ablauf mit **echter Datenbank** komplett durchgelaufen —
+MariaDB 10.11, alle drei SQL-Dateien eingespielt, 38 Tabellen:
 
 ```
 Successfully loaded component sampvoice open.mp port (0.0.0.1)
-[sv:dbg:network:bind] : voice server running on port 40283
+[sv:dbg:main:Load] : creating 2 work threads...
+[sv:dbg:network:bind] : voice server running on port 7798
+ >> plugin.mysql: R39-4 successfully loaded.
 [Voice] 32 Funkkanaele bereit (18 Fraktionen, 9 Unternehmen, 4 Parteien, 1 Admin)
 [Voice] Sprachsystem bereit - 20000 Bit/s, Proximity bis 30.0 Einheiten
-Legacy Network started on port 7777
+[IL]: Der Server hat erfolgreich der Verbindung zum MySQL Server hergstellt.
+[IL]: Das Script wurde gesteartet und ist nun Online.
+Script: Es wurden erfolgreich 100 Objekte geladen!
+Legacy Network started on port 7799
 ```
 
 Alle 22 Komponenten laden, alle vier Legacy-Plugins laden, der Gamemode
-übersetzt und startet, **null Laufzeitfehler**. Danach bricht der Start ab,
-weil es hier keine MySQL-Datenbank gibt — das ist das vorgesehene Verhalten
-deines Scripts.
+übersetzt fehlerfrei und **bleibt oben** — der frühere Abbruch kam nur von der
+fehlenden Datenbank.
 
-**Drei Sachen, die dabei aufgefallen sind:**
+**Gemessen dabei** (voller Gamemode, `max_players: 500`, null Spieler):
 
-1. **Streamer-Version passt nicht zum Include.** Das Plugin ist 2.6.1, das
-   Include erwartet 2.9.6 (`Streamer_IncludeFileVersion = 0x296`). Der Server
-   warnt beim Start. Ein Streamer, der nicht zum Include passt, kann sich in
-   Randfällen anders verhalten als erwartet — entweder `plugins/streamer.*`
-   auf 2.9.6 heben oder das Include auf 2.6.1 zurücknehmen.
+| | |
+|---|---|
+| Arbeitsspeicher, Spitze | 120 MB |
+| Prozessorlast im Leerlauf | 2,4 % eines Kerns |
+| Threads | 7 |
+| Offene Sockets | 2 × UDP, **kein TCP** |
 
-2. **Zwei Timer zeigen ins Leere.** `SetTimer("bot", ...)` in `script.pwn:11133`
-   und `RotateFerrisWheel` — von letzterem gibt es nur ein `forward` in
-   Zeile 588, keine Umsetzung. Beide erzeugen beim Start eine Warnung und tun
-   nichts. Harmlos, aber unnötig.
+**Was dabei aufgefallen ist:**
 
-3. **Absturz beim Herunterfahren.** Nachdem das Script wegen der fehlenden
-   Datenbank die Abschaltung ausgelöst hat und alle Plugins sauber entladen
-   waren, endet der Prozess mit einem Speicherzugriffsfehler. Ob das auch bei
-   einem normalen Herunterfahren mit funktionierender Datenbank passiert, ist
-   damit nicht gesagt — beobachten.
+1. **Eine Tabelle fehlt im Schema.** `script.pwn:11116` liest
+   `server_firmfahrzeuge`, `Datenbank/samp_server.sql` legt sie nicht an →
+   Fehler 1146 beim Start, Firmenfahrzeuge werden nicht geladen.
+
+2. **Eine abgeschnittene Abfrage.** `script.pwn:80063` endet mitten im
+   `WHERE` → Fehler 1064. Feuert einmal beim Start und tut nichts.
+
+3. **Die sieben Bots verbinden sich unter Linux nicht.** `ConnectNPC()`
+   braucht ein externes `samp-npc`, und die Linux-Veröffentlichung von open.mp
+   liefert keins mit — im Repository liegt nur `samp-npc.exe` für Windows.
+
+4. **Streamer-Version passt nicht zum Include.** Das Plugin ist 2.6.1, das
+   Include erwartet 2.9.6 (`Streamer_IncludeFileVersion = 0x296`). Entweder
+   `plugins/streamer.*` auf 2.9.6 heben oder das Include zurücknehmen.
+
+5. **Zwei Timer zeigen ins Leere.** `SetTimer("bot", ...)` in
+   `script.pwn:11133` und `RotateFerrisWheel` — von letzterem gibt es nur ein
+   `forward` in Zeile 588, keine Umsetzung.
+
+6. **Absturz beim Herunterfahren.** Tritt weiterhin auf, wenn das Script die
+   Abschaltung selbst auslöst. Beim Beenden per Signal aus dem laufenden
+   Betrieb ist er nicht aufgetreten.
 
 ## Warum die Binärdateien nicht im Repository liegen
 

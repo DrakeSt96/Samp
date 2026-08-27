@@ -75,13 +75,23 @@ if [ ! -f config.json ]; then
 else
   ok "config.json vorhanden"
 fi
-if grep -q '"sampvoice"' config.json; then
+LEGACY_LISTE="$(tr -d '\n' < config.json \
+  | sed -n 's/.*"legacy_plugins"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p')"
+if printf '%s' "$LEGACY_LISTE" | grep -q 'sampvoice'; then
   fehler 'sampvoice steht in legacy_plugins in der config.json.
       Das ist falsch: sampvoice ist eine KOMPONENTE, kein Plugin. Der Server
       ueberspringt es dort und alle Sv*-Befehle im Script schlagen fehl.
       Bitte den Eintrag "sampvoice" aus legacy_plugins entfernen.'
 else
   ok "legacy_plugins ist korrekt (ohne sampvoice)"
+fi
+if tr -d '\n' < config.json | grep -q '"sampvoice"[[:space:]]*:[[:space:]]*{[^}]*"port"[[:space:]]*:[[:space:]]*[1-9]'; then
+  ok "sampvoice.port ist fest gesetzt"
+else
+  warn 'In config.json fehlt ein fester Voiceport. Ohne ihn sucht sich'
+  warn 'sampvoice bei JEDEM Start einen zufaelligen Port - der laesst sich'
+  warn 'in keiner Firewall freigeben. Bitte ergaenzen:'
+  warn '    "sampvoice": { "port": 7778, "threads": 2, "updaterate": 10 },'
 fi
 if [ -f server.cfg ]; then
   warn "Eine server.cfg liegt hier. open.mp liest sie NACH config.json und"
