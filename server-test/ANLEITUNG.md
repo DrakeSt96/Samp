@@ -512,9 +512,10 @@ reines UDP.
 
 ## 17. Als Dienst einrichten
 
-Als `root`, `/etc/systemd/system/omp.service`:
+Als `root` — **komplett einfügen, von `cat` bis `EOF`**:
 
-```ini
+```bash
+cat > /etc/systemd/system/omp.service <<'EOF'
 [Unit]
 Description=open.mp Rollenspielserver
 After=network-online.target mariadb.service
@@ -542,13 +543,23 @@ LimitNOFILE=16384
 
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
 
+`<<'EOF'` heißt: alles bis zur Zeile `EOF` wandert unverändert in die Datei.
+Nach dem Einfügen kommt die Eingabeaufforderung stumm zurück — das ist richtig
+so. Dann prüfen und starten:
+
 ```bash
+systemd-analyze verify /etc/systemd/system/omp.service
 systemctl daemon-reload
 systemctl enable --now omp
 journalctl -u omp -f
 ```
+
+`systemd-analyze verify` darf nichts oder nur Belangloses ausgeben. Im
+`journalctl` läuft das Log live mit; beenden mit `Strg+C`, der Server läuft
+weiter.
 
 `Requires=mariadb.service` ist wichtig: der Gamemode fährt sich selbst herunter,
 wenn beim Start keine Datenbankverbindung zustande kommt. Zusammen mit
@@ -672,6 +683,7 @@ Die 44 Tag-Warnungen sind geprüft: alle Zahlen treffen die richtige Konstante
 | `cannot read from file: "voice_config.inc"` | Die Modulordner fehlen im Suchpfad (Schritt 15) |
 | `MySQL ERROR! Der Server wird jetzt heruntergefahren` | Die AMX wurde ohne echte `config.inc` gebaut. Auf dem Server neu übersetzen (Schritt 15) |
 | `scp` sagt `Permission denied (publickey)` | Der Befehl wurde auf dem **Server** getippt statt auf dem PC. `scp` kopiert von der Maschine, auf der du ihn eingibst |
+| `/etc/systemd/system/omp.service: No such file or directory` | Der Pfad wurde als Befehl eingegeben. Die Datei muss erst angelegt werden — `cat > … <<'EOF'` (Schritt 17) |
 
 ---
 
