@@ -698,7 +698,9 @@ Die 44 Tag-Warnungen sind geprüft: alle Zahlen treffen die richtige Konstante
 | Voiceport bei jedem Start anders | `sampvoice.port` fehlt in `config.json` |
 | `cannot read from file: "open.mp"` | Beide `-i`-Pfade fehlen, oder es lief der 3.2er-Compiler |
 | `cannot read from file: "voice_config.inc"` | Die Modulordner fehlen im Suchpfad (Schritt 15) |
-| `MySQL ERROR! Der Server wird jetzt heruntergefahren` | Die AMX wurde ohne echte `config.inc` gebaut. Auf dem Server neu übersetzen (Schritt 15) |
+| `MySQL ERROR! Der Server wird jetzt heruntergefahren` | Die AMX wurde ohne echte `config.inc` gebaut. Erst `cat gamemodes/config.inc` prüfen, dann Zugangsdaten mit `mariadb -u samp -p samp1 -e "SELECT 1"` testen, dann neu übersetzen (Schritt 15) |
+| Dienst startet im Kreis, dann `start-limit-hit` | Fast immer dasselbe: kein Datenbankzugang. Der Gamemode fährt sich selbst herunter, `Restart=on-failure` startet neu, nach fünf Versuchen stoppt `StartLimitBurst` die Schleife |
+| `code=dumped, status=11/SEGV` beim Herunterfahren | Bekannter Absturz beim Beenden, **Folge** und nicht Ursache. Im Log darüber steht der echte Grund |
 | `CreateDynamicObject: Expecting 11 parameter(s), but found 14` | Streamer-Plugin ist zu alt. `plugins/streamer.*` muss 2.9.6 sein — neu ziehen |
 | Map ist leer, nur ~100 Objekte laden | Dasselbe. Bei 2.9.6 sind es 5094 |
 | `scp` sagt `Permission denied (publickey)` | Der Befehl wurde auf dem **Server** getippt statt auf dem PC. `scp` kopiert von der Maschine, auf der du ihn eingibst |
