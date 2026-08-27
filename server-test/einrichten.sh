@@ -142,9 +142,11 @@ fi
 # --- 5 ---------------------------------------------------------------------
 schritt 5 "Datenbank"
 warn "Wird NICHT automatisch eingespielt. Reihenfolge:"
-echo "         mysql -u USER -p DATENBANK < Datenbank/samp_server.sql"
-echo "         mysql -u USER -p DATENBANK < gamemodes/modules/anticheat/ac_log.sql"
-echo "         mysql -u USER -p DATENBANK < gamemodes/modules/voice/voice_mutes.sql"
+echo "         mariadb DATENBANK < Datenbank/samp_server.sql"
+echo "         mariadb DATENBANK < gamemodes/modules/anticheat/ac_log.sql"
+echo "         mariadb DATENBANK < gamemodes/modules/voice/voice_mutes.sql"
+warn "ALS ROOT einspielen. Die Dateien legen die Tabellen an und brauchen"
+warn "CREATE und DROP; der Serverbenutzer hat davon bewusst nichts."
 
 # --- 6 ---------------------------------------------------------------------
 schritt 6 "Fertig"

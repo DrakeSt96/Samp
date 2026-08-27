@@ -259,8 +259,12 @@ EXIT;
 
 * `CHARACTER SET latin1` ist Absicht: der Gamemode ist durchgehend ISO-8859-1.
   Mit `utf8mb4` werden aus Umlauten Fragezeichen.
-* Kein `GRANT ALL` — der Gamemode legt im Betrieb keine Tabellen an und braucht
-  weder `DROP` noch `ALTER`.
+* Kein `GRANT ALL` — nachgeprüft: im ganzen Gamemode steht **kein einziges**
+  `CREATE TABLE`, `ALTER TABLE` oder `DROP TABLE`. Zur Laufzeit braucht er
+  diese Rechte nie.
+* **Das Schema selbst spielst du deshalb in Schritt 14 als `root` ein**, nicht
+  als `samp`. Der Anwendungsbenutzer bekommt nie DDL-Rechte, auch nicht
+  vorübergehend.
 * **Kein `root` als Serverbenutzer.** Nie.
 * MariaDB steht unter Ubuntu schon auf `127.0.0.1`. Lass es so. Port 3306
   gehört nie ins Internet.
@@ -353,19 +357,40 @@ der `config.json` und überschreibt deren Werte kommentarlos.
 
 ## 14. Datenbank einspielen
 
-Drei Dateien, **in dieser Reihenfolge**:
+Drei Dateien, **in dieser Reihenfolge** — und **als `root`**, nicht als `samp`:
 
 ```bash
-mariadb -u samp -p samp1 < Datenbank/samp_server.sql
-mariadb -u samp -p samp1 < gamemodes/modules/anticheat/ac_log.sql
-mariadb -u samp -p samp1 < gamemodes/modules/voice/voice_mutes.sql
+exit                          # falls du als omp angemeldet bist
+cd /home/omp/samp
+mariadb samp1 < Datenbank/samp_server.sql
+mariadb samp1 < gamemodes/modules/anticheat/ac_log.sql
+mariadb samp1 < gamemodes/modules/voice/voice_mutes.sql
 ```
+
+> ### Warum als root und nicht als samp
+>
+> Die SQL-Dateien **legen die Tabellen erst an** — sie brauchen `CREATE`,
+> `DROP` und `INSERT`. Der Benutzer `samp` hat aus Schritt 11 bewusst nur die
+> Betriebsrechte. Mit ihm bricht der Import sofort ab:
+>
+> ```
+> ERROR 1142 (42000) at line 21: DROP command denied to user
+>   'samp'@'localhost' for table `samp1`.`regeln`
+> ```
+>
+> **Gib `samp` deswegen nicht mehr Rechte.** Das Schema gehört dem
+> Administrator, der Anwendungsbenutzer schreibt nur Zeilen hinein. Nachgeprüft:
+> im ganzen Gamemode steht **kein einziges** `CREATE TABLE`, `ALTER TABLE` oder
+> `DROP TABLE` — zur Laufzeit braucht er die Rechte nie.
+>
+> Ein abgebrochener Versuch macht nichts kaputt: `samp_server.sql` beginnt mit
+> `DROP TABLE IF EXISTS`, die anderen beiden mit `CREATE TABLE IF NOT EXISTS`.
+> Der Neuversuch räumt selbst auf.
 
 Danach stehen **38 Tabellen** in `samp1`:
 
 ```bash
-mariadb -u samp -p -N -e \
-  "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='samp1';"
+mariadb -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='samp1';"
 ```
 
 Die hinteren beiden legen die Tabellen für das Anti-Cheat-Protokoll und die
@@ -578,6 +603,7 @@ Die 44 Tag-Warnungen sind geprüft: alle Zahlen treffen die richtige Konstante
 |---|---|
 | Aus SSH ausgesperrt | **Fernwartungskonsole** im SCP |
 | Härtung wirkt nicht | `sshd -T` zeigt, was gilt. Datei muss `00-` heißen — erster Treffer gewinnt |
+| `ERROR 1142 ... DROP command denied` | Schema als `root` einspielen, nicht als `samp` (Schritt 14) |
 | Server bootet nicht | Fernwartungskonsole; danach **Rescue-System** im SCP |
 | SCP-Passwort weg | Zurücksetzen im **CCP**, nicht im SCP |
 | Nach Image-Wechsel kein Boot | Prüfen, ob **UEFI-Boot** zum Image passt |
@@ -659,7 +685,7 @@ GAMESERVER
 [ ] ./server-test/einrichten.sh gelaufen
 [ ] gamemodes/config.inc ausgefuellt
 [ ] config.json: name, port, sampvoice.port, rcon
-[ ] Drei SQL-Dateien der Reihe nach -> 38 Tabellen
+[ ] Drei SQL-Dateien ALS ROOT der Reihe nach -> 38 Tabellen
 [ ] Neu uebersetzt nach der config.inc
 
 BETRIEB
