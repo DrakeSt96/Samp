@@ -79473,7 +79473,13 @@ public sql_array2(const index[],sqlresultid,extraid,SconnectionHandle)
 		new wtafel = 0;
 		if(rows)
 		{
-		    while(wtafel<rows)
+			// Auch die Arraygrenze pruefen, nicht nur die Zeilenzahl.
+			// server_werbungsschilder hat mehr Zeilen als es Werbetafeln
+			// gibt - die Positionen der Tafeln stehen fest im Script, aus
+			// der Tabelle kommt nur der Text. Ohne diese Grenze schreibt
+			// die Schleife ab Index MAX_WERBETAFELN ueber das Array hinaus
+			// und Pawn bricht den Rueckruf mit Laufzeitfehler 4 ab.
+		    while(wtafel<rows && wtafel<MAX_WERBETAFELN)
 			{
 				cache_get_field_content(wtafel,"Text",result);
 			    strmid(Werbetafeln[wtafel][wtafeltext],result,0,strlen(result),64);
