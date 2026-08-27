@@ -15,6 +15,7 @@
 #include <sscanf2>
 #include <md5>
 #include <zcmd>
+#include <sampvoice>    // sampvoice open.mp-Fork (AmyrAhmady), Server-Plugin erforderlich
 
 // Projekteigene Includes
 #include <AMC1>

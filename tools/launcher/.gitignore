@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+schluessel/
+api_config.json
+manifest.json
+api.log

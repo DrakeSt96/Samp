@@ -1,7 +1,7 @@
 #include <a_npc>
 
 //Public
-public ScanTimer();
+forward ScanTimer();
 
 //News
 new gStoppedForTraffic = 0;
@@ -62,10 +62,8 @@ public ScanTimer()
 }
 StartPlayback()
 {
-    new gPlaybackActive = 0;
 	StartRecordingPlayback(PLAYER_RECORDING_TYPE_DRIVER,"");
 	gStoppedForTraffic = 0;
-	gPlaybackActive = 1;
 }
 public OnRecordingPlaybackEnd()
 {

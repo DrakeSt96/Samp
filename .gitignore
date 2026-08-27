@@ -13,3 +13,21 @@ scriptfiles/*.txt
 scriptfiles/*.db
 server_log.txt
 crashinfo.txt
+
+# Serverbinaerdateien - werden von server-test/einrichten.* geholt
+omp-server
+omp-server.exe
+components/*.so
+components/*.dll
+components/*.pdb
+plugins/sampvoice.*
+pawncc
+libpawnc.so
+
+# Laufzeitdateien
+server_log.txt
+bans.json
+log.txt
+mysql_log.txt
+svlog.txt
+sampvoice*.log

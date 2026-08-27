@@ -118,20 +118,20 @@ native mysql_option(E_MYSQL_OPTION:type, value);
 
 native mysql_errno(connectionHandle = 1);
 native mysql_escape_string(const source[], destination[], connectionHandle = 1, max_len = sizeof(destination));
-native mysql_format(connectionHandle, output[], len, format[], {Float,_}:...);
-native mysql_pquery(connectionHandle, query[], callback[] = "", format[] = "", {Float,_}:...);
+native mysql_format(connectionHandle, output[], len, const format[], {Float,_}:...);
+native mysql_pquery(connectionHandle, const query[], const callback[] = "", const format[] = "", {Float,_}:...);
 /*
-native mysql_pquery_inline(connHandle, query[], callback:Callback, format[], {Float,_}:...); //y_inline
+native mysql_pquery_inline(connHandle, const query[], callback:Callback, const format[], {Float,_}:...); //y_inline
 */
-native mysql_tquery(connectionHandle, query[], callback[] = "", format[] = "", {Float,_}:...);
+native mysql_tquery(connectionHandle, const query[], const callback[] = "", const format[] = "", {Float,_}:...);
 /*
-native mysql_tquery_inline(connHandle, query[], callback:Callback, format[], {Float,_}:...); //y_inline
+native mysql_tquery_inline(connHandle, const query[], callback:Callback, const format[], {Float,_}:...); //y_inline
 */
-native Cache:mysql_query(conhandle, query[], bool:use_cache = true);
+native Cache:mysql_query(conhandle, const query[], bool:use_cache = true);
 
 native mysql_stat(destination[], connectionHandle = 1, max_len = sizeof(destination));
 native mysql_get_charset(destination[], connectionHandle = 1, max_len = sizeof(destination));
-native mysql_set_charset(charset[], connectionHandle = 1);
+native mysql_set_charset(const charset[], connectionHandle = 1);
 
 
 // Cache functions
@@ -162,7 +162,7 @@ native cache_get_query_string(destination[], max_len = sizeof(destination));
 
 
 // Forward declarations
-forward OnQueryError(errorid, error[], callback[], query[], connectionHandle);
+forward OnQueryError(errorid, const error[], const callback[], const query[], connectionHandle);
 
 
 #if defined MYSQL_USE_YINLINE || defined E_CALLBACK_DATA
