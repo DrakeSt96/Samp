@@ -225,11 +225,16 @@ gelinkt. Du brauchst auch **kein** `dpkg --add-architecture i386`; die vier
 ## 10. Werkzeuge und ein eigener Benutzer
 
 ```bash
-apt install -y git curl unzip mariadb-server ufw
+apt install -y git curl unzip nano mariadb-server ufw
 adduser --disabled-password --gecos "" omp
 ```
 
 Der Server hat keinen Grund, als `root` zu laufen.
+
+> **`nano` ist bei der Minimal-Variante des Images nicht dabei** — und du hast
+> in Schritt 06 bewusst die Minimal-Variante genommen. Ohne diese Zeile
+> begrüßt dich später ein `bash: nano: command not found`. Es gibt auch keinen
+> `vi` und keinen `vim`.
 
 ---
 
@@ -304,19 +309,20 @@ installieren.
 Zwei Dateien, beide von `.gitignore` ausgeschlossen. Sie dürfen nie in einem
 Commit landen.
 
-**`gamemodes/config.inc`** — der Datenbankzugang:
+**`gamemodes/config.inc`** — der Datenbankzugang. Ganz ohne Editor, als `omp`:
 
 ```bash
-cp gamemodes/config.inc.example gamemodes/config.inc
-nano gamemodes/config.inc
-```
-
-```pawn
+cat > gamemodes/config.inc <<'EOF'
 #define MySQL_Host      "127.0.0.1"
 #define MySQL_User      "samp"
 #define MySQL_Passwort  "DEIN-PASSWORT-AUS-SCHRITT-11"
 #define MySQL_Datenbank "samp1"
+EOF
+cat gamemodes/config.inc
 ```
+
+Mit Editor geht es genauso — `nano gamemodes/config.inc`, sofern du es in
+Schritt 10 mitinstalliert hast.
 
 Diese Werte werden **beim Übersetzen** in die `script.amx` eingebacken. Änderst
 du sie später, musst du neu übersetzen.
@@ -738,6 +744,7 @@ Die 44 Tag-Warnungen sind geprüft: alle Zahlen treffen die richtige Konstante
 | Map ist leer, nur ~100 Objekte laden | Dasselbe. Bei 2.9.6 sind es 5094 |
 | `scp` sagt `Permission denied (publickey)` | Der Befehl wurde auf dem **Server** getippt statt auf dem PC. `scp` kopiert von der Maschine, auf der du ihn eingibst |
 | `/etc/systemd/system/omp.service: No such file or directory` | Der Pfad wurde als Befehl eingegeben. Die Datei muss erst angelegt werden — `cat > … <<'EOF'` (Schritt 17) |
+| `bash: nano: command not found` | Die Minimal-Variante des Images bringt keinen Editor mit. `apt install -y nano` als root — oder Dateien gleich per `cat > … <<'EOF'` schreiben |
 
 ---
 
