@@ -22,6 +22,22 @@ vom Einrichtungsskript automatisch nach qawno\ gelegt:
     Windows:   .\server-test\einrichten.ps1
     Linux:     ./server-test/einrichten.sh
 
+Danach unter Windows einfach doppelklicken:
+
+    uebersetzen.bat        (liegt im Wurzelverzeichnis)
+
+Sie uebersetzt mit den richtigen Pfaden und laesst das Fenster offen.
+
+
+PAWNCC.EXE NICHT DOPPELKLICKEN
+------------------------------
+
+pawncc.exe ist ein Kommandozeilenprogramm. Ein Doppelklick startet es
+ohne Argumente: es druckt seine Hilfe und beendet sich sofort wieder.
+Man sieht ein schwarzes Fenster fuer den Bruchteil einer Sekunde. Das
+ist kein Fehler - das Programm braucht Argumente, und die kann man beim
+Doppelklick nicht mitgeben. Dafuer ist uebersetzen.bat da.
+
 Von Hand, aus dem WURZELVERZEICHNIS des Repositories (nicht aus
 gamemodes\ heraus - der Compiler loest #include relativ zum Aufrufort
 auf):

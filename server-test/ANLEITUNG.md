@@ -378,7 +378,9 @@ LD_LIBRARY_PATH=qawno qawno/pawncc gamemodes/script.pwn \
     -o"gamemodes/script.amx"
 ```
 
-Unter Windows, im Wurzelverzeichnis:
+Unter Windows reicht ein Doppelklick auf **`uebersetzen.bat`** im
+Wurzelverzeichnis — die setzt die Pfade selbst und lässt das Fenster offen.
+Von Hand geht es auch:
 
 ```powershell
 .\qawno\pawncc.exe gamemodes\script.pwn `
@@ -386,11 +388,14 @@ Unter Windows, im Wurzelverzeichnis:
     -o"gamemodes\script.amx"
 ```
 
+Die fertige `script.amx` ist plattformunabhängig — du kannst sie unter Windows
+bauen und einfach auf den Linux-Server legen.
+
 Ergebnis: `gamemodes/script.amx`, rund 10 MB, **0 Fehler**. Die rund 346
 Warnungen sind Bestand und kein Hindernis; die volle Ausgabe legt das Skript
 in `uebersetzen.log` ab.
 
-### Zwei Fallen, und beide kosten Stunden
+### Drei Fallen, und die ersten beiden kosten Stunden
 
 **1. Nicht `pawno\pawno.exe` benutzen.** Der Compiler in diesem Ordner ist
 `pawnc.dll` **3.2.3664 von 2011**. Der Gamemode braucht 3.10. Wer es trotzdem
@@ -420,6 +425,12 @@ modules/voice/voice.inc(20) : fatal error 100: cannot read from file: "voice_con
 **Beide Include-Pfade werden gebraucht.** `open.mp.inc` liegt im Unterordner
 `Gloabe Includes`, und den durchsucht der Compiler nicht von selbst — daher die
 zwei `-i`-Angaben. Genau das fehlt, wenn man `pawno.exe` einfach doppelklickt.
+
+**3. `pawncc.exe` nicht doppelklicken.** Es ist ein Kommandozeilenprogramm.
+Ein Doppelklick startet es ohne Argumente: es druckt seine Hilfe und beendet
+sich sofort. Man sieht ein schwarzes Fenster für den Bruchteil einer Sekunde
+und denkt, es sei abgestürzt. Es hat nur nichts zu tun bekommen — Argumente
+kann man beim Doppelklick nicht mitgeben. Genau dafür ist `uebersetzen.bat` da.
 
 ## 8. Firewall
 
