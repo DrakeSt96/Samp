@@ -74,23 +74,59 @@ Die beiden Punkte, an denen billige Angebote scheitern:
    Taktrate, und genau das merkst du als Ruckeln — nicht als niedrige
    Auslastung. Achte auf **dedizierte** Kerne.
 2. **DDoS-Schutz.** Ein Gameserver mit offenem UDP-Port ist ein Ziel. Nicht
-   irgendwann — sondern sobald jemand sauer ist. Hetzner und OVH haben ihn
-   ohne Aufpreis, andere verlangen dafür Geld oder haben ihn gar nicht.
+   irgendwann — sondern sobald jemand sauer ist. netcup, Hetzner und OVH haben
+   ihn ohne Aufpreis, andere verlangen dafür Geld oder haben ihn gar nicht.
 
-Passende Produktklassen (Preise ändern sich, prüf sie selbst):
+Konkrete Angebote, Stand August 2026, alle Preise inkl. 19 % MwSt. — Preise
+ändern sich, prüf sie vor dem Bestellen selbst nach:
 
-| Anbieter | Linie | Warum |
-|---|---|---|
-| **Hetzner** | CCX (dedizierte AMD-Kerne) | DDoS-Schutz gratis, Standorte Nürnberg/Falkenstein |
-| **OVH** | Game-Reihe | DDoS-Schutz speziell für Spielprotokolle |
-| **netcup** | Root-Server (nicht die VPS-Linie) | VPS = geteilte Kerne, Root-Server = dedizierte |
+| Anbieter | Modell | Dedizierte Kerne | RAM | NVMe | pro Monat |
+|---|---|---|---|---|---|
+| **netcup** | RS 1000 G12, Root-Server | **4** | 8 GB ECC | 256 GB | **12,79 €** bei 12 Monaten<br>**17,70 €** monatlich kündbar |
+| Hetzner | CCX13 | 2 | 8 GB | 80 GB | ≈ 51,16 € (42,99 € netto) |
+| Hetzner | CCX23 | 4 | 16 GB | 160 GB | ≈ 102,33 € (85,99 € netto) |
+
+**netcup gewinnt das derzeit deutlich** — doppelt so viele Kerne wie das
+Hetzner-Gegenstück, dreimal so viel Platte, zu einem Drittel des Preises.
+DDoS-Schutz ist bei netcup inklusive (bis 2 Tbit/s, Anexia DDoS Guard,
+Filterung bis Layer 4), die Root-Server-Linie hat garantierte Kerne unter KVM,
+und Nürnberg ist als Standort wählbar.
+
+> **Achtung, das hat sich geändert:** Hetzner hat am **15. Juni 2026** die
+> Preise der dedizierten CCX-Linie rund verdreifacht — CCX13 von 15,99 € auf
+> 42,99 € netto, CCX23 von 31,49 € auf 85,99 €. Die geteilten CX-Linien stiegen
+> nur moderat. Ältere Empfehlungen für Hetzner CCX stammen von vor diesem
+> Datum. Bestandsserver behalten ihren Preis; eine Umstellung der Größe
+> rechnet neu ab.
+
+Beim Bestellen bei netcup zwei Sachen beachten:
+
+1. **Standort ausdrücklich auf Nürnberg stellen.** Die Voreinstellung ist
+   „Keine Präferenz Europa" und kann in Österreich oder den Niederlanden
+   landen — das kostet deutsche Spieler Ping ohne Gegenwert.
+2. **Ubuntu 24.04 LTS im Kundenpanel prüfen**, bevor du installierst.
+
+**Zum Prozessor:** Der EPYC 9645 ist die dichte Zen-5c-Variante — 96 Kerne bei
+2,3 GHz Basis und 3,7 GHz Boost. Dichte Kerne tauschen Takt gegen Anzahl, und
+Takt ist genau das, worauf es bei der Single-Thread-Schleife ankommt. Für
+diesen Gamemode reicht es trotzdem klar: Zen 5 hat hohe IPC, und gemessen sind
+2,4 % eines Kerns im Leerlauf. Unter 500 echten Spielern habe ich es nicht
+gemessen — das sage ich lieber dazu.
 
 Contabo würde ich für einen Gameserver **nicht** nehmen: viel RAM fürs Geld,
 aber schwache Einzelkernleistung und stark überbuchte Knoten — genau die
-falsche Kombination für eine Single-Thread-Schleife.
+falsche Kombination für eine Single-Thread-Schleife. OVHs Standard-VPS-Linie
+fällt aus einem anderen Grund raus: die vCores sind dort nicht dediziert.
 
-**Zum Anfangen und Testen reichen 2 vCPU und 4 GB völlig.** Hochstufen geht
-bei jedem Anbieter in fünf Minuten, umziehen nicht.
+**Größer bestellen bringt nichts.** Mehr Kerne machen die Pawn-Schleife nicht
+schneller, und bei 120 MB gemessenem Verbrauch sind 8 GB schon reichlich
+Reserve. Der Takt ist über die ganze Reihe derselbe.
+
+**Monatlich oder Jahresvertrag?** Bei netcup kostet die monatliche Kündbarkeit
+4,91 € Aufpreis. Der Break-even liegt bei 153,48 / 17,70 = **8,7 Monaten**:
+länger als neun Monate, und der Jahresvertrag war billiger. Solange der Server
+noch nie mit echten Spielern gelaufen ist, ist monatlich das Richtige — später
+wechseln geht immer.
 
 ---
 
