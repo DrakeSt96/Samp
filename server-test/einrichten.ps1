@@ -129,7 +129,15 @@ $log  = Join-Path $Wurzel "uebersetzen.log"
 Remove-Item $aus -EA SilentlyContinue
 # Volle Ausgabe in die Datei, auf den Bildschirm nur Fehler und eine
 # Zusammenfassung. Warnungen werden nicht unterdrueckt, nur gebuendelt.
-& $pawncc (Join-Path $Wurzel "gamemodes\script.pwn") "-i$inc1" "-i$inc2" "-o$aus" 2>&1 |
+# Die Modulordner gehoeren mit in den Suchpfad. script.pwn bindet sie mit
+# Schraegstrichen ein ("modules/voice/voice.inc"), und pawncc schneidet unter
+# Windows das Verzeichnis am letzten BACKSLASH ab - der steht dann vor
+# "modules". Es sucht voice_config.inc also in gamemodes\ statt in
+# gamemodes\modules\voice\. Ueber den Suchpfad wird es trotzdem gefunden.
+$pfade = @("-i$inc1", "-i$inc2")
+Get-ChildItem (Join-Path $Wurzel "gamemodes\modules") -Directory -EA SilentlyContinue |
+    ForEach-Object { $pfade += "-i$($_.FullName)" }
+& $pawncc (Join-Path $Wurzel "gamemodes\script.pwn") @pfade "-o$aus" 2>&1 |
     Out-File -FilePath $log -Encoding utf8
 $zeilen  = Get-Content $log -EA SilentlyContinue
 $fehler  = @($zeilen | Where-Object { $_ -match ": (fatal )?error \d+" })

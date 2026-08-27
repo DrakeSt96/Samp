@@ -116,9 +116,17 @@ fi
 # eine Zusammenfassung. Warnungen werden nicht unterdrueckt, nur gebuendelt -
 # wer sie sehen will, liest uebersetzen.log.
 rm -f gamemodes/script.amx
+# Die Modulordner gehoeren mit in den Suchpfad. script.pwn bindet sie mit
+# Schraegstrichen ein ("modules/voice/voice.inc"), und pawncc schneidet unter
+# Windows das Verzeichnis am letzten BACKSLASH ab - der steht dann vor
+# "modules". Es sucht voice_config.inc also in gamemodes\ statt in
+# gamemodes\modules\voice\. Ueber den Suchpfad wird es trotzdem gefunden.
+PFADE=(-i"pawno/include" -i"pawno/include/Gloabe Includes")
+for d in gamemodes/modules/*/; do
+  [ -d "$d" ] && PFADE+=(-i"${d%/}")
+done
 LD_LIBRARY_PATH=qawno qawno/pawncc gamemodes/script.pwn \
-  -i"pawno/include" -i"pawno/include/Gloabe Includes" \
-  -o"gamemodes/script.amx" > uebersetzen.log 2>&1 || true
+  "${PFADE[@]}" -o"gamemodes/script.amx" > uebersetzen.log 2>&1 || true
 FEHLERZEILEN="$(grep -E ": (fatal )?error [0-9]+" uebersetzen.log || true)"
 if [ -n "$FEHLERZEILEN" ]; then
   printf '%s\n' "$FEHLERZEILEN" | head -20 | sed 's/^/      /'

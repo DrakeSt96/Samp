@@ -33,7 +33,15 @@ if exist "gamemodes\script.amx" del "gamemodes\script.amx"
 echo   Uebersetze gamemodes\script.pwn - das dauert etwa eine Minute ...
 echo.
 
-qawno\pawncc.exe gamemodes\script.pwn -i"pawno\include" -i"pawno\include\Gloabe Includes" -o"gamemodes\script.amx" > uebersetzen.log 2>&1
+rem Die Modulordner gehoeren mit in den Suchpfad. script.pwn bindet sie mit
+rem Schraegstrichen ein - "modules/voice/voice.inc" - und pawncc schneidet
+rem unter Windows das Verzeichnis am letzten BACKSLASH ab. Der steht dann vor
+rem "modules", also wird voice_config.inc in gamemodes\ gesucht statt in
+rem gamemodes\modules\voice\. Ueber den Suchpfad wird es trotzdem gefunden.
+set INCS=-i"pawno\include" -i"pawno\include\Gloabe Includes"
+for /d %%D in ("gamemodes\modules\*") do set INCS=!INCS! -i"%%~fD"
+
+qawno\pawncc.exe gamemodes\script.pwn !INCS! -o"gamemodes\script.amx" > uebersetzen.log 2>&1
 
 rem Reine Textsuche, kein /R: findstr behandelt /C: je nach Windows-Fassung
 rem auch mit /R als Text, dann waeren Zeichenklassen wirkungslos.

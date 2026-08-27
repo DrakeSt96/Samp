@@ -375,6 +375,8 @@ derselben open.mp-Veröffentlichung wie den Server. Von Hand:
 cd ~/samp                     # WICHTIG: aus dem Wurzelverzeichnis, nicht aus gamemodes/
 LD_LIBRARY_PATH=qawno qawno/pawncc gamemodes/script.pwn \
     -i"pawno/include" -i"pawno/include/Gloabe Includes" \
+    -i"gamemodes/modules/voice" -i"gamemodes/modules/anticheat" \
+    -i"gamemodes/modules/launcher" \
     -o"gamemodes/script.amx"
 ```
 
@@ -385,6 +387,8 @@ Von Hand geht es auch:
 ```powershell
 .\qawno\pawncc.exe gamemodes\script.pwn `
     -i"pawno\include" -i"pawno\include\Gloabe Includes" `
+    -i"gamemodes\modules\voice" -i"gamemodes\modules\anticheat" `
+    -i"gamemodes\modules\launcher" `
     -o"gamemodes\script.amx"
 ```
 
@@ -395,7 +399,7 @@ Ergebnis: `gamemodes/script.amx`, rund 10 MB, **0 Fehler**. Die rund 346
 Warnungen sind Bestand und kein Hindernis; die volle Ausgabe legt das Skript
 in `uebersetzen.log` ab.
 
-### Drei Fallen, und die ersten beiden kosten Stunden
+### Vier Fallen, und die ersten drei kosten Stunden
 
 **1. Nicht `pawno\pawno.exe` benutzen.** Der Compiler in diesem Ordner ist
 `pawnc.dll` **3.2.3664 von 2011**. Der Gamemode braucht 3.10. Wer es trotzdem
@@ -426,7 +430,33 @@ modules/voice/voice.inc(20) : fatal error 100: cannot read from file: "voice_con
 `Gloabe Includes`, und den durchsucht der Compiler nicht von selbst — daher die
 zwei `-i`-Angaben. Genau das fehlt, wenn man `pawno.exe` einfach doppelklickt.
 
-**3. `pawncc.exe` nicht doppelklicken.** Es ist ein Kommandozeilenprogramm.
+**3. Die Modulordner müssen in den Suchpfad — sonst scheitert es unter Windows.**
+`script.pwn` bindet die Module mit **Schrägstrichen** ein:
+
+```pawn
+#include "modules/voice/voice.inc"
+```
+
+Innerhalb von `voice.inc` steht dann `#include "voice_config.inc"` — ein
+Dateiname ohne Pfad, den pawncc relativ zum aktuellen Verzeichnis auflöst. Unter
+Windows schneidet es dieses Verzeichnis am **letzten Backslash** ab, und der
+steht in `…\gamemodes\modules/voice/voice.inc` vor `modules`:
+
+```
+...\gamemodes\modules/voice/voice.inc(20) : fatal error 100:
+     cannot read from file: "voice_config.inc"
+        ↑ Backslash      ↑ ab hier Schrägstriche
+```
+
+Es sucht die Datei also in `gamemodes\`, wo sie nicht liegt. Unter Linux fällt
+das nicht auf, weil dort durchgehend Schrägstriche stehen.
+
+Die drei zusätzlichen `-i`-Angaben oben lösen das: findet pawncc die Datei
+relativ nicht, greift der Suchpfad. Beide Einrichtungsskripte und
+`uebersetzen.bat` sammeln die Modulordner selbst ein, neue Module kommen also
+automatisch mit.
+
+**4. `pawncc.exe` nicht doppelklicken.** Es ist ein Kommandozeilenprogramm.
 Ein Doppelklick startet es ohne Argumente: es druckt seine Hilfe und beendet
 sich sofort. Man sieht ein schwarzes Fenster für den Bruchteil einer Sekunde
 und denkt, es sei abgestürzt. Es hat nur nichts zu tun bekommen — Argumente
